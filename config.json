@@ -1,0 +1,25 @@
+{
+        "/book": {
+            "returnCode": "0",
+            "data": {
+                "pageNumber": ":pageNumber",
+                "list:1-12": {
+                    "id": "[+]",
+                    "name": "[()6-10]"
+                }
+            }
+        },
+        "/ana/:user": {
+            "returnCode": "0",
+            "data": {
+                "pageNumber": ":pageNumber",
+                "list:1-12": {
+                    "id": "[+]",
+                    "name": "[()6-10]",
+                    "date": "[1960-2012]-[01-12]-[01-30]",
+                    "user":":user",
+                    "ip":"192.168.1.[1-255]"
+                }
+            }
+        }
+    }
