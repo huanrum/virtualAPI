@@ -4,6 +4,7 @@ var random = require('./random');
 var config = JSON.parse(fs.readFileSync('config.json').toString());
 
 http.createServer(function (request, response) {
+    response.setHeader('Access-Control-Allow-Origin', '*')
     try {
         if (!Object.keys(config).some(function (key) {
             var method = key.match(/\[(.*)\]/) && key.match(/\[(.*)\]/)[1];
@@ -38,12 +39,12 @@ http.createServer(function (request, response) {
 
             }
         })) {
-            response.writeHead(404, { 'Content-Type': 'text/html;charset=utf-8' });
-            response.end('<strong>404</strong> 地址不存在');
+            response.writeHead(404, { 'Content-Type': 'text/plain;charset=utf-8' });
+            response.end('404 地址不存在');
         };
     } catch (e) {
-        response.writeHead(500, { 'Content-Type': 'text/html;charset=utf-8' });
-        response.end('<strong>500</strong> 服务器异常' + e.message);
+        response.writeHead(500, { 'Content-Type': 'text/plain;charset=utf-8' });
+        response.end('500 服务器异常' + e.message);
     }
 
 

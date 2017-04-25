@@ -1,11 +1,36 @@
 {
-        "/book": {
+        "login":{
+             "returnCode": "0",
+             "message":":user,login succeed!"
+        },
+        "/mall/book/story": {
             "returnCode": "0",
             "data": {
                 "pageNumber": ":pageNumber",
-                "list:1-12": {
+                "list::pageSize": {
                     "id": "[+]",
-                    "name": "[()6-10]"
+                    "name": "[(A-Z)1][()6-10]",
+                    "author":"[(a-z)6-10]",
+                    "price":"$[12-25]",
+                    "email":"[()6-10]@[(a-z)2-3].[(a-z)2-4]",
+                    "date": "[1960-2012]-[01-12]-[01-30]",
+                    "class":"[都市,历史,末世,游戏,异界]"
+                }
+            }
+        },
+        "/mall/book/math": {
+            "returnCode": "0",
+            "data": {
+                "pageNumber": ":pageNumber",
+                "list::pageSize": {
+                    "id": "[+]",
+                    "name": "[(A-Z)1][()6-10]",
+                    "author":"[(a-z)6-10]",
+                    "price":"$[12-25]",
+                    "email":"[()6-10]@[(a-z)2-3].[(a-z)2-4]",
+                    "date": "[1960-2012]-[01-12]-[01-30]",
+                    "difficulty":"[(0-9)1]",
+                    "class":"[基础,函数,方程,高数,线性代数,微积分,平面几何,立体几何]"
                 }
             }
         },
@@ -13,7 +38,7 @@
             "returnCode": "0",
             "data": {
                 "pageNumber": ":pageNumber",
-                "list:1-12": {
+                "list::pageSize": {
                     "id": "[+]",
                     "name": "[()6-10]",
                     "date": "[1960-2012]-[01-12]-[01-30]",
