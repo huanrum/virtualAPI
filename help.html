@@ -76,6 +76,11 @@
             display: inline-block;
             width: 12em;
         }
+        .common-dialog-back .common-dialog .common-dialog-content div input {
+            background: #f3f3f3;
+            border: none;
+            border-bottom: 1px solid #666699;
+        }
         
         .common-dialog-back .common-dialog .common-dialog-message {
             background: #d3d3d3;
@@ -215,6 +220,7 @@
             dialog.appendChild(footer);
 
             document.body.appendChild(dialogPanl);
+            drag(header,dialog);
 
             function initHeader() {
                 var title = document.createElement('label');
@@ -240,18 +246,18 @@
                             if (typeof data[key.replace(':', '')] === 'undefined') {
                                 Object.defineProperty(data, key.replace(':', ''), {
                                     enumerable: enumerable,
-                                    get: initRow(key)
+                                    get: initRow(key, enumerable)
                                 });
                             }
                         });
                     }
                 }
 
-                function initRow(key) {
+                function initRow(key, nullable) {
                     var row = document.createElement('div');
                     var label = document.createElement('div');
                     var value = document.createElement('input');
-                    label.innerHTML = key.replace(':', '');
+                    label.innerHTML = key.replace(':', '') + (nullable ? '' : '*');
                     row.appendChild(label);
                     row.appendChild(value);
                     content.appendChild(row);
@@ -267,25 +273,63 @@
                 footer.appendChild(confrom);
                 confrom.innerHTML = methodData;
                 confrom.onclick = function () {
-                    http().then(function (req) { return req.json(); }).then(function (req) {
+                    http(urlData.split('/').map(function (i) { return /:/.test(i) && el_data[i.replace(':', '')] || i; }).join('/')).then(function (req) {
+                        if (req.status === 200) {
+                            return req.json();
+                        }
+                        return req.text();
+                    }).then(function (req) {
                         message.innerHTML = linefeed(JSON.stringify(req));
                     });
                 };
 
-                function http() {
-                    if (methodData === 'GET' || methodData === 'HEADER') {
-                        var urlParm = Object.keys(el_data).map(function (key) {
-                            return key + '=' + el_data[key];
-                        }).join('&');
-                        return fetch(urlData.split('/').map(function (i) { return /:/.test(i) ? el_data[i.replace(':', '')] : i; }).join('/') + (urlParm ? ('?' + urlParm) : ''), {
-                            method: methodData
-                        });
+                function http(urlFull) {
+                    if (/:/.test(urlFull)) {
+                        message.innerHTML = "必填参数没有填写";
                     } else {
-                        return fetch(urlData.split('/').map(function (i) { return /:/.test(i) ? el_data[i.replace(':', '')] : i; }).join('/'), {
-                            method: methodData,
-                            body: JSON.stringify(el_data)
-                        });
+                        if (methodData === 'GET' || methodData === 'HEADER') {
+                            var urlParm = Object.keys(el_data).map(function (key) {
+                                return key + '=' + el_data[key];
+                            }).join('&');
+                            return fetch(urlFull + (urlParm ? ('?' + urlParm) : ''), {
+                                method: methodData
+                            });
+                        } else {
+                            return fetch(urlFull, {
+                                method: methodData,
+                                body: JSON.stringify(el_data)
+                            });
+                        }
                     }
+                }
+            }
+
+
+            function drag(canDragElement,element) {
+                var temp = {};
+                canDragElement.addEventListener('mousedown', function (e) {
+                    var style = window.getComputedStyle(element);
+                    if (e.clientX < (parseInt(style.left) || 0) + (parseInt(style.width) || 0) - 15 ||
+                        e.clientY < (parseInt(style.top) || 0) + (parseInt(style.height) || 0) - 15) {
+                        mousedown(e);
+                    }
+                });
+                window.addEventListener('mouseup', function () {
+                    temp.e = null;
+                    element.style.cursor = 'default';
+                    window.removeEventListener('mousemove', mousemove);
+                });
+                function mousedown(e) {
+                    var style = window.getComputedStyle(element);
+                    temp.e = e;
+                    temp.x = e.clientX - (parseInt(style.left) || 0);
+                    temp.y = e.clientY - (parseInt(style.top) || 0);
+                    element.style.cursor = 'move';
+                    window.addEventListener('mousemove', mousemove);
+                }
+                function mousemove(e) {
+                    element.style.left = e.clientX - temp.x + 'px';
+                    element.style.top = e.clientY - temp.y + 'px';
                 }
             }
         }
