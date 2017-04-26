@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .config-group {
+            margin: 1em;
+        }
+        
+        .config-item {
+            margin: 1em;
+        }
+        
+        .config-item .config-url>* {
+            display: inline-block;
+            width: 6em;
+            font-weight: bold;
+        }
+        
+        .config-item .config-url:hover {
+            cursor: pointer;
+            opacity: 0.6;
+        }
+        
+        .config-item .config-return {
+            margin-left: 6em;
+        }
+        /*dialog*/
+        
+        .common-dialog-back {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(123, 123, 123, 0.6);
+        }
+        
+        .common-dialog-back .common-dialog {
+            position: absolute;
+            margin-left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            padding: 2px;
+            border-radius: 10px;
+            background: #f3f3f3;
+        }
+        
+        .common-dialog-back .common-dialog .common-dialog-header {
+            height: 2em;
+            background: #666699;
+            padding: 0.5em;
+        }
+        
+        .common-dialog-back .common-dialog .common-dialog-header a {
+            float: right;
+            cursor: pointer;
+        }
+        
+        .common-dialog-back .common-dialog .common-dialog-content {
+            min-height: 3em;
+            max-height: 33em;
+            min-width: 8em;
+            padding: 1em;
+        }
+        
+        .common-dialog-back .common-dialog .common-dialog-content>* {
+            margin: 0.3em;
+        }
+        
+        .common-dialog-back .common-dialog .common-dialog-content div div {
+            display: inline-block;
+            width: 12em;
+        }
+        
+        .common-dialog-back .common-dialog .common-dialog-message {
+            background: #d3d3d3;
+            margin: 1em;
+            max-height: 33em;
+            overflow: auto;
+        }
+        
+        .common-dialog-back .common-dialog .common-dialog-footer {
+            border-top: 1px solid #d3d3d3;
+            text-align: center;
+            padding: 2px;
+        }
+        
+        .common-dialog-back .common-dialog .common-dialog-footer a {
+            border: 1px solid #666699;
+            margin: 2px 1em;
+            padding: 1px;
+            cursor: pointer;
+        }
+        
+        .common-dialog-back .common-dialog .common-dialog-footer a:hover {
+            opacity: 0.8;
+            color: #f3f3f3;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        window.configData = [];
+    </script>
+    <script>
+        var panel = document.createElement('div');
+        document.body.appendChild(panel);
+        window.configData.forEach(function (item) {
+            panel.appendChild(createGroup(item));
+        });
+
+        function createGroup(item) {
+            var fieldset = document.createElement('fieldset');
+            var legend = document.createElement('legend');
+            var content = document.createElement('div');
+            fieldset.className = 'config-group';
+            legend.innerHTML = item.file;
+            Object.keys(item.config).forEach(function (key) {
+                content.appendChild(createItem(key.match(/^\[(.*)\]/), key, item.config[key]));
+            });
+            fieldset.appendChild(legend);
+            fieldset.appendChild(content);
+            return fieldset;
+        }
+
+        function createItem(methodData, urlData, returnData) {
+            var parent = document.createElement('div');
+            var urlElement = document.createElement('div');
+            var returnElement = document.createElement('div');
+
+            var method = document.createElement('div');
+            var url = document.createElement('div');
+
+            parent.className = 'config-item';
+            urlElement.className = 'config-url';
+            returnElement.className = 'config-return';
+            method.innerHTML = (methodData && methodData[1] || 'GET').toLocaleUpperCase();
+
+            url.innerHTML = urlData.replace(/^\[.*\]/, '');
+            returnElement.style.display = 'none';
+            returnElement.innerHTML = linefeed(JSON.stringify(returnData));
+            urlElement.appendChild(method);
+            urlElement.appendChild(url);
+            parent.appendChild(urlElement);
+            parent.appendChild(returnElement);
+
+            url.onclick = function () {
+                returnElement.style.display = returnElement.style.display === 'none' ? 'block' : 'none';
+            };
+            method.onclick = function () {
+                showDialog(method.innerHTML, url.innerHTML, JSON.stringify(returnData));
+            };
+
+            return parent;
+        }
+
+        function linefeed(str) {
+            var live = 0;
+            for (var i = 0; i < str.length; i++) {
+                switch (str[i]) {
+                    case '{':
+                        live = live + 1;
+                        str = str.slice(0, i + 1) + '<br>' + Array(live + 1).join('    ') + str.slice(i + 1);
+                        i = i + live * 4 + 4;
+                        break;
+                    case '}':
+                        live = live - 1;
+                        str = str.slice(0, i) + '<br>' + Array(live + 1).join('    ') + '}' + Array(live + 1).join('    ') + str.slice(i + 1);
+                        i = i + live * 4 + live * 4 + 4;
+                        break;
+                    case ',':
+                        if (str[i + 1] === '"') {
+                            str = str.slice(0, i + 1) + '<br>' + Array(live + 1).join('    ') + str.slice(i + 1);
+                            i = i + live * 4 + 4;
+                        }
+                        break;
+                    case ';':
+                        str = str.slice(0, i + 1) + '<br>' + Array(live + 1).join('    ') + str.slice(i + 1);
+                        i = i + live * 4 + 4;
+                        break;
+                }
+            }
+            return str.replace(/\s/g, '&nbsp;&nbsp;');
+        }
+
+
+        function showDialog(methodData, urlData, returnData) {
+            var dialogPanl = document.createElement('div');
+            var dialog = document.createElement('div');
+
+            var header = document.createElement('div');
+            var content = document.createElement('div');
+            var message = document.createElement('div');
+            var footer = document.createElement('div');
+
+            initHeader();
+            initFooter(initContent());
+
+            dialogPanl.className = 'common-dialog-back';
+            dialog.className = 'common-dialog';
+            header.className = 'common-dialog-header';
+            content.className = 'common-dialog-content';
+            message.className = 'common-dialog-message';
+            footer.className = 'common-dialog-footer';
+            dialogPanl.appendChild(dialog);
+            dialog.appendChild(header);
+            dialog.appendChild(content);
+            dialog.appendChild(message);
+            dialog.appendChild(footer);
+
+            document.body.appendChild(dialogPanl);
+
+            function initHeader() {
+                var title = document.createElement('label');
+                var close = document.createElement('a');
+                title.innerHTML = urlData;
+                close.innerHTML = '&times;';
+                header.appendChild(title);
+                header.appendChild(close);
+                close.onclick = function () {
+                    dialogPanl.parentNode.removeChild(dialogPanl);
+                };
+            }
+            function initContent() {
+                var el_data = {};
+                match(urlData, el_data, false);
+                match(returnData, el_data, true);
+                return el_data;
+
+                function match(str, data, enumerable) {
+                    var parms = str.match(/:[0-9a-zA-Z_]+/g);
+                    if (parms) {
+                        parms.forEach(function (key) {
+                            if (typeof data[key.replace(':', '')] === 'undefined') {
+                                Object.defineProperty(data, key.replace(':', ''), {
+                                    enumerable: enumerable,
+                                    get: initRow(key)
+                                });
+                            }
+                        });
+                    }
+                }
+
+                function initRow(key) {
+                    var row = document.createElement('div');
+                    var label = document.createElement('div');
+                    var value = document.createElement('input');
+                    label.innerHTML = key.replace(':', '');
+                    row.appendChild(label);
+                    row.appendChild(value);
+                    content.appendChild(row);
+                    return function () {
+                        return value.value;
+                    };
+                }
+            }
+
+
+            function initFooter(el_data) {
+                var confrom = document.createElement('a');
+                footer.appendChild(confrom);
+                confrom.innerHTML = methodData;
+                confrom.onclick = function () {
+                    http().then(function (req) { return req.json(); }).then(function (req) {
+                        message.innerHTML = linefeed(JSON.stringify(req));
+                    });
+                };
+
+                function http() {
+                    if (methodData === 'GET' || methodData === 'HEADER') {
+                        var urlParm = Object.keys(el_data).map(function (key) {
+                            return key + '=' + el_data[key];
+                        }).join('&');
+                        return fetch(urlData.split('/').map(function (i) { return /:/.test(i) ? el_data[i.replace(':', '')] : i; }).join('/') + (urlParm ? ('?' + urlParm) : ''), {
+                            method: methodData
+                        });
+                    } else {
+                        return fetch(urlData.split('/').map(function (i) { return /:/.test(i) ? el_data[i.replace(':', '')] : i; }).join('/'), {
+                            method: methodData,
+                            body: JSON.stringify(el_data)
+                        });
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
