@@ -1,0 +1,7 @@
+.idea/
+.vscode/
+
+node_modules/
+config/demo-mall/
+
+start.sh
