@@ -147,7 +147,7 @@
             returnElement.className = 'config-return';
             method.innerHTML = (methodData && methodData[1] || 'GET').toLocaleUpperCase();
 
-            url.innerHTML = urlData.replace(/^\[.*\]/, '');
+            url.innerHTML = urlData.split('?')[0].replace(/^\[.*\]/, '');
             returnElement.style.display = 'none';
             returnElement.innerHTML = linefeed(JSON.stringify(returnData));
             urlElement.appendChild(method);
@@ -159,7 +159,13 @@
                 returnElement.style.display = returnElement.style.display === 'none' ? 'block' : 'none';
             };
             method.onclick = function () {
-                showDialog(method.innerHTML, url.innerHTML, JSON.stringify(returnData));
+                var default_data = {};
+                if(urlData.split('?')[1]){
+                    urlData.split('?')[1].split('&').forEach(function(kv){
+                        default_data[kv.split('=')[0]] = kv.split('=')[1];
+                    });
+                }
+                showDialog(method.innerHTML, url.innerHTML, JSON.stringify(returnData),default_data);
             };
 
             return parent;
@@ -195,7 +201,7 @@
         }
 
 
-        function showDialog(methodData, urlData, returnData) {
+        function showDialog(methodData, urlData, returnData,default_data) {
             var dialogPanl = document.createElement('div');
             var dialog = document.createElement('div');
 
@@ -235,29 +241,30 @@
             }
             function initContent() {
                 var el_data = {};
-                match(urlData, el_data, false);
-                match(returnData, el_data, true);
+                match(urlData, false);
+                match(returnData, true);
                 return el_data;
 
-                function match(str, data, enumerable) {
+                function match(str, enumerable) {
                     var parms = str.match(/:[0-9a-zA-Z_]+/g);
                     if (parms) {
                         parms.forEach(function (key) {
-                            if (typeof data[key.replace(':', '')] === 'undefined') {
-                                Object.defineProperty(data, key.replace(':', ''), {
+                            if (typeof el_data[key.replace(':', '')] === 'undefined') {
+                                Object.defineProperty(el_data, key.replace(':', ''), {
                                     enumerable: enumerable,
-                                    get: initRow(key, enumerable)
+                                    get: initRow(key, default_data[key.replace(':', '')],enumerable)
                                 });
                             }
                         });
                     }
                 }
 
-                function initRow(key, nullable) {
+                function initRow(key,dafaultValue, nullable) {
                     var row = document.createElement('div');
                     var label = document.createElement('div');
                     var value = document.createElement('input');
                     label.innerHTML = key.replace(':', '') + (nullable ? '' : '*');
+                    value.value = dafaultValue || '';
                     row.appendChild(label);
                     row.appendChild(value);
                     content.appendChild(row);

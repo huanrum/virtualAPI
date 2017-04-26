@@ -5,29 +5,44 @@ var fs = require("fs");
 module.exports = (function () {
 
     var returnData = {};
-    var helpHtml = fs.readFileSync('help.html').toString().replace('window.configData = []', 'window.configData = '+ JSON.stringify(initConfig('config',returnData)));
+    var helpHtml = fs.readFileSync('help.html').toString().replace('window.configData = []', 'window.configData = ' + JSON.stringify(initConfig('config', returnData)));
 
-    return function (request,bodyData) {
-        if(!request){
+    return function (request, bodyData) {
+        if (!request) {
             return helpHtml;
         }
         var keys = Object.keys(returnData);
-        for (var index = 0; index < keys.length; index++) {
-            //判断是否是对应的url
-            if ((!keys[index].match(/\[(.*)\]/) || new RegExp('^\[' + request.method + '\]', 'i').test(keys[index]))
-                && new RegExp('^\\/*' + keys[index].replace(/\//g, '\\/+').replace(/:((?!\/).)*/g, '((?!\\/).)+') + '\\/*$').test(request.url.split('?')[0])) {
-                var parameters = getParameters(keys[index], request.url.split('?'));
-                var configStr = JSON.stringify(returnData[keys[index]]);
-                Object.keys(parameters).forEach(function (parm) {
-                    configStr = configStr.replace(new RegExp(':' + parm, 'g'), parameters[parm]);
-                });
-                Object.keys(bodyData).forEach(function (parm) {
-                    configStr = configStr.replace(new RegExp(':' + parm, 'g'), bodyData[parm]);
-                });
-                return JSON.parse(configStr);
+        var urls = Object.keys(returnData).filter(function (key) {
+            return (!key.match(/\[(.*)\]/) || new RegExp('\[' + request.method + '\]', 'i').test(key))
+                && new RegExp('^\\/*' + key.split('?')[0].replace(/\[(.*)\]/,'').replace(/\//g, '\\/+').replace(/:((?!\/).)*/g, '((?!\\/).)+') + '\\/*$','i').test(request.url.split('?')[0])
+        });
+
+        if (urls.length) {
+            var mothedUrl = urls.filter(function (i) {return new RegExp('\\[' + request.method + '\\]','i').test(i);});
+            if (mothedUrl.length) {
+                return returnResult(mothedUrl[0],request.url, bodyData);
             }
+
+            var noParmUrl = urls.filter(function (i) { return !/:/.test(i); });
+            if (noParmUrl.length) {
+                return returnResult(noParmUrl[0],request.url, bodyData);
+            }
+
+            return returnResult(urls[0],request.url, bodyData);
         }
     };
+
+    function returnResult(key, url, bodyData) {
+        var parameters = getParameters(key, url.split('?'));
+        var configStr = JSON.stringify(returnData[key]);
+        Object.keys(parameters).forEach(function (parm) {
+            configStr = configStr.replace(new RegExp(':' + parm, 'g'), parameters[parm]);
+        });
+        Object.keys(bodyData).forEach(function (parm) {
+            configStr = configStr.replace(new RegExp(':' + parm, 'g'), bodyData[parm]);
+        });
+        return JSON.parse(configStr);
+    }
 
     function initConfig(dirpath, returnData) {
         var config = [];
@@ -37,7 +52,7 @@ module.exports = (function () {
                 config = config.concat(initConfig(dirpath + '/' + item, returnData));
             } else if (/\.json$/.test(item)) {
                 var data = JSON.parse(fs.readFileSync(dirpath + '/' + item).toString());
-                 config.push({
+                config.push({
                     file: dirpath + '/' + item,
                     config: data
                 });
@@ -53,7 +68,7 @@ module.exports = (function () {
     function getParameters(key, urlAndParms) {
         var parameters = {};
 
-        var keys = key.replace(/\[.*\]/, '').split('/').filter(function (i) { return !!i; });
+        var keys = key.split('?')[0].replace(/\[.*\]/, '').split('/').filter(function (i) { return !!i; });
         var urls = urlAndParms[0].split('/').filter(function (i) { return !!i; });
 
         if (urlAndParms[1]) {

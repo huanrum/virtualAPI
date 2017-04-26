@@ -1,6 +1,5 @@
 var http = require('http');
 var fs = require("fs");
-var querystring = require('querystring');
 
 var random = require('./random');
 var helper = require('./helper');
@@ -18,7 +17,7 @@ http.createServer(function (request, response) {
                 bodyData += chunk;
             });
             request.on('end', function () {
-                var returnData = helper(request, querystring.parse(bodyData));
+                var returnData = helper(request, JSON.parse(bodyData||'{}'));
                 if (returnData) {
                     response.writeHead(200, { 'Content-Type': 'text/plain;charset=utf-8' });
                     response.end(JSON.stringify(random(returnData)));
