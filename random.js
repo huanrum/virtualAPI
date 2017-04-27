@@ -34,6 +34,7 @@ module.exports = (function (getValue) {
             var obj = {};
             Object.keys(str).forEach(function (key) {
                 var len = key.match(/:.*/);
+                tempData([key, str[key]]);
                 obj[random(key.replace(len && len[0], ''), null, tempData)] = random(str[key], len && len[0].replace(':', '').trim(), tempData);
             });
             return obj;
@@ -43,13 +44,19 @@ module.exports = (function (getValue) {
     function tempDataFn() {
         var activeKey = null, tempData = {};
         return function (model) {
-            if (!/^\d*\+\d*/.test(model)) {
-                activeKey = JSON.stringify(model);
-            } else {
-                tempData[activeKey] = tempData[activeKey] || ((+model.split('+')[0] || 1) - (+model.split('+')[1] || 1));
-                tempData[activeKey] = tempData[activeKey] + (+model.split('+')[1] || 1);
-                return tempData[activeKey];
+            if (typeof model === 'string') {
+                if (/^\d*\+\d*/.test(model)) {
+                    tempData[activeKey] = tempData[activeKey] || ((+model.split('+')[0] || 1) - (+model.split('+')[1] || 1));
+                    tempData[activeKey] = tempData[activeKey] + (+model.split('+')[1] || 1);
+                    return tempData[activeKey];
+                } else if (/^((?!\+).)+(\+((?!\+).)+)+$/.test(model)) {
+                    var items = model.split('+');
+                    tempData[activeKey] = tempData[activeKey] || -1;
+                    tempData[activeKey] = items[items.indexOf(tempData[activeKey]) + 1];
+                    return tempData[activeKey];
+                }
             }
+            activeKey = JSON.stringify(model);
         };
     }
 

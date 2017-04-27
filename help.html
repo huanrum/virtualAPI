@@ -279,7 +279,7 @@
                     var parms = str.match(/:[0-9a-zA-Z_]+/g);
                     if (parms) {
                         parms.forEach(function (key) {
-                            if (typeof el_data[key.replace(':', '')] === 'undefined') {
+                            if (typeof el_data[key.replace(':', '')] === 'undefined' && !/:\d+/.test(key)) {
                                 Object.defineProperty(el_data, key.replace(':', ''), {
                                     enumerable: enumerable,
                                     get: initRow(key, default_data[key.replace(':', '')],enumerable)
