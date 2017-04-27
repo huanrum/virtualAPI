@@ -3,6 +3,18 @@
              "returnCode": "0",
              "message":":user,login succeed!"
         },
+        "[PUT]login/user/location":{
+             "returnCode": "0",
+             "message":"login/user/location!"
+        },
+        "[DELETE]login/:user/:location":{
+             "returnCode": "0",
+             "message":"login/--/--!"
+        },
+        "login/:user/ana":{
+             "returnCode": "0",
+             "message":"login/--/ana!"
+        },
         "/test/:user": {
             "returnCode": "0",
             "data": {

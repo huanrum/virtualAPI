@@ -14,21 +14,31 @@ module.exports = (function () {
         var keys = Object.keys(returnData);
         var urls = Object.keys(returnData).filter(function (key) {
             return (!key.match(/\[(.*)\]/) || new RegExp('\[' + request.method + '\]', 'i').test(key))
-                && new RegExp('^\\/*' + key.split('?')[0].replace(/\[(.*)\]/,'').replace(/\//g, '\\/+').replace(/:((?!\/).)*/g, '((?!\\/).)+') + '\\/*$','i').test(request.url.split('?')[0])
+                && new RegExp('^\\/*' + key.split('?')[0].replace(/\[(.*)\]/, '').replace(/\//g, '\\/+').replace(/:((?!\/).)*/g, '((?!\\/).)+') + '\\/*$', 'i').test(request.url.split('?')[0])
         });
 
         if (urls.length) {
-            var mothedUrl = urls.filter(function (i) {return new RegExp('\\[' + request.method + '\\]','i').test(i);});
+            var mothedUrl = urls.filter(function (i) { return new RegExp('\\[' + request.method + '\\]', 'i').test(i.match(/\[(.*)\]/) ? i : ('[GET]' + i)); });
             if (mothedUrl.length) {
-                return returnResult(mothedUrl[0],request.url, bodyData);
+                return run(countValue(mothedUrl));
             }
+            return run(countValue(urls));
+        }
 
-            var noParmUrl = urls.filter(function (i) { return !/:/.test(i); });
-            if (noParmUrl.length) {
-                return returnResult(noParmUrl[0],request.url, bodyData);
-            }
+        function run(filterUrlKV) {
+            return returnResult(filterUrlKV[Math.min.apply(Math, Object.keys(filterUrlKV))], request.url, bodyData);
+        }
 
-            return returnResult(urls[0],request.url, bodyData);
+        function countValue(filterUrls) {
+            var filterUrlArray = {};
+            filterUrls.map(function (i) {
+                var value = 0;
+                i.replace(/\[.*\]/, '').split('/').filter(function (i) { return !!i; }).forEach(function (i, index) {
+                    value += (/:/.test(i) ? Math.pow(filterUrls.length, index) : 0);
+                });
+                filterUrlArray[value] = i;
+            });
+            return filterUrlArray;
         }
     };
 

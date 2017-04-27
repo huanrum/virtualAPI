@@ -7,8 +7,15 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
     <style>
+        .text-align-center{
+            text-align: center;
+        }
         .config-group {
             margin: 1em;
+        }
+        .config-group legend:hover{
+            cursor: pointer;
+            color:#99ff99;
         }
         
         .config-item {
@@ -114,11 +121,30 @@
         window.configData = [];
     </script>
     <script>
+        var methodColor = {
+            GET:'#337733',
+            POST:'#CCCC66',
+            PUT:'#66CCCC',
+            DELETE:'#FF3333'
+        };
+
+        var info = document.createElement('div');
         var panel = document.createElement('div');
+        info.className = 'text-align-center';
+        document.body.appendChild(info);
         document.body.appendChild(panel);
+        info.innerHTML = ' URL里面参数越靠后优先级越高,点击API的<strong>Method</strong>可以进行测试,点击<strong>URL</strong>可以打开和关闭返回数据结构。';
         window.configData.forEach(function (item) {
             panel.appendChild(createGroup(item));
         });
+        info.onclick = function(){
+            var close = Array.prototype.some.call(panel.children,function(fieldset){
+                return fieldset.lastChild.style.display === 'none';
+            });
+            Array.prototype.forEach.call(panel.children,function(fieldset){
+                fieldset.lastChild.style.display = close?'block':'none';
+            })
+        };
 
         function createGroup(item) {
             var fieldset = document.createElement('fieldset');
@@ -131,6 +157,9 @@
             });
             fieldset.appendChild(legend);
             fieldset.appendChild(content);
+            legend.onclick = function () {
+                content.style.display = content.style.display === 'none' ? 'block' : 'none';
+            };
             return fieldset;
         }
 
@@ -146,6 +175,7 @@
             urlElement.className = 'config-url';
             returnElement.className = 'config-return';
             method.innerHTML = (methodData && methodData[1] || 'GET').toLocaleUpperCase();
+            method.style.color = methodColor[method.innerHTML];
 
             url.innerHTML = urlData.split('?')[0].replace(/^\[.*\]/, '');
             returnElement.style.display = 'none';
@@ -268,6 +298,9 @@
                     row.appendChild(label);
                     row.appendChild(value);
                     content.appendChild(row);
+                    setTimeout(function(){
+                        value.focus();
+                    },200);
                     return function () {
                         return value.value;
                     };
