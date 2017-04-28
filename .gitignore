@@ -7,4 +7,5 @@ websocket/
 log/
 
 start.sh
+websocket.js
 analog_data_source.rar
