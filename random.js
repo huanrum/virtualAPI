@@ -108,7 +108,7 @@ module.exports = (function (emnuData,getValue) {
             } else if (/\+/.test(model)) {
                 return tempData(model);
             } else {
-                return getValue(model) || model;
+                return getValue(model) || (model);
             }
         }
     }

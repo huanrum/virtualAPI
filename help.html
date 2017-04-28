@@ -62,6 +62,12 @@
             background: #666699;
             padding: 0.5em;
         }
+        .common-dialog-back .common-dialog .common-dialog-header label{
+            color:#ffffff;
+        }
+        .common-dialog-back .common-dialog .common-dialog-header label sup{
+            color:rgba(168,168,168,0.4);
+        }
         
         .common-dialog-back .common-dialog .common-dialog-header a {
             float: right;
@@ -71,7 +77,7 @@
         .common-dialog-back .common-dialog .common-dialog-content {
             min-height: 3em;
             max-height: 33em;
-            min-width: 8em;
+            min-width: 12em;
             padding: 1em;
         }
         
@@ -160,6 +166,9 @@
             legend.onclick = function () {
                 content.style.display = content.style.display === 'none' ? 'block' : 'none';
             };
+            if(item.file === 'config/base.json'){
+                content.style.display = 'none';
+            }
             return fieldset;
         }
 
@@ -195,7 +204,10 @@
                         default_data[kv.split('=')[0]] = kv.split('=')[1];
                     });
                 }
-                showDialog(method.innerHTML, url.innerHTML, JSON.stringify(returnData),default_data);
+                urlElement.style.color = '#6666ff';
+                showDialog(method.innerHTML, url.innerHTML, JSON.stringify(returnData),default_data,function(){
+                    urlElement.style.color = null;
+                });
             };
 
             return parent;
@@ -231,7 +243,7 @@
         }
 
 
-        function showDialog(methodData, urlData, returnData,default_data) {
+        function showDialog(methodData, urlData, returnData,default_data,callback) {
             var dialogPanl = document.createElement('div');
             var dialog = document.createElement('div');
 
@@ -267,6 +279,7 @@
                 header.appendChild(close);
                 close.onclick = function () {
                     dialogPanl.parentNode.removeChild(dialogPanl);
+                    callback();
                 };
             }
             function initContent() {
