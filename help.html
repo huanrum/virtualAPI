@@ -7,15 +7,17 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
     <style>
-        .text-align-center{
+        .text-align-center {
             text-align: center;
         }
+        
         .config-group {
             margin: 1em;
         }
-        .config-group legend:hover{
+        
+        .config-group legend:hover {
             cursor: pointer;
-            color:#99ff99;
+            color: #99ff99;
         }
         
         .config-item {
@@ -62,11 +64,13 @@
             background: #666699;
             padding: 0.5em;
         }
-        .common-dialog-back .common-dialog .common-dialog-header label{
-            color:#ffffff;
+        
+        .common-dialog-back .common-dialog .common-dialog-header label {
+            color: #ffffff;
         }
-        .common-dialog-back .common-dialog .common-dialog-header label sup{
-            color:rgba(168,168,168,0.4);
+        
+        .common-dialog-back .common-dialog .common-dialog-header label sup {
+            color: rgba(168, 168, 168, 0.4);
         }
         
         .common-dialog-back .common-dialog .common-dialog-header a {
@@ -89,6 +93,7 @@
             display: inline-block;
             width: 12em;
         }
+        
         .common-dialog-back .common-dialog .common-dialog-content div input {
             background: #f3f3f3;
             border: none;
@@ -128,10 +133,10 @@
     </script>
     <script>
         var methodColor = {
-            GET:'#337733',
-            POST:'#CCCC66',
-            PUT:'#66CCCC',
-            DELETE:'#FF3333'
+            GET: '#337733',
+            POST: '#CCCC66',
+            PUT: '#66CCCC',
+            DELETE: '#FF3333'
         };
 
         var info = document.createElement('div');
@@ -143,12 +148,12 @@
         window.configData.forEach(function (item) {
             panel.appendChild(createGroup(item));
         });
-        info.onclick = function(){
-            var close = Array.prototype.some.call(panel.children,function(fieldset){
+        info.onclick = function () {
+            var close = Array.prototype.some.call(panel.children, function (fieldset) {
                 return fieldset.lastChild.style.display === 'none';
             });
-            Array.prototype.forEach.call(panel.children,function(fieldset){
-                fieldset.lastChild.style.display = close?'block':'none';
+            Array.prototype.forEach.call(panel.children, function (fieldset) {
+                fieldset.lastChild.style.display = close ? 'block' : 'none';
             })
         };
 
@@ -166,7 +171,7 @@
             legend.onclick = function () {
                 content.style.display = content.style.display === 'none' ? 'block' : 'none';
             };
-            if(item.file === 'config/base.json'){
+            if (item.file === 'config/base.json') {
                 content.style.display = 'none';
             }
             return fieldset;
@@ -199,13 +204,13 @@
             };
             method.onclick = function () {
                 var default_data = {};
-                if(urlData.split('?')[1]){
-                    urlData.split('?')[1].split('&').forEach(function(kv){
+                if (urlData.split('?')[1]) {
+                    urlData.split('?')[1].split('&').forEach(function (kv) {
                         default_data[kv.split('=')[0]] = kv.split('=')[1];
                     });
                 }
                 urlElement.style.color = '#6666ff';
-                showDialog(method.innerHTML, url.innerHTML, JSON.stringify(returnData),default_data,function(){
+                showDialog(method.innerHTML, url.innerHTML, JSON.stringify(returnData), default_data, function () {
                     urlElement.style.color = null;
                 });
             };
@@ -217,15 +222,36 @@
             var live = 0;
             for (var i = 0; i < str.length; i++) {
                 switch (str[i]) {
+                    case '[':
+                        live = live + 1;
+                        break;
+                    case ']':
+                        live = live - 1;
+                        break;
                     case '{':
                         live = live + 1;
-                        str = str.slice(0, i + 1) + '<br>' + Array(live + 1).join('    ') + str.slice(i + 1);
-                        i = i + live * 4 + 4;
+                        if (',;[]'.indexOf(str[i - 1]) === -1) {
+                            str = str.slice(0, i + 1) + '<br>' + Array(live + 1).join('    ') + str.slice(i + 1);
+                            i = i + live * 4 + 4;
+                        } else {
+                            str = str.slice(0, i) + '<br>' + Array(live).join('    ') + str[i] + '<br>' + Array(live + 1).join('    ') + str.slice(i + 1);
+                            i = i + live * 4 + live * 4 + 4;
+                        }
                         break;
                     case '}':
                         live = live - 1;
-                        str = str.slice(0, i) + '<br>' + Array(live + 1).join('    ') + '}' + Array(live + 1).join('    ') + str.slice(i + 1);
-                        i = i + live * 4 + live * 4 + 4;
+                        if (',;[]'.indexOf(str[i + 1]) === -1) {//下一个不是这些符号
+                            str = str.slice(0, i) + '<br>' + Array(live + 1).join('    ') + '}' + Array(live + 1).join('    ') + str.slice(i + 1);
+                            i = i + live * 4 + live * 4 + 4;
+                        } else {
+                            if (',;'.indexOf(str[i + 1]) === -1) {//下一个不是这些符号
+                                str = str.slice(0, i) + '<br>' + Array(live + 1).join('    ') + '}<br>' + Array(live).join('    ') + str.slice(i + 1);
+                                i = i + live * 4 + live * 4;
+                            } else {
+                                str = str.slice(0, i) + '<br>' + Array(live + 1).join('    ') + '}' + str.slice(i + 1);
+                                i = i + live * 4 + 4;
+                            }
+                        }
                         break;
                     case ',':
                         if (str[i + 1] === '"') {
@@ -243,7 +269,7 @@
         }
 
 
-        function showDialog(methodData, urlData, returnData,default_data,callback) {
+        function showDialog(methodData, urlData, returnData, default_data, callback) {
             var dialogPanl = document.createElement('div');
             var dialog = document.createElement('div');
 
@@ -268,7 +294,7 @@
             dialog.appendChild(footer);
 
             document.body.appendChild(dialogPanl);
-            drag(header,dialog);
+            drag(header, dialog);
 
             function initHeader() {
                 var title = document.createElement('label');
@@ -295,14 +321,14 @@
                             if (typeof el_data[key.replace(':', '')] === 'undefined' && !/:\d+/.test(key)) {
                                 Object.defineProperty(el_data, key.replace(':', ''), {
                                     enumerable: enumerable,
-                                    get: initRow(key, default_data[key.replace(':', '')],enumerable)
+                                    get: initRow(key, default_data[key.replace(':', '')], enumerable)
                                 });
                             }
                         });
                     }
                 }
 
-                function initRow(key,dafaultValue, nullable) {
+                function initRow(key, dafaultValue, nullable) {
                     var row = document.createElement('div');
                     var label = document.createElement('div');
                     var value = document.createElement('input');
@@ -311,9 +337,9 @@
                     row.appendChild(label);
                     row.appendChild(value);
                     content.appendChild(row);
-                    setTimeout(function(){
+                    setTimeout(function () {
                         value.focus();
-                    },200);
+                    }, 200);
                     return function () {
                         return value.value;
                     };
@@ -358,7 +384,7 @@
             }
 
 
-            function drag(canDragElement,element) {
+            function drag(canDragElement, element) {
                 var temp = {};
                 canDragElement.addEventListener('mousedown', function (e) {
                     var style = window.getComputedStyle(element);
