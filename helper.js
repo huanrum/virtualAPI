@@ -26,7 +26,7 @@ module.exports = (function () {
         }
 
         function run(filterUrlKV) {
-            return returnResult(filterUrlKV[Math.min.apply(Math, Object.keys(filterUrlKV))], request.url, bodyData);
+            return returnResult(filterUrlKV[Math.max.apply(Math, Object.keys(filterUrlKV))], request.url, bodyData);
         }
 
         function countValue(filterUrls) {
@@ -34,7 +34,7 @@ module.exports = (function () {
             filterUrls.map(function (i) {
                 var value = 0;
                 i.replace(/\[.*\]/, '').split('/').filter(function (i) { return !!i; }).forEach(function (i, index) {
-                    value += (/:/.test(i) ? Math.pow(filterUrls.length, index) : 0);
+                    value += (/:/.test(i) ? 0 : Math.pow(filterUrls.length, index));
                 });
                 filterUrlArray[value] = i;
             });
