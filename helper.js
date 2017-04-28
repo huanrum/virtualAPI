@@ -49,7 +49,7 @@ module.exports = (function () {
             configStr = configStr.replace(new RegExp(':' + parm, 'g'), parameters[parm]);
         });
         Object.keys(bodyData).forEach(function (parm) {
-            configStr = configStr.replace(new RegExp('((?!\\).)+:' + parm, 'g'), bodyData[parm]);
+            configStr = configStr.replace(new RegExp(':' + parm, 'g'), bodyData[parm]);
         });
         return JSON.parse(configStr.replace(/\\:/g,':'));
     }
