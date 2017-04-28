@@ -4,7 +4,7 @@ var child_process = require('child_process');
 var random = require('./random');
 var helper = require('./helper');
 
-var createServer = function (port, websocket,exits) {
+var createServer = function (port,exits) {
     if (exits) { return; }
     http.createServer(function (request, response) {
         response.setHeader('Access-Control-Allow-Origin', '*')
@@ -52,9 +52,9 @@ child_process.exec(process.platform == 'win32' ? 'netstat -aon' : 'netstat –ap
         if (p[2].split(':')[1] == port || p[3].split(':')[1] == port) {
             ++count;
             child_process.exec('taskkill /pid ' + p[5].split('/')[0] + ' -t -f ', function (err, stdout, stderr) {
-                createServer(port,websocket, --count);
+                createServer(port, --count);
             });
         }
     });
-    createServer(port,websocket, count);
+    createServer(port, count);
 });
