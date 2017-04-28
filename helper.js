@@ -59,7 +59,7 @@ module.exports = (function () {
         Object.keys(bodyData).forEach(function (parm) {
             configStr = configStr.replace(new RegExp(':' + parm, 'g'), bodyData[parm]);
         });
-        log(new Date(),getClientIp(request),key, request.url, JSON.stringify(bodyData));
+        log(new Date(),getClientIp(request),request.headers['referer'],key, request.url, JSON.stringify(bodyData));
         return JSON.parse(configStr);
     }
 
