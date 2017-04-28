@@ -26,7 +26,8 @@ module.exports = (function () {
         }
 
         function run(filterUrlKV) {
-            return returnResult(filterUrlKV[Math.max.apply(Math, Object.keys(filterUrlKV))], request.url, bodyData);
+
+            return returnResult(filterUrlKV[Math.max.apply(Math, Object.keys(filterUrlKV))], request, bodyData);
         }
 
         function countValue(filterUrls) {
@@ -42,8 +43,15 @@ module.exports = (function () {
         }
     };
 
-    function returnResult(key, url, bodyData) {
-        var parameters = getParameters(key, url.split('?'));
+    function getClientIp(req) {
+        return req.headers['x-forwarded-for'] ||
+        req.connection.remoteAddress ||
+        req.socket.remoteAddress ||
+        req.connection.socket.remoteAddress;
+    };
+
+    function returnResult(key, request, bodyData) {
+        var parameters = getParameters(key, request.url.split('?'));
         var configStr = JSON.stringify(returnData[key]);
         Object.keys(parameters).forEach(function (parm) {
             configStr = configStr.replace(new RegExp(':' + parm, 'g'), parameters[parm]);
@@ -51,7 +59,8 @@ module.exports = (function () {
         Object.keys(bodyData).forEach(function (parm) {
             configStr = configStr.replace(new RegExp(':' + parm, 'g'), bodyData[parm]);
         });
-        return JSON.parse(configStr.replace(/\\:/g,':'));
+        log(new Date(),getClientIp(request),key, request.url, JSON.stringify(bodyData));
+        return JSON.parse(configStr);
     }
 
     function initConfig(dirpath, returnData) {
@@ -92,6 +101,26 @@ module.exports = (function () {
             }
         }
         return parameters;
+    }
+
+
+    function log() {
+        var size = 100 * 1024;
+        var message = '\n' + Array(40).join('*') + '\n' + Array.prototype.join.call(arguments,'\n') + '\n' + Array(40).join('*') + '\n' ;
+        fs.readdir('log', function (error, files) {
+            if (error) { return; }
+            var file = files.find(function (item) {
+                return /\.log$/.test(item) && fs.statSync('log/' + item).size < size;
+            });
+            if (!file) {
+                file = Date.now() + '.log';
+            }
+            fs.appendFile('log/' + file, message,function(err){
+                if(err){
+                    console.log(err);
+                }
+            });
+        });
     }
 
 

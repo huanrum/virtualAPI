@@ -79,10 +79,8 @@
         }
         
         .common-dialog-back .common-dialog .common-dialog-content {
-            min-height: 3em;
             max-height: 33em;
             min-width: 12em;
-            padding: 1em;
         }
         
         .common-dialog-back .common-dialog .common-dialog-content>* {
@@ -102,7 +100,7 @@
         
         .common-dialog-back .common-dialog .common-dialog-message {
             background: #d3d3d3;
-            margin: 1em;
+            margin: 0.5em;
             max-height: 33em;
             overflow: auto;
         }
@@ -361,6 +359,10 @@
                         message.innerHTML = linefeed(JSON.stringify(req));
                     });
                 };
+
+                setTimeout(function(){
+                    confrom.click();
+                }),100;
 
                 function http(urlFull) {
                     if (/:/.test(urlFull)) {

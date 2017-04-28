@@ -3,6 +3,7 @@
 
 node_modules/
 config/demo-mall/
+log/
 
 start.sh
 analog_data_source.rar
