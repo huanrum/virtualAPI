@@ -3,6 +3,7 @@
 
 node_modules/
 config/demo-mall/
+config/vue-mall/
 websocket/
 log/
 
