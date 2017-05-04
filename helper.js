@@ -92,7 +92,7 @@ module.exports = (function () {
 
         if (urlAndParms[1]) {
             urlAndParms[1].split('&').forEach(function (str) {
-                parameters[str.split('=')[0]] = str.split('=')[1];
+                parameters[str.split('=')[0]] = decodeURIComponent(str.split('=')[1]);
             });
         }
         for (var i = 0; i < keys.length; i++) {
