@@ -176,7 +176,7 @@
             fieldset.className = 'config-group';
             legend.innerHTML = item.file;
             Object.keys(item.config).forEach(function (key) {
-                content.appendChild(createItem(key.match(/^\[(.*)\]/), key, item.config[key]));
+                content.appendChild(createItem(key.match(/^\[(.*)\]/), key, item.config[key], item.file === 'config/base.json'));
             });
             fieldset.appendChild(legend);
             fieldset.appendChild(content);
@@ -185,11 +185,13 @@
             };
             if (item.file === 'config/base.json') {
                 content.style.display = 'none';
+                legend.innerHTML = item.file + ' <i>[Test]</i>';
             }
             return fieldset;
         }
 
-        function createItem(methodData, urlData, returnData) {
+        function createItem(methodData, urlData, returnData, isTest) {
+            var isDisable = isTest ? false : null;
             var parent = document.createElement('div');
             var urlElement = document.createElement('div');
             var returnElement = document.createElement('div');
@@ -200,16 +202,19 @@
             parent.className = 'config-item';
             urlElement.className = 'config-url';
             returnElement.className = 'config-return';
+
             method.innerHTML = (methodData && methodData[1] || 'GET').toLocaleUpperCase();
             method.style.color = methodColor[method.innerHTML];
 
             url.innerHTML = urlData.split('?')[0].replace(/^\[.*\]/, '');
             returnElement.style.display = 'none';
             returnElement.innerHTML = linefeed(JSON.stringify(returnData));
+
             urlElement.appendChild(method);
             urlElement.appendChild(url);
             parent.appendChild(urlElement);
             parent.appendChild(returnElement);
+
 
             url.onclick = function () {
                 returnElement.style.display = returnElement.style.display === 'none' ? 'block' : 'none';
@@ -222,8 +227,13 @@
                     });
                 }
                 urlElement.style.color = '#6666ff';
-                showDialog(method.innerHTML, url.innerHTML, JSON.stringify(returnData), default_data, function () {
-                    urlElement.style.color = null;
+                showDialog(isDisable, method.innerHTML, url.innerHTML, JSON.stringify(returnData), default_data, function (disable) {
+                    if (disable === undefined) {
+                        urlElement.style.color = null;
+                    } else {
+                        isDisable = disable;
+                        urlElement.style.opacity = disable ? '0.2' : '1.0';
+                    }
                 });
             };
 
@@ -281,7 +291,7 @@
         }
 
 
-        function showDialog(methodData, urlData, returnData, default_data, callback) {
+        function showDialog(isDisable, methodData, urlData, returnData, default_data, callback) {
             var dialogPanl = document.createElement('div');
             var dialog = document.createElement('div');
 
@@ -360,13 +370,51 @@
 
 
             function initFooter(el_data) {
+                var disable = document.createElement('a');
                 var copy = document.createElement('a');
                 var confrom = document.createElement('a');
+
                 footer.appendChild(confrom);
+                if (typeof isDisable === 'boolean') {
+                    footer.appendChild(disable);
+                }
+                
                 footer.appendChild(copy);
+
+                disable.innerHTML = isDisable ? 'Enable' : 'Disable';
                 copy.innerHTML = 'Copy';
                 confrom.innerHTML = methodData;
+
+                copy.style.opacity = isDisable ? 0.2 : 1.0;
+                confrom.style.opacity = isDisable ? 0.2 : 1.0;
+
+                disable.onclick = function () {
+                    http(urlData.split('/').map(function (i) { return /:/.test(i) && el_data[i.replace(':', '')] || i; }).join('/'),{disable:!isDisable}).then(function (req) {
+                        if (req.status === 200) {
+                            return req.json();
+                        }
+                        return req.text();
+                    }).then(function () {
+                        isDisable = !isDisable;
+                        disable.innerHTML = isDisable ? 'Enable' : 'Disable';
+                        copy.style.opacity = isDisable ? 0.2 : 1.0;
+                        confrom.style.opacity = isDisable ? 0.2 : 1.0;
+                        if(isDisable){
+                            message.innerHTML = '此API不可用！';
+                        }else{
+                            setTimeout(function () {
+                                confrom.click();
+                            }, 100);
+                        }
+                        callback(isDisable);
+                    });
+                };
+
                 confrom.onclick = function () {
+                    if (isDisable) {
+                        message.innerHTML = '此API不可用！';
+                        return;
+                    }
                     http(urlData.split('/').map(function (i) { return /:/.test(i) && el_data[i.replace(':', '')] || i; }).join('/')).then(function (req) {
                         if (req.status === 200) {
                             return req.json();
@@ -378,6 +426,7 @@
                 };
 
                 copy.onclick = function (item) {
+                    if (isDisable) { return; }
                     var textarea = document.createElement("textarea");
                     textarea.style.position = 'fixed';
                     textarea.style.opacity = 0.01;
@@ -402,7 +451,7 @@
                     confrom.click();
                 }, 100);
 
-                function http(urlFull) {
+                function http(urlFull,headers) {
                     if (/:/.test(urlFull)) {
                         message.innerHTML = "必填参数没有填写";
                     } else {
@@ -411,11 +460,13 @@
                                 return key + '=' + encodeURIComponent(el_data[key]);
                             }).join('&');
                             return fetch(urlFull + (urlParm ? ('?' + urlParm) : ''), {
-                                method: methodData
+                                method: methodData,
+                                headers:headers
                             });
                         } else {
                             return fetch(urlFull, {
                                 method: methodData,
+                                headers:headers,
                                 body: JSON.stringify(el_data)
                             });
                         }

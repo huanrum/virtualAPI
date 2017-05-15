@@ -4,17 +4,19 @@ var fs = require("fs");
 
 module.exports = (function () {
 
-    var returnData = {};
+    var returnData = {},disableList = [];
     var helpHtml = fs.readFileSync('help.html').toString().replace('window.configData = []', 'window.configData = ' + JSON.stringify(initConfig('config', returnData)));
 
     return function (request, bodyData) {
         if (!request) {
             return helpHtml;
         }
+
         var keys = Object.keys(returnData);
         var urls = Object.keys(returnData).filter(function (key) {
             return (!key.match(/\[(.*)\]/) || new RegExp('\[' + request.method + '\]', 'i').test(key))
                 && new RegExp('^\\/*' + key.split('?')[0].replace(/\[(.*)\]/, '').replace(/\//g, '\\/+').replace(/:((?!\/).)*/g, '((?!\\/).)+') + '\\/*$', 'i').test(request.url.split('?')[0])
+                && (Object.keys(request.headers).indexOf('disable') !== -1 || disableList.indexOf(key) === -1);
         });
 
         if (urls.length) {
@@ -26,7 +28,6 @@ module.exports = (function () {
         }
 
         function run(filterUrlKV) {
-
             return returnResult(filterUrlKV[Math.max.apply(Math, Object.keys(filterUrlKV))], request, bodyData);
         }
 
@@ -53,6 +54,14 @@ module.exports = (function () {
     function returnResult(key, request, bodyData) {
         var parameters = getParameters(key, request.url.split('?'));
         var configStr = JSON.stringify(returnData[key]);
+        if(Object.keys(request.headers).indexOf('disable') !== -1){
+            if(request.headers.disable === 'true'){
+                disableList.push(key);
+            }else{
+                disableList = disableList.filter(function(i){return i!==key;});
+            }
+            return '改变API的可用性为' + request.headers.disable;
+        }
         Object.keys(parameters).forEach(function (parm) {
             configStr = configStr.replace(new RegExp(':' + parm, 'g'), parameters[parm]);
         });
