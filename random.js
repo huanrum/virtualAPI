@@ -1,5 +1,5 @@
 
-module.exports = (function (emnuData,getValue) {
+module.exports = (function (emnuData, getValue) {
     //根据传入的模型对象构建出一个完整的对象
     //第二个参数是产生数组的 例如 3-5 表示生成数组长度3-5
     //str是字符串或者是对象
@@ -12,130 +12,140 @@ module.exports = (function (emnuData,getValue) {
     //      [10-100]表示生成10-100之间的一个数字,
     //      [aaa,bbb,100-200]表示冲三个字符串中随机一个,里面的100-200会被替换成100-200之前的一个数字
     //      [1+1]表示从1开始步长1递增,数字1是可以省略的
-    return random;
+    return function (someValue) {
+        var replaceValue = getValue(someValue);
+        return random;
 
-    function random(str, length, tempData) {
-        tempData = (typeof tempData === 'function') ? tempData : tempDataFn();
-        if (length) {
-            return initLength('' + length, function (len) {
-                var list = [];
-                tempData(str);
-                for (var i = 0; i < len; i++) {
-                    list.push(random(str, null, tempData));
-                }
-                return list;
-            });
-        }
 
-        if (typeof str === 'string') {
-            return getString(str, tempData);
-        } else {
-            var obj = {};
-            Object.keys(str).forEach(function (key) {
-                var len = key.match(/:.*/);
-                tempData([key, str[key]]);
-                obj[random(key.replace(len && len[0], ''), null, tempData)] = random(str[key], len && len[0].replace(':', '').trim(), tempData);
-            });
-            return obj;
-        }
-    }
-
-    function tempDataFn() {
-        var activeKey = null, tempData = {};
-        return function (model) {
-            if (typeof model === 'string') {
-                if (/^\d*\+\d*/.test(model)) {
-                    tempData[activeKey] = tempData[activeKey] || ((+model.split('+')[0] || 1) - (+model.split('+')[1] || 1));
-                    tempData[activeKey] = tempData[activeKey] + (+model.split('+')[1] || 1);
-                    return tempData[activeKey];
-                } else if (/^((?!\+).)+(\+((?!\+).)+)+$/.test(model)) {
-                    var items = model.split('+');
-                    tempData[activeKey] = tempData[activeKey] || -1;
-                    tempData[activeKey] = items[items.indexOf(tempData[activeKey]) + 1];
-                    return tempData[activeKey];
-                }
+        function random(str, length, tempData) {
+            tempData = (typeof tempData === 'function') ? tempData : tempDataFn();
+            if (length) {
+                return initLength('' + length, function (len) {
+                    var list = [];
+                    tempData(str);
+                    for (var i = 0; i < len; i++) {
+                        list.push(random(str, null, tempData));
+                    }
+                    return list;
+                });
             }
-            activeKey = JSON.stringify(model);
-        };
-    }
 
-    function initLength(length, fn) {
-        fn = fn || function (l) { return l; };
-        length = length && length.trim() || '1-100';
-        length = length.split('-');
-        length[1] = length[1] || length[0];
-        if (length[1].length === length[0].length) {
-            length = (Array(length[1].length).join('0') + Math.floor(+ (length[0]) + Math.random() * (length[1] - length[0]))).slice(- length[1].length);
-        } else {
-            length = Math.floor(+ (length[0]) + Math.random() * (length[1] - length[0]));
-        }
-
-        return fn(length);
-
-    }
-
-    function getString(regex, tempData) {
-        var regs = regex.match(/\[((?!\[).)*\]/g);
-        if (regs) {
-            regs.forEach(function (reg) {
-                if (!/[\(\)\{\}]/.test(reg)) {
-                    var numbers = reg.replace(/[\[\]]/g, '').split(',').map(initNumber);
-                    regex = regex.replace(reg, numbers[Math.floor(Math.random() * numbers.length)]);
-                } else {
-                    var splits = reg.replace(/[\[\]]/g, '').split(/[\(\)\{\}]/);
-                    regex = regex.replace(reg, initLength(splits[3] || splits[2], function (length) {
-                        var result = '';
-                        for (var i = 0; i < length; i++) {
-                            if(!splits[1] || /^[\-0-9a-zA-Z]+$/.test(splits[1])){
-                                result += initChar(splits[1] || '0-Z');
-                            }else if(/^@+$/.test(splits[1])){
-                                result += initName(emnuData.chinese,splits[1].length);
-                            }else if(/^\$+$/.test(splits[1])){
-                                result += initName(emnuData.english,splits[1].length);
-                            }
-                            
-                        }
-                        return result;
-                    }));
-                }
-            });
-        }
-        return regex;
-
-        function initNumber(model) {
-            if (/\-/.test(model)) {
-                return initLength(model);
-            } else if (/\+/.test(model)) {
-                return tempData(model);
+            if (typeof str === 'string') {
+                return getString(str, tempData);
             } else {
-                return getValue(model) || (model);
+                var obj = {};
+                Object.keys(str).forEach(function (key) {
+                    var len = key.match(/:.*/);
+                    tempData([key, str[key]]);
+                    obj[random(key.replace(len && len[0], ''), null, tempData)] = random(str[key], len && len[0].replace(':', '').trim(), tempData);
+                });
+                return obj;
             }
         }
-    }
 
-    function initName(names,length){
-        var result = [];for(var i=0;i<length;i++){
-            result.push(names[Math.floor(Math.random()*names.length)]);
+        function tempDataFn() {
+            var activeKey = null, tempData = {};
+            return function (model) {
+                if (typeof model === 'string') {
+                    if (/^\d*\+\d*/.test(model)) {
+                        tempData[activeKey] = tempData[activeKey] || ((+model.split('+')[0] || 1) - (+model.split('+')[1] || 1));
+                        tempData[activeKey] = tempData[activeKey] + (+model.split('+')[1] || 1);
+                        return tempData[activeKey];
+                    } else if (/^((?!\+).)+(\+((?!\+).)+)+$/.test(model)) {
+                        var items = model.split('+');
+                        tempData[activeKey] = tempData[activeKey] || -1;
+                        tempData[activeKey] = items[items.indexOf(tempData[activeKey]) + 1];
+                        return tempData[activeKey];
+                    }
+                }
+                activeKey = JSON.stringify(model);
+            };
         }
-        return ' ' + result.join(' ') + ' ';
-    }
 
-    function initChar(model) {
-        while (/\-/.test(model)) {
-            var start = model[model.indexOf('-') - 1] || '';
-            var end = model[model.indexOf('-') + 1] || '';
-            model = model.replace(start + '-' + end, emnuData.chars.slice(emnuData.chars.indexOf(start || emnuData.chars[0]), emnuData.chars.indexOf(end || emnuData.chars[emnuData.chars.length - 1])));
+        function initLength(length, fn) {
+            fn = fn || function (l) { return l; };
+            length = length && length.trim() || '1-100';
+            length = length.split('-');
+            length[1] = length[1] || length[0];
+            if (length[1].length === length[0].length) {
+                length = (Array(length[1].length).join('0') + Math.floor(+ (length[0]) + Math.random() * (length[1] - length[0]))).slice(- length[1].length);
+            } else {
+                length = Math.floor(+ (length[0]) + Math.random() * (length[1] - length[0]));
+            }
+
+            return fn(length);
+
         }
-        return model[Math.floor(Math.random() * model.length)];
-    }
+
+        function getString(regex, tempData) {
+            var regs = regex.match(/\[((?!\[).)*\]/g);
+            if (regs) {
+                regs.forEach(function (reg) {
+                    if (!/[\(\)\{\}]/.test(reg)) {
+                        var numbers = reg.replace(/[\[\]]/g, '').split(',').map(initNumber);
+                        regex = regex.replace(reg, numbers[Math.floor(Math.random() * numbers.length)]);
+                    } else {
+                        var splits = reg.replace(/[\[\]]/g, '').split(/[\(\)\{\}]/);
+                        regex = regex.replace(reg, initLength(splits[3] || splits[2], function (length) {
+                            var result = '';
+                            for (var i = 0; i < length; i++) {
+                                if (!splits[1] || /^[\-0-9a-zA-Z]+$/.test(splits[1])) {
+                                    result += initChar(splits[1] || '0-Z');
+                                } else if (/^@+$/.test(splits[1])) {
+                                    result += initName(emnuData.chinese, splits[1].length);
+                                } else if (/^\$+$/.test(splits[1])) {
+                                    result += initName(emnuData.english, splits[1].length);
+                                }
+
+                            }
+                            return result;
+                        }));
+                    }
+                });
+            }
+            return regex;
+
+            function initNumber(model) {
+                if (/\-/.test(model)) {
+                    return initLength(model);
+                } else if (/\+/.test(model)) {
+                    return tempData(model);
+                } else {
+                    return replaceValue(model) || (model);
+                }
+            }
+        }
+
+        function initName(names, length) {
+            var result = []; for (var i = 0; i < length; i++) {
+                result.push(names[Math.floor(Math.random() * names.length)]);
+            }
+            return ' ' + result.join(' ') + ' ';
+        }
+
+        function initChar(model) {
+            while (/\-/.test(model)) {
+                var start = model[model.indexOf('-') - 1] || '';
+                var end = model[model.indexOf('-') + 1] || '';
+                model = model.replace(start + '-' + end, emnuData.chars.slice(emnuData.chars.indexOf(start || emnuData.chars[0]), emnuData.chars.indexOf(end || emnuData.chars[emnuData.chars.length - 1])));
+            }
+            return model[Math.floor(Math.random() * model.length)];
+        }
+    };
 })({
-    chars : '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
-    chinese :'a,ai,an,ang,ao,ba,bai,ban,bang,bao,bei,ben,beng,bi,bian,biao,bie,bin,bing,bo,bu,ca,cai,can,cang,cao,ce,cen,ceng,cha,chai,chan,chang,chao,che,chen,cheng,chi,chong,chou,chu,chua,chuai,chuan,chuang,chui,chun,chuo,ci,cong,cou,cu,cuan,cui,cun,cuo,da,dai,dan,dang,dao,de,dei,den,deng,di,dia,dian,diao,die,ding,diu,dong,dou,du,duan,dui,dun,duo,e,en,eng,er,fa,fan,fang,fei,fen,feng,fiao,fo,fou,fu,ga,gai,gan,gang,gao,ge,gei,gen,geng,gong,gou,gu,gua,guai,guan,guang,gui,gun,guo,ha,hai,han,hang,hao,he,hei,hen,heng,hong,hou,hu,hua,huai,huan,huang,hui,hun,huo,ji,jia,jian,jiang,jiao,jie,jin,jing,jiong,jiu,ju,juan,jue,#NAME?,ka,kai,kan,kang,kao,ke,ken,keng,kong,kou,ku,kua,kuai,kuan,kuang,kui,kun,kuo,la,lai,lan,lang,lao,le,lei,leng,li,lia,lian,liang,liao,lie,lin,ling,liu,lo,long,lou,lu,luan,lun,luo,lv,lve,ma,mai,man,mang,mao,me,mei,men,meng,mi,mian,miao,mie,min,ming,miu,mo,mou,mu,na,nai,nan,nang,nao,ne,nei,nen,neng,ni,nian,niang,niao,nie,nin,ning,niu,nong,nou,nu,nuan,nun,nuo,nv,nve,o,ou,pa,pai,pan,pang,pao,pei,pen,peng,pi,pian,piao,pie,pin,ping,po,pou,pu,qi,qia,qian,qiang,qiao,qie,qin,qing,qiong,qiu,qu,quan,que,qun,ran,rang,rao,re,ren,reng,ri,rong,rou,ru,rua,ruan,rui,run,ruo,sa,sai,san,sang,sao,se,sen,seng,sha,shai,shan,shang,shao,she,shei,shen,sheng,shi,shou,shu,shua,shuai,shuan,shuang,shui,shun,shuo,si,song,sou,su,suan,sui,sun,suo,ta,tai,tan,tang,tao,te,tei,teng,ti,tian,tiao,tie,ting,tong,tou,tu,tuan,tui,tun,tuo,wa,wai,wan,wang,wei,wen,weng,wo,wu,xi,xia,xian,xiang,xiao,xie,xin,xing,xiong,xiu,xu,xuan,xue,xun,ya,yan,yang,yao,ye,yi,yin,ying,yo,yong,you,yu,yuan,yue,yun,za,zai,zan,zang,zao,ze,zei,zen,zeng,zha,zhai,zhan,zhang,zhao,zhe,zhei,zhen,zheng,zhi,zhong,zhou,zhu,zhua,zhuai,zhuan,zhuang,zhui,zhun,zhuo,zi,zong,zou,zu,zuan,zui,zun,zuo,ń,ň,ê,hng'.split(','),
-    english:''
+    chars: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+    chinese: 'a,ai,an,ang,ao,ba,bai,ban,bang,bao,bei,ben,beng,bi,bian,biao,bie,bin,bing,bo,bu,ca,cai,can,cang,cao,ce,cen,ceng,cha,chai,chan,chang,chao,che,chen,cheng,chi,chong,chou,chu,chua,chuai,chuan,chuang,chui,chun,chuo,ci,cong,cou,cu,cuan,cui,cun,cuo,da,dai,dan,dang,dao,de,dei,den,deng,di,dia,dian,diao,die,ding,diu,dong,dou,du,duan,dui,dun,duo,e,en,eng,er,fa,fan,fang,fei,fen,feng,fiao,fo,fou,fu,ga,gai,gan,gang,gao,ge,gei,gen,geng,gong,gou,gu,gua,guai,guan,guang,gui,gun,guo,ha,hai,han,hang,hao,he,hei,hen,heng,hong,hou,hu,hua,huai,huan,huang,hui,hun,huo,ji,jia,jian,jiang,jiao,jie,jin,jing,jiong,jiu,ju,juan,jue,#NAME?,ka,kai,kan,kang,kao,ke,ken,keng,kong,kou,ku,kua,kuai,kuan,kuang,kui,kun,kuo,la,lai,lan,lang,lao,le,lei,leng,li,lia,lian,liang,liao,lie,lin,ling,liu,lo,long,lou,lu,luan,lun,luo,lv,lve,ma,mai,man,mang,mao,me,mei,men,meng,mi,mian,miao,mie,min,ming,miu,mo,mou,mu,na,nai,nan,nang,nao,ne,nei,nen,neng,ni,nian,niang,niao,nie,nin,ning,niu,nong,nou,nu,nuan,nun,nuo,nv,nve,o,ou,pa,pai,pan,pang,pao,pei,pen,peng,pi,pian,piao,pie,pin,ping,po,pou,pu,qi,qia,qian,qiang,qiao,qie,qin,qing,qiong,qiu,qu,quan,que,qun,ran,rang,rao,re,ren,reng,ri,rong,rou,ru,rua,ruan,rui,run,ruo,sa,sai,san,sang,sao,se,sen,seng,sha,shai,shan,shang,shao,she,shei,shen,sheng,shi,shou,shu,shua,shuai,shuan,shuang,shui,shun,shuo,si,song,sou,su,suan,sui,sun,suo,ta,tai,tan,tang,tao,te,tei,teng,ti,tian,tiao,tie,ting,tong,tou,tu,tuan,tui,tun,tuo,wa,wai,wan,wang,wei,wen,weng,wo,wu,xi,xia,xian,xiang,xiao,xie,xin,xing,xiong,xiu,xu,xuan,xue,xun,ya,yan,yang,yao,ye,yi,yin,ying,yo,yong,you,yu,yuan,yue,yun,za,zai,zan,zang,zao,ze,zei,zen,zeng,zha,zhai,zhan,zhang,zhao,zhe,zhei,zhen,zheng,zhi,zhong,zhou,zhu,zhua,zhuai,zhuan,zhuang,zhui,zhun,zhuo,zi,zong,zou,zu,zuan,zui,zun,zuo,ń,ň,ê,hng'.split(','),
+    english: ''
 
-},function getValue(model) {
-    return ({
-        date: Date.now,
-        dir: __dirname
-    })[model.toLocaleLowerCase()];
+}, function getValue(someValue) {
+    var data = {
+            date: Date.now,
+            dir: __dirname
+        };
+        Object.keys(someValue || {}).forEach(function(key){
+            data[key.toLocaleLowerCase()] = someValue[key];
+        });
+    return function(model){
+        return data[model.toLocaleLowerCase()];
+    };
 });

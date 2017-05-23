@@ -1,11 +1,28 @@
+var os = require('os');  
 var http = require('http');
 var child_process = require('child_process');
 
 var random = require('./random');
 var helper = require('./helper');
 
+var getSomeValue = function(){
+    var someValue = {host:os.hostname(),ips:[]};
+    
+    Object.values(os.networkInterfaces()).forEach(function(networkInterfaces){
+        for(var i=0;i<networkInterfaces.length;i++){  
+            if(networkInterfaces[i].family=='IPv4'){  
+                someValue.ips.push(networkInterfaces[i].address);  
+            }  
+        }  
+    });
+    someValue.ip = someValue.ips.sort().reverse()[0];
+    return someValue;
+}
+
 var createServer = function (port,exits) {
     if (exits) { return; }
+    
+    randomFn = random(getSomeValue());
     http.createServer(function (request, response) {
         response.setHeader('Access-Control-Allow-Origin', '*')
         if (/^[\/\s]*$/.test(request.url)) {
@@ -21,7 +38,7 @@ var createServer = function (port,exits) {
                     var returnData = helper(request, JSON.parse(bodyData || '{}'));
                     if (returnData) {
                         response.writeHead(200, { 'Content-Type': 'text/plain;charset=utf-8' });
-                        response.end(JSON.stringify(random(returnData)));
+                        response.end(JSON.stringify(randomFn(returnData)));
                     } else {
                         response.writeHead(404, { 'Content-Type': 'text/plain;charset=utf-8' });
                         response.end('404 地址不存在');
