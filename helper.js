@@ -4,7 +4,7 @@ var fs = require("fs");
 
 module.exports = (function () {
 
-    var returnData = {},disableList = [];
+    var returnData = {}, disableList = [];
     var helpHtml = fs.readFileSync('help.html').toString().replace('window.configData = []', 'window.configData = ' + JSON.stringify(initConfig('config', returnData)));
 
     return function (request, bodyData) {
@@ -46,19 +46,19 @@ module.exports = (function () {
 
     function getClientIp(req) {
         return req.headers['x-forwarded-for'] ||
-        req.connection.remoteAddress ||
-        req.socket.remoteAddress ||
-        req.connection.socket.remoteAddress;
+            req.connection.remoteAddress ||
+            req.socket.remoteAddress ||
+            req.connection.socket.remoteAddress;
     };
 
     function returnResult(key, request, bodyData) {
         var parameters = getParameters(key, request.url.split('?'));
         var configStr = JSON.stringify(returnData[key]);
-        if(Object.keys(request.headers).indexOf('disable') !== -1){
-            if(request.headers.disable === 'true'){
+        if (Object.keys(request.headers).indexOf('disable') !== -1) {
+            if (request.headers.disable === 'true') {
                 disableList.push(key);
-            }else{
-                disableList = disableList.filter(function(i){return i!==key;});
+            } else {
+                disableList = disableList.filter(function (i) { return i !== key; });
             }
             return '改变API的可用性为' + request.headers.disable;
         }
@@ -68,25 +68,30 @@ module.exports = (function () {
         Object.keys(bodyData).forEach(function (parm) {
             configStr = configStr.replace(new RegExp(':' + parm, 'g'), bodyData[parm]);
         });
-        log(new Date(),getClientIp(request),request.headers['referer'],key, request.url, JSON.stringify(bodyData));
+        log(new Date(), getClientIp(request), request.headers['referer'], key, request.url, JSON.stringify(bodyData));
         return JSON.parse(configStr);
     }
 
     function initConfig(dirpath, returnData) {
         var config = [];
         fs.readdirSync(dirpath).forEach(function (item) {
-            var info = fs.statSync(dirpath + '/' + item);
-            if (info.isDirectory()) {
-                config = config.concat(initConfig(dirpath + '/' + item, returnData));
-            } else if (/\.json$/.test(item)) {
-                var data = JSON.parse(fs.readFileSync(dirpath + '/' + item).toString());
-                config.push({
-                    file: dirpath + '/' + item,
-                    config: data
-                });
-                Object.keys(data).forEach(function (key) {
-                    returnData[key] = data[key];
-                });
+            try {
+                var info = fs.statSync(dirpath + '/' + item);
+                if (info.isDirectory()) {
+                    config = config.concat(initConfig(dirpath + '/' + item, returnData));
+                } else if (/\.json$/.test(item)) {
+                    var data = JSON.parse(fs.readFileSync(dirpath + '/' + item).toString());
+                    config.push({
+                        file: dirpath + '/' + item,
+                        config: data
+                    });
+                    Object.keys(data).forEach(function (key) {
+                        returnData[key] = data[key];
+                    });
+                }
+            }
+            catch (e) {
+                log(new Date(), dirpath + '/' + item, e.message);
             }
         });
         return config;
@@ -115,7 +120,7 @@ module.exports = (function () {
 
     function log() {
         var size = 100 * 1024;
-        var message = '\n' + Array(40).join('*') + '\n' + Array.prototype.join.call(arguments,'\n') + '\n' + Array(40).join('*') + '\n' ;
+        var message = '\n' + Array(40).join('*') + '\n' + Array.prototype.join.call(arguments, '\n') + '\n' + Array(40).join('*') + '\n';
         fs.readdir('log', function (error, files) {
             if (error) { return; }
             var file = files.find(function (item) {
@@ -124,8 +129,8 @@ module.exports = (function () {
             if (!file) {
                 file = Date.now() + '.log';
             }
-            fs.appendFile('log/' + file, message,function(err){
-                if(err){
+            fs.appendFile('log/' + file, message, function (err) {
+                if (err) {
                     console.log(err);
                 }
             });
