@@ -24,11 +24,14 @@ var createServer = function (port,exits) {
     
     randomFn = random(getSomeValue());
     http.createServer(function (request, response) {
-        response.setHeader('Access-Control-Allow-Origin', '*')
+        response.setHeader('Access-Control-Allow-Origin', '*');
+        response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With,User,Language,IsPc,Token')
         if (/^[\/\s]*$/.test(request.url)) {
             response.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8' });
             response.end(helper());
-        } else {
+        } else if(request.url.toLocaleLowerCase() === '/test'){
+            response.end(JSON.stringify(true));
+        }else{
             try {
                 var bodyData = '';
                 request.on('data', function (chunk) {
