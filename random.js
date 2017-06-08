@@ -32,7 +32,7 @@ module.exports = (function (emnuData, getValue) {
 
             if (typeof str === 'string') {
                 return getString(str, tempData);
-            } else {
+            } else if (typeof str === 'object') {
                 var obj = {};
                 Object.keys(str).forEach(function (key) {
                     var len = key.match(/:.*/);
@@ -40,6 +40,8 @@ module.exports = (function (emnuData, getValue) {
                     obj[random(key.replace(len && len[0], ''), null, tempData)] = random(str[key], len && len[0].replace(':', '').trim(), tempData);
                 });
                 return obj;
+            } else {
+                return str;
             }
         }
 
@@ -85,21 +87,23 @@ module.exports = (function (emnuData, getValue) {
                         var numbers = reg.replace(/[\[\]]/g, '').split(',').map(initNumber);
                         regex = regex.replace(reg, numbers[Math.floor(Math.random() * numbers.length)]);
                     } else {
-                        var splits = reg.replace(/[\[\]]/g, '').split(/[\(\)\{\}]/);
-                        regex = regex.replace(reg, initLength(splits[3] || splits[2], function (length) {
-                            var result = '';
-                            for (var i = 0; i < length; i++) {
-                                if (!splits[1] || /^[\-0-9a-zA-Z]+$/.test(splits[1])) {
-                                    result += initChar(splits[1] || '0-Z');
-                                } else if (/^@+$/.test(splits[1])) {
-                                    result += initName(emnuData.chinese, splits[1].length);
-                                } else if (/^\$+$/.test(splits[1])) {
-                                    result += initName(emnuData.english, splits[1].length);
-                                }
+                        var splits = reg.replace(/[\[\]]/g, '').split(/[\(\)\{\}]/).filter(function (i) { return !!i.trim(); });
+                        regex = regex.replace(reg, Array(+splits[2] || 1).join().split(',').map(function () {
+                            return initLength(splits[1], function (length) {
+                                var result = '';
+                                for (var i = 0; i < length; i++) {
+                                    if (!splits[0] || /^[\-0-9a-zA-Z]+$/.test(splits[0])) {
+                                        result += initChar(splits[0] || '0-Z');
+                                    } else if (/^@+$/.test(splits[0])) {
+                                        result += initName(emnuData.chinese, splits[0].length);
+                                    } else if (/^\$+$/.test(splits[0])) {
+                                        result += initName(emnuData.english, splits[0].length);
+                                    }
 
-                            }
-                            return result;
-                        }));
+                                }
+                                return result;
+                            });
+                        }).join());
                     }
                 });
             }
@@ -139,13 +143,13 @@ module.exports = (function (emnuData, getValue) {
 
 }, function getValue(someValue) {
     var data = {
-            date: Date.now,
-            dir: __dirname
-        };
-        Object.keys(someValue || {}).forEach(function(key){
-            data[key.toLocaleLowerCase()] = someValue[key];
-        });
-    return function(model){
+        date: Date.now,
+        dir: __dirname
+    };
+    Object.keys(someValue || {}).forEach(function (key) {
+        data[key.toLocaleLowerCase()] = someValue[key];
+    });
+    return function (model) {
         return data[model.toLocaleLowerCase()];
     };
 });

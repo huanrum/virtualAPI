@@ -1,0 +1,10 @@
+{
+    "ng2/mall/login":{
+        "message":"",
+        "data":{
+            "name":":name",
+            "login":"[date]",
+            "token":"[()12]"
+        }
+    }
+}
