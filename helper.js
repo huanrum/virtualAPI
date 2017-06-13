@@ -53,7 +53,7 @@ module.exports = (function () {
 
     function returnResult(key, request, bodyData) {
         var parameters = getParameters(key, request.url.split('?'));
-        var configStr = JSON.stringify(returnData[key]);
+        var configStr = JSON.stringify(typeof returnData[key].js === 'function' ? returnData[key].js(returnData[key].data,parameters,bodyData) : returnData[key].data);
         if (Object.keys(request.headers).indexOf('disable') !== -1) {
             if (request.headers.disable === 'true') {
                 disableList.push(key);
@@ -81,12 +81,19 @@ module.exports = (function () {
                     config = config.concat(initConfig(dirpath + '/' + item, returnData));
                 } else if (/\.json$/.test(item)) {
                     var data = JSON.parse(fs.readFileSync(dirpath + '/' + item).toString());
+                    var javascript = {};
                     config.push({
                         file: dirpath + '/' + item,
                         config: data
                     });
+                    if(fs.existsSync(dirpath + '/' + item.replace(/\.json$/,'.js'))){
+                        javascript = require('./'+ dirpath + '/' + item.replace(/\.json$/,''))
+                    }
                     Object.keys(data).forEach(function (key) {
-                        returnData[key] = data[key];
+                        returnData[key] = {
+                            data:data[key],
+                            js:javascript[key]
+                        };
                     });
                 }
             }
