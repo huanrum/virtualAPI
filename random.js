@@ -107,7 +107,7 @@ module.exports = (function (emnuData, getValue) {
                     }
                 });
             }
-            return regex;
+            return /^\s*\d+\s*$/.test(regex)?parseInt(regex):regex;
 
             function initNumber(model) {
                 if (/\-/.test(model)) {
