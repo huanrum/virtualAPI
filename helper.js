@@ -1,6 +1,6 @@
 
 var fs = require("fs");
-
+var debugFn = require("./debug");
 
 module.exports = (function () {
 
@@ -54,6 +54,7 @@ module.exports = (function () {
     function returnResult(key, request, bodyData) {
         var parameters = getParameters(key, request.url.split('?'));
         var configStr = JSON.stringify(typeof returnData[key].js === 'function' ? returnData[key].js(returnData[key].data,parameters,bodyData) : returnData[key].data);
+        debugFn(request,parameters,bodyData,returnData[key].data,log);
         if (Object.keys(request.headers).indexOf('disable') !== -1) {
             if (request.headers.disable === 'true') {
                 disableList.push(key);
