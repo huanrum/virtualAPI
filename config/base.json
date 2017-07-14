@@ -37,7 +37,8 @@
     },
     "test/:user/ana": {
         "returnCode": "0",
-        "message": "login/--/ana!"
+        "message": "login/--/ana!",
+        "data":"[data/test.json]"
     },
     "/test/:user": {
         "returnCode": "0",
@@ -46,6 +47,7 @@
             "list::pageSize": {
                 "id": "[+]",
                 "name": "[()6-10]",
+                "price":"-[1-9].[(0-9)2]",
                 "date": "[1960-2012]-[01-12]-[01-30]",
                 "user": ":user",
                 "ip": "192.168.1.[1-255]",

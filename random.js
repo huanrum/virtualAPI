@@ -1,3 +1,4 @@
+var fs = require("fs");
 
 module.exports = (function (emnuData, getValue) {
     //根据传入的模型对象构建出一个完整的对象
@@ -12,6 +13,7 @@ module.exports = (function (emnuData, getValue) {
     //      [10-100]表示生成10-100之间的一个数字,
     //      [aaa,bbb,100-200]表示冲三个字符串中随机一个,里面的100-200会被替换成100-200之前的一个数字
     //      [1+1]表示从1开始步长1递增,数字1是可以省略的
+    //      [@]表示拼音
     return function (someValue) {
         var replaceValue = getValue(someValue);
         return random;
@@ -31,8 +33,12 @@ module.exports = (function (emnuData, getValue) {
             }
 
             if (typeof str === 'string') {
-                return getString(str, tempData);
-            } else if (typeof str === 'object') {
+                return getRealValue(str, getString(str, tempData));
+            } else if (str instanceof Array) {
+                return str.map(function (item) {
+                    return random(item, null, tempData);
+                });
+            } else if (str && typeof str === 'object') {
                 var obj = {};
                 Object.keys(str).forEach(function (key) {
                     var len = key.match(/:.*/);
@@ -45,13 +51,34 @@ module.exports = (function (emnuData, getValue) {
             }
         }
 
+        function getRealValue(str, regex) {
+            var raelValue = {
+                true: true,
+                false: false,
+                null: null
+            };
+            if (/\[.*\]/.test(str)) {
+                if (/^\-?\s*\d*\s*(\.\s*\d*\s*)?$/.test(regex)) {
+                    return parseFloat(regex);
+                } else if (fs.existsSync(regex)) {
+                    return /\.json$/.test(regex)?JSON.parse(fs.readFileSync(regex).toString()):fs.readFileSync(regex).toString();
+                }
+            }
+            var value = raelValue[regex.toLocaleLowerCase().trim()];
+            return typeof value === 'undefined' ? regex : value;
+        }
+
         function tempDataFn() {
             var activeKey = null, tempData = {};
             return function (model) {
                 if (typeof model === 'string') {
-                    if (/^\d*\+\d*/.test(model)) {
+                    if (/^\-?\d*\+\-?\d*/.test(model)) {
+                        var newModel = model.split('!')[0],castoff = model.split('!')[1];
                         tempData[activeKey] = tempData[activeKey] || ((+model.split('+')[0] || 1) - (+model.split('+')[1] || 1));
                         tempData[activeKey] = tempData[activeKey] + (+model.split('+')[1] || 1);
+                        while(castoff && castoff.split('+').indexOf(''+tempData[activeKey])!==-1){
+                            tempData[activeKey] = tempData[activeKey] + (+model.split('+')[1] || 1);
+                        }
                         return tempData[activeKey];
                     } else if (/^((?!\+).)+(\+((?!\+).)+)+$/.test(model)) {
                         var items = model.split('+');
@@ -87,7 +114,7 @@ module.exports = (function (emnuData, getValue) {
                         var numbers = reg.replace(/[\[\]]/g, '').split(',').map(initNumber);
                         regex = regex.replace(reg, numbers[Math.floor(Math.random() * numbers.length)]);
                     } else {
-                        var splits = reg.replace(/[\[\]]/g, '').split(/[\(\)\{\}]/).filter(function (i) { return !!i.trim(); });
+                        var splits = reg.replace(/[\[\]]/g, '').replace(/\(\s*\)/, '(0-Z)').split(/[\(\)\{\}]/).filter(function (i) { return !!i.trim(); });
                         regex = regex.replace(reg, Array(+splits[2] || 1).join().split(',').map(function () {
                             return initLength(splits[1], function (length) {
                                 var result = '';
@@ -107,10 +134,10 @@ module.exports = (function (emnuData, getValue) {
                     }
                 });
             }
-            return /^\s*\d+\s*$/.test(regex)?parseInt(regex):regex;
+            return regex;
 
             function initNumber(model) {
-                if (/\-/.test(model)) {
+                if (/^[\-0-9]+$/.test(model)) {
                     return initLength(model);
                 } else if (/\+/.test(model)) {
                     return tempData(model);

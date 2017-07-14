@@ -70,7 +70,12 @@ module.exports = (function () {
             configStr = configStr.replace(new RegExp(':' + parm, 'g'), bodyData[parm]);
         });
         log(new Date(), getClientIp(request), request.headers['referer'], key, request.url, JSON.stringify(bodyData));
-        return JSON.parse(configStr);
+        try{
+            return JSON.parse(configStr);
+        }catch(e){
+            return configStr;
+        }
+        
     }
 
     function initConfig(dirpath, returnData) {
@@ -85,7 +90,7 @@ module.exports = (function () {
                     var javascript = {};
                     config.push({
                         file: dirpath + '/' + item,
-                        config: data
+                        config: JSON.parse(JSON.stringify(data).replace(/</g,'&lt;').replace(/>/g,'&gt;'))
                     });
                     if(fs.existsSync(dirpath + '/' + item.replace(/\.json$/,'.js'))){
                         javascript = require('./'+ dirpath + '/' + item.replace(/\.json$/,''))

@@ -30,7 +30,7 @@
         
         .config-item .config-url>* {
             display: inline-block;
-            width: 6em;
+            min-width: 6em;
             font-weight: bold;
         }
         
@@ -241,8 +241,12 @@
         }
 
         function linefeed(str) {
-            var live = 0;
+            var live = 0,line = false;
+            var br = function(){return line?'':'<br>';}
             for (var i = 0; i < str.length; i++) {
+                if(str[i] === '"' && str[i-1] !== '\\'){
+                    line = !line;
+                }
                 switch (str[i]) {
                     case '[':
                         live = live + 1;
@@ -253,36 +257,36 @@
                     case '{':
                         live = live + 1;
                         if (',;[]'.indexOf(str[i - 1]) === -1) {
-                            str = str.slice(0, i + 1) + '<br>' + Array(live + 1).join('    ') + str.slice(i + 1);
+                            str = str.slice(0, i + 1) + br() + Array(live + 1).join('    ') + str.slice(i + 1);
                             i = i + live * 4 + 4;
                         } else {
-                            str = str.slice(0, i) + '<br>' + Array(live).join('    ') + str[i] + '<br>' + Array(live + 1).join('    ') + str.slice(i + 1);
+                            str = str.slice(0, i) + br() + Array(live).join('    ') + str[i] + br() + Array(live + 1).join('    ') + str.slice(i + 1);
                             i = i + live * 4 + live * 4 + 4;
                         }
                         break;
                     case '}':
                         live = live - 1;
                         if (',;[]'.indexOf(str[i + 1]) === -1) {//下一个不是这些符号
-                            str = str.slice(0, i) + '<br>' + Array(live + 1).join('    ') + '}' + Array(live + 1).join('    ') + str.slice(i + 1);
+                            str = str.slice(0, i) + br() + Array(live + 1).join('    ') + '}' + Array(live + 1).join('    ') + str.slice(i + 1);
                             i = i + live * 4 + live * 4 + 4;
                         } else {
                             if (',;'.indexOf(str[i + 1]) === -1) {//下一个不是这些符号
-                                str = str.slice(0, i) + '<br>' + Array(live + 1).join('    ') + '}<br>' + Array(live).join('    ') + str.slice(i + 1);
+                                str = str.slice(0, i) + br() + Array(live + 1).join('    ') + '}'+br()+ Array(live).join('    ') + str.slice(i + 1);
                                 i = i + live * 4 + live * 4;
                             } else {
-                                str = str.slice(0, i) + '<br>' + Array(live + 1).join('    ') + '}' + str.slice(i + 1);
+                                str = str.slice(0, i) + br() + Array(live + 1).join('    ') + '}' + str.slice(i + 1);
                                 i = i + live * 4 + 4;
                             }
                         }
                         break;
                     case ',':
                         if (str[i + 1] === '"') {
-                            str = str.slice(0, i + 1) + '<br>' + Array(live + 1).join('    ') + str.slice(i + 1);
+                            str = str.slice(0, i + 1) + br() + Array(live + 1).join('    ') + str.slice(i + 1);
                             i = i + live * 4 + 4;
                         }
                         break;
                     case ';':
-                        str = str.slice(0, i + 1) + '<br>' + Array(live + 1).join('    ') + str.slice(i + 1);
+                        str = str.slice(0, i + 1) + br() + Array(live + 1).join('    ') + str.slice(i + 1);
                         i = i + live * 4 + 4;
                         break;
                 }
@@ -303,6 +307,12 @@
             initHeader();
             initFooter(initContent());
 
+            document.body.onkeyup = function(e){
+                if(e.keyCode === 27){
+                     dialogPanl.parentNode.removeChild(dialogPanl);
+                }
+            };
+
             dialogPanl.className = 'common-dialog-back';
             dialog.className = 'common-dialog';
             header.className = 'common-dialog-header';
@@ -315,6 +325,7 @@
             dialog.appendChild(message);
             dialog.appendChild(footer);
 
+            message.style.maxWidth = document.body.offsetWidth*2/3 + 'px';
             document.body.appendChild(dialogPanl);
             drag(header, dialog);
 
@@ -340,6 +351,9 @@
                     var parms = str.match(/:[0-9a-zA-Z_]+/g);
                     if (parms) {
                         parms.forEach(function (key) {
+                            if(/:(null|false|true|undefined|\d+)/.test(key)){
+                                return;
+                            }
                             if (typeof el_data[key.replace(':', '')] === 'undefined' && !/:\d+/.test(key)) {
                                 Object.defineProperty(el_data, key.replace(':', ''), {
                                     enumerable: enumerable,

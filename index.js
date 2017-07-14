@@ -1,28 +1,16 @@
-var os = require('os');  
+
+var fs = require("fs");
 var http = require('http');
 var child_process = require('child_process');
 
 var random = require('./random');
 var helper = require('./helper');
 
-var getSomeValue = function(){
-    var someValue = {host:os.hostname(),ips:[]};
-    
-    Object.values(os.networkInterfaces()).forEach(function(networkInterfaces){
-        for(var i=0;i<networkInterfaces.length;i++){  
-            if(networkInterfaces[i].family=='IPv4'){  
-                someValue.ips.push(networkInterfaces[i].address);  
-            }  
-        }  
-    });
-    someValue.ip = someValue.ips.sort().reverse()[0];
-    return someValue;
-}
 
 var createServer = function (port,exits) {
     if (exits) { return; }
     
-    randomFn = random(getSomeValue());
+    randomFn = random({IP:'http://127.0.0.1',PORT:port});
     http.createServer(function (request, response) {
         response.setHeader('Access-Control-Allow-Origin', '*');
         response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With,User,Language,IsPc,Token')
@@ -31,6 +19,8 @@ var createServer = function (port,exits) {
             response.end(helper());
         } else if(request.url.toLocaleLowerCase() === '/test'){
             response.end(JSON.stringify(true));
+        }else if(/^\/images\//i.test(request.url)){
+            response.end(fs.readFileSync(__dirname + request.url));
         }else{
             try {
                 var bodyData = '';
@@ -59,7 +49,6 @@ var createServer = function (port,exits) {
     console.log('Server running at http://127.0.0.1:' + port + '/');
 
 };
-
 
 child_process.exec(process.platform == 'win32' ? 'netstat -aon' : 'netstat –apn', function (err, stdout, stderr) {
     var port = 8888, count = 0, thenList = [];
