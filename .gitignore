@@ -6,6 +6,7 @@ config/demo-mall/
 config/vue-mall/
 config/ng2-mall/
 config/react-mall/
+config/tngMobile/
 websocket/
 log/
 
