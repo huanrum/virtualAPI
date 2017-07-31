@@ -10,40 +10,40 @@
         body {
             position: relative;
         }
-        
+
         .text-align-center {
             text-align: center;
         }
-        
+
         .config-group {
             margin: 1em;
         }
-        
+
         .config-group legend:hover {
             cursor: pointer;
             color: #99ff99;
         }
-        
+
         .config-item {
             margin: 1em;
         }
-        
+
         .config-item .config-url>* {
             display: inline-block;
             min-width: 6em;
             font-weight: bold;
         }
-        
+
         .config-item .config-url:hover {
             cursor: pointer;
             opacity: 0.6;
         }
-        
+
         .config-item .config-return {
             margin-left: 6em;
         }
         /*dialog*/
-        
+
         .common-dialog-back {
             position: fixed;
             top: 0;
@@ -52,7 +52,7 @@
             height: 100%;
             background: rgba(123, 123, 123, 0.6);
         }
-        
+
         .common-dialog-Message {
             position: absolute;
             margin-left: 80%;
@@ -62,7 +62,7 @@
             border-radius: 10px;
             background: #669966;
         }
-        
+
         .common-dialog-back .common-dialog {
             position: absolute;
             margin-left: 50%;
@@ -72,66 +72,66 @@
             border-radius: 10px;
             background: #f3f3f3;
         }
-        
+
         .common-dialog-back .common-dialog .common-dialog-header {
             height: 2em;
             background: #666699;
             padding: 0.5em;
         }
-        
+
         .common-dialog-back .common-dialog .common-dialog-header label {
             color: #ffffff;
         }
-        
+
         .common-dialog-back .common-dialog .common-dialog-header label sup {
             color: rgba(168, 168, 168, 0.4);
         }
-        
+
         .common-dialog-back .common-dialog .common-dialog-header a {
             float: right;
             cursor: pointer;
         }
-        
+
         .common-dialog-back .common-dialog .common-dialog-content {
             max-height: 33em;
             min-width: 12em;
         }
-        
+
         .common-dialog-back .common-dialog .common-dialog-content>* {
             margin: 0.3em;
         }
-        
+
         .common-dialog-back .common-dialog .common-dialog-content div div {
             display: inline-block;
             width: 12em;
         }
-        
+
         .common-dialog-back .common-dialog .common-dialog-content div input {
             background: #f3f3f3;
             border: none;
             border-bottom: 1px solid #666699;
         }
-        
+
         .common-dialog-back .common-dialog .common-dialog-message {
             background: #d3d3d3;
             margin: 0.5em;
             max-height: 33em;
             overflow: auto;
         }
-        
+
         .common-dialog-back .common-dialog .common-dialog-footer {
             border-top: 1px solid #d3d3d3;
             text-align: center;
             padding: 2px;
         }
-        
+
         .common-dialog-back .common-dialog .common-dialog-footer a {
             border: 1px solid #666699;
             margin: 2px 1em;
             padding: 1px;
             cursor: pointer;
         }
-        
+
         .common-dialog-back .common-dialog .common-dialog-footer a:hover {
             opacity: 0.8;
             color: #f3f3f3;
@@ -173,12 +173,17 @@
             var fieldset = document.createElement('fieldset');
             var legend = document.createElement('legend');
             var content = document.createElement('div');
+            var charCount = 0;
+            Array.prototype.forEach.call('' + item.file.split('/')[1], function (i) {
+                charCount = charCount + i.charCodeAt();
+            });
             fieldset.className = 'config-group';
             legend.innerHTML = item.file;
+            legend.style.color = '#' + new Date(10000).setYear(charCount).toString(16).slice(-8, -2);
             Object.keys(item.config).forEach(function (key) {
                 content.appendChild(createItem(key.match(/^\[(.*)\]/), key, item.config[key], item.file === 'config/base.json'));
             });
-            if(!Object.keys(item.config).length){
+            if (!Object.keys(item.config).length) {
                 legend.style.textDecoration = 'line-through';
             }
             fieldset.appendChild(legend);
@@ -244,10 +249,10 @@
         }
 
         function linefeed(str) {
-            var live = 0,line = false;
-            var br = function(){return line?'':'<br>';}
+            var live = 0, line = false;
+            var br = function () { return line ? '' : '<br>'; }
             for (var i = 0; i < str.length; i++) {
-                if(str[i] === '"' && str[i-1] !== '\\'){
+                if (str[i] === '"' && str[i - 1] !== '\\') {
                     line = !line;
                 }
                 switch (str[i]) {
@@ -274,7 +279,7 @@
                             i = i + live * 4 + live * 4 + 4;
                         } else {
                             if (',;'.indexOf(str[i + 1]) === -1) {//下一个不是这些符号
-                                str = str.slice(0, i) + br() + Array(live + 1).join('    ') + '}'+br()+ Array(live).join('    ') + str.slice(i + 1);
+                                str = str.slice(0, i) + br() + Array(live + 1).join('    ') + '}' + br() + Array(live).join('    ') + str.slice(i + 1);
                                 i = i + live * 4 + live * 4;
                             } else {
                                 str = str.slice(0, i) + br() + Array(live + 1).join('    ') + '}' + str.slice(i + 1);
@@ -310,9 +315,9 @@
             initHeader();
             initFooter(initContent());
 
-            document.body.onkeyup = function(e){
-                if(e.keyCode === 27){
-                     dialogPanl.parentNode.removeChild(dialogPanl);
+            document.body.onkeyup = function (e) {
+                if (e.keyCode === 27) {
+                    dialogPanl.parentNode.removeChild(dialogPanl);
                 }
             };
 
@@ -328,7 +333,7 @@
             dialog.appendChild(message);
             dialog.appendChild(footer);
 
-            message.style.maxWidth = document.body.offsetWidth*2/3 + 'px';
+            message.style.maxWidth = document.body.offsetWidth * 2 / 3 + 'px';
             document.body.appendChild(dialogPanl);
             drag(header, dialog);
 
@@ -354,7 +359,7 @@
                     var parms = str.match(/:[0-9a-zA-Z_]+/g);
                     if (parms) {
                         parms.forEach(function (key) {
-                            if(/:(null|false|true|undefined|\d+)/.test(key)){
+                            if (/:(null|false|true|undefined|\d+)/.test(key)) {
                                 return;
                             }
                             if (typeof el_data[key.replace(':', '')] === 'undefined' && !/:\d+/.test(key)) {
@@ -395,7 +400,7 @@
                 if (typeof isDisable === 'boolean') {
                     footer.appendChild(disable);
                 }
-                
+
                 footer.appendChild(copy);
 
                 disable.innerHTML = isDisable ? 'Enable' : 'Disable';
@@ -406,7 +411,7 @@
                 confrom.style.opacity = isDisable ? 0.2 : 1.0;
 
                 disable.onclick = function () {
-                    http(urlData.split('/').map(function (i) { return /:/.test(i) && el_data[i.replace(':', '')] || i; }).join('/'),{disable:!isDisable}).then(function (req) {
+                    http(urlData.split('/').map(function (i) { return /:/.test(i) && el_data[i.replace(':', '')] || i; }).join('/'), { disable: !isDisable }).then(function (req) {
                         if (req.status === 200) {
                             return req.json();
                         }
@@ -416,9 +421,9 @@
                         disable.innerHTML = isDisable ? 'Enable' : 'Disable';
                         copy.style.opacity = isDisable ? 0.2 : 1.0;
                         confrom.style.opacity = isDisable ? 0.2 : 1.0;
-                        if(isDisable){
+                        if (isDisable) {
                             message.innerHTML = '此API不可用！';
-                        }else{
+                        } else {
                             setTimeout(function () {
                                 confrom.click();
                             }, 100);
@@ -468,7 +473,7 @@
                     confrom.click();
                 }, 100);
 
-                function http(urlFull,headers) {
+                function http(urlFull, headers) {
                     if (/:/.test(urlFull)) {
                         message.innerHTML = "必填参数没有填写";
                     } else {
@@ -478,12 +483,12 @@
                             }).join('&');
                             return fetch(urlFull + (urlParm ? ('?' + urlParm) : ''), {
                                 method: methodData,
-                                headers:headers
+                                headers: headers
                             });
                         } else {
                             return fetch(urlFull, {
                                 method: methodData,
-                                headers:headers,
+                                headers: headers,
                                 body: JSON.stringify(el_data)
                             });
                         }
