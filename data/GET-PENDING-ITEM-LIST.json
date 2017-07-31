@@ -25,7 +25,7 @@
                 "status": "COMPLETED",
                 "refNo": "19214424",
                 "remark": null,
-                "enable": true,
+                "enable": false,
                 "jsonConent": "{\"RefundFXamount\":\"302.28\",\"FXcurrencyNameZhHK\":\"CNY\",\"ExchangeFXamount\":\"433\",\"FXcurrencyZhCN\":\"CNY\",\"ExchangeFXratio\":\"100:115.4875\",\"FXlocationZhCN\":\"假数据  尖沙咀弥敦道54-64号美丽都大厦地下42号铺\",\"FXcurrencyEN\":\"CNY\",\"CashoutBusinessHourEN\":\"Mon-Fri: 08:30-19:00 Sat: 08:30-18:00 Sun & Public holiday off\",\"MessageDateTime\":\"2017-06-12 09:27:44\",\"RefundFXratio\":\"100:116.0000\",\"FXlocationEN\":\"假数据  Shop No. 42, G/F, Mirador Mansion Arcade, 54-64 , Nathan Road,Tsim Sha Tsui, Kowloon.\",\"CollectFXExpiryDateTime\":\"2017-08-12 09:27:44\",\"ExpiryFXRefNo\":\"TT019214424\",\"CollectFXRefNo\":\"TT019209171\",\"FXcurrencyNameZhCN\":\"CNY\",\"FXExpiredAdminFee\":\"200\",\"CollectFXDateTime\":\"2017-06-07 15:24:15\",\"CashoutBusinessHourZhHK\":\"Mon-Fri: 08:30-19:00 Sat: 08:30-18:00 Sun & Public holiday off\",\"CashoutBusinessHourZhCN\":\"Mon-Fri: 08:30-19:00 Sat: 08:30-18:00 Sun & Public holiday off\",\"FXlocationZhHK\":\"假数据  尖沙咀彌敦道54-64號美麗都大廈地下42號舖\",\"FXcurrencyZhHK\":\"CNY\",\"FXcurrencyNameEN\":\"CNY\",\"CollectFXamount\":\"500.07\",\"CancelFXamount\":\"502.28\"}"
             }
         },

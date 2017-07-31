@@ -178,6 +178,9 @@
             Object.keys(item.config).forEach(function (key) {
                 content.appendChild(createItem(key.match(/^\[(.*)\]/), key, item.config[key], item.file === 'config/base.json'));
             });
+            if(!Object.keys(item.config).length){
+                legend.style.textDecoration = 'line-through';
+            }
             fieldset.appendChild(legend);
             fieldset.appendChild(content);
             legend.onclick = function () {

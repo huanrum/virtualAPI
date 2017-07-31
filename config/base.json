@@ -1,7 +1,7 @@
 {
     "login": {
         "returnCode": "0",
-        "message": ":user,login succeed!"
+        "message": ":user,login succeed!!!"
     },
     "[GET]login/user/location": {
         "returnCode": "0",

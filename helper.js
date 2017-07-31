@@ -2,14 +2,60 @@
 var fs = require("fs");
 var debugFn = require("./debug");
 
+var watchDirectory = (function(){
+    var watches = [];
+    setInterval(function () {
+        watches.forEach(w=>w());
+    }, 1000);
+    return function(dirpath,fn){
+        watches.push(readDirectory(dirpath,fn));
+    }
+    function readDirectory(dirpath,fn){
+        var files = fs.readdirSync(dirpath);
+        files.forEach(fn);
+        return function(){
+            fs.readdirSync(dirpath).forEach(function(item){
+                if(files.indexOf(item) === -1){
+                    files.push(item);
+                    fn(item);
+                }
+            });
+        }
+    }
+})();
+
+var watchFiles = (function () {
+    var watches = [];
+    setInterval(function () {
+        watches.forEach(w=>w());
+    }, 1000);
+    return function (files, fn) {
+        if(!(files instanceof Array)){
+            files = [files];
+        }
+        watches.push(readFiles(files, fn));
+    };
+    function readFiles(files,fn){
+        var baseContents = files.map(file=>fs.existsSync(file)?fs.readFileSync(file).toString():'');
+        fn.apply(null,baseContents);
+        return function(){
+            var contents = files.map(file=>fs.existsSync(file)?fs.readFileSync(file).toString():'');
+            if (contents.join() !== baseContents.join()) {
+                baseContents = contents;
+                fn.apply(null,baseContents);
+            }
+        };
+    }
+})();
+
 module.exports = (function () {
 
-    var returnData = {}, disableList = [];
-    var helpHtml = fs.readFileSync('help.html').toString().replace('window.configData = []', 'window.configData = ' + JSON.stringify(initConfig('config', returnData)));
+    var returnData = {}, configData = {}, disableList = [];
+    initConfig('config', configData, returnData);
 
     return function (request, bodyData) {
         if (!request) {
-            return helpHtml;
+            return fs.readFileSync('help.html').toString().replace('window.configData = []', 'window.configData = ' + JSON.stringify(Object.keys(configData).map(f => {return { file: f, config: configData[f]};})));
         }
 
         var keys = Object.keys(returnData);
@@ -53,8 +99,8 @@ module.exports = (function () {
 
     function returnResult(key, request, bodyData) {
         var parameters = getParameters(key, request.url.split('?'));
-        var configStr = JSON.stringify(typeof returnData[key].js === 'function' ? returnData[key].js(returnData[key].data,parameters,bodyData) : returnData[key].data);
-        debugFn(request,parameters,bodyData,returnData[key].data,log);
+        var configStr = JSON.stringify(typeof returnData[key].js === 'function' ? returnData[key].js(returnData[key].data, parameters, bodyData) : returnData[key].data);
+        debugFn(request, parameters, bodyData, returnData[key].data, log);
         if (Object.keys(request.headers).indexOf('disable') !== -1) {
             if (request.headers.disable === 'true') {
                 disableList.push(key);
@@ -70,36 +116,34 @@ module.exports = (function () {
             configStr = configStr.replace(new RegExp(':' + parm, 'g'), bodyData[parm]);
         });
         log(new Date(), getClientIp(request), request.headers['referer'], key, request.url, JSON.stringify(bodyData));
-        try{
+        try {
             return JSON.parse(configStr);
-        }catch(e){
+        } catch (e) {
             return configStr;
         }
-        
+
     }
 
-    function initConfig(dirpath, returnData) {
-        var config = [];
-        fs.readdirSync(dirpath).forEach(function (item) {
+
+    function initConfig(dirpath, configData,returnData) {
+        watchDirectory(dirpath,function (item) {
             try {
                 var info = fs.statSync(dirpath + '/' + item);
                 if (info.isDirectory()) {
-                    config = config.concat(initConfig(dirpath + '/' + item, returnData));
-                } else if (/\.json$/.test(item)) {
-                    var data = JSON.parse(fs.readFileSync(dirpath + '/' + item).toString());
-                    var javascript = {};
-                    config.push({
-                        file: dirpath + '/' + item,
-                        config: JSON.parse(JSON.stringify(data).replace(/</g,'&lt;').replace(/>/g,'&gt;'))
-                    });
-                    if(fs.existsSync(dirpath + '/' + item.replace(/\.json$/,'.js'))){
-                        javascript = require('./'+ dirpath + '/' + item.replace(/\.json$/,''))
-                    }
-                    Object.keys(data).forEach(function (key) {
-                        returnData[key] = {
-                            data:data[key],
-                            js:javascript[key]
-                        };
+                    initConfig(dirpath + '/' + item,configData, returnData);
+                } else if (/\.json$/.test(item.replace(/\.js$/, '.json'))) {
+                    watchFiles([dirpath + '/' + item.replace(/\.js$/, '.json'),dirpath + '/' + item.replace(/\.json$/, '.js')], function (json,js) {
+                        var data = JSON.parse(json||'{}');
+                        var javascript = eval('(function(){var module = {};'+(js||'module.exports={};')+';return module.exports;})()');
+
+                        configData[dirpath + '/' + item.replace(/\.js(on)?$/, '')] = Object.assign({},javascript,JSON.parse(JSON.stringify(data).replace(/</g, '&lt;').replace(/>/g, '&gt;')));
+                        
+                        Object.keys(data).concat(Object.keys(javascript)).forEach(function (key) {
+                            returnData[key] = {
+                                data: data[key],
+                                js: javascript[key]
+                            };
+                        });
                     });
                 }
             }
@@ -107,7 +151,6 @@ module.exports = (function () {
                 log(new Date(), dirpath + '/' + item, e.message);
             }
         });
-        return config;
     }
 
     // 解析url获取参数

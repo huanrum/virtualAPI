@@ -5,37 +5,50 @@ var child_process = require('child_process');
 
 var random = require('./random');
 var helper = require('./helper');
+var cache = require('./cache');
+var views = require('./views');
 
 
-var createServer = function (port,exits) {
+var createServer = function (port, exits) {
     if (exits) { return; }
-    
-    randomFn = random({IP:'http://127.0.0.1',PORT:port});
+
+    randomFn = random({ IP: 'http://127.0.0.1', PORT: port });
     http.createServer(function (request, response) {
         response.setHeader('Access-Control-Allow-Origin', '*');
         response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With,User,Language,IsPc,Token')
         if (/^[\/\s]*$/.test(request.url)) {
             response.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8' });
             response.end(helper());
-        } else if(request.url.toLocaleLowerCase() === '/test'){
+        } else if (request.url.toLocaleLowerCase() === '/test') {
             response.end(JSON.stringify(true));
-        }else if(/^\/images\//i.test(request.url)){
+        } else if (/^\/images\//i.test(request.url)) {
             response.end(fs.readFileSync(__dirname + request.url));
-        }else{
+        } else {
             try {
                 var bodyData = '';
                 request.on('data', function (chunk) {
                     bodyData += chunk;
                 });
                 request.on('end', function () {
-                    var returnData = helper(request, JSON.parse(bodyData || '{}'));
-                    if (returnData) {
-                        response.writeHead(200, { 'Content-Type': 'text/plain;charset=utf-8' });
-                        response.end(JSON.stringify(randomFn(returnData)));
+                    if (/^\/cache\//i.test(request.url)) {//用于处理缓存数据
+                        response.end(cache(decodeURIComponent(request.url.replace(/^\/cache\//i, '')), bodyData));
                     } else {
-                        response.writeHead(404, { 'Content-Type': 'text/plain;charset=utf-8' });
-                        response.end('404 地址不存在');
+                        var returnData = helper(request, JSON.parse(bodyData || '{}'));
+                        if (returnData) {
+                            response.writeHead(200, { 'Content-Type': 'text/plain;charset=utf-8' });
+                            response.end(JSON.stringify(randomFn(returnData)));
+                        } else {
+                            if (/^\/views/i.test(request.url)) {
+                                response.end(views.views());
+                            } else if (views.is(request)) {
+                                response.end(views.get(request, response), "binary");
+                            } else {
+                                response.writeHead(404, { 'Content-Type': 'text/plain;charset=utf-8' });
+                                response.end('404 地址不存在');
+                            }
+                        }
                     }
+
                 });
 
             } catch (e) {
