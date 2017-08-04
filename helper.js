@@ -2,20 +2,20 @@
 var fs = require("fs");
 var debugFn = require("./debug");
 
-var watchDirectory = (function(){
+var watchDirectory = (function () {
     var watches = [];
     setInterval(function () {
-        watches.forEach(w=>w());
+        watches.forEach(w => w());
     }, 1000);
-    return function(dirpath,fn){
-        watches.push(readDirectory(dirpath,fn));
+    return function (dirpath, fn) {
+        watches.push(readDirectory(dirpath, fn));
     }
-    function readDirectory(dirpath,fn){
+    function readDirectory(dirpath, fn) {
         var files = fs.readdirSync(dirpath);
         files.forEach(fn);
-        return function(){
-            fs.readdirSync(dirpath).forEach(function(item){
-                if(files.indexOf(item) === -1){
+        return function () {
+            fs.readdirSync(dirpath).forEach(function (item) {
+                if (files.indexOf(item) === -1) {
                     files.push(item);
                     fn(item);
                 }
@@ -27,22 +27,22 @@ var watchDirectory = (function(){
 var watchFiles = (function () {
     var watches = [];
     setInterval(function () {
-        watches.forEach(w=>w());
+        watches.forEach(w => w());
     }, 1000);
     return function (files, fn) {
-        if(!(files instanceof Array)){
+        if (!(files instanceof Array)) {
             files = [files];
         }
         watches.push(readFiles(files, fn));
     };
-    function readFiles(files,fn){
-        var baseContents = files.map(file=>fs.existsSync(file)?fs.readFileSync(file).toString():'');
-        fn.apply(null,baseContents);
-        return function(){
-            var contents = files.map(file=>fs.existsSync(file)?fs.readFileSync(file).toString():'');
+    function readFiles(files, fn) {
+        var baseContents = files.map(file => fs.existsSync(file) ? fs.readFileSync(file).toString() : '');
+        fn.apply(null, baseContents);
+        return function () {
+            var contents = files.map(file => fs.existsSync(file) ? fs.readFileSync(file).toString() : '');
             if (contents.join() !== baseContents.join()) {
                 baseContents = contents;
-                fn.apply(null,baseContents);
+                fn.apply(null, baseContents);
             }
         };
     }
@@ -55,7 +55,7 @@ module.exports = (function () {
 
     return function (request, bodyData) {
         if (!request) {
-            return fs.readFileSync('help.html').toString().replace('window.configData = []', 'window.configData = ' + JSON.stringify(Object.keys(configData).map(f => {return { file: f, config: configData[f]};})));
+            return fs.readFileSync('help.html').toString().replace('window.configData = []', 'window.configData = ' + JSON.stringify(Object.keys(configData).map(f => { return { file: f, config: configData[f] }; })));
         }
 
         var keys = Object.keys(returnData);
@@ -125,25 +125,30 @@ module.exports = (function () {
     }
 
 
-    function initConfig(dirpath, configData,returnData) {
-        watchDirectory(dirpath,function (item) {
+    function initConfig(dirpath, configData, returnData) {
+        watchDirectory(dirpath, function (item) {
             try {
                 var info = fs.statSync(dirpath + '/' + item);
                 if (info.isDirectory()) {
-                    initConfig(dirpath + '/' + item,configData, returnData);
+                    initConfig(dirpath + '/' + item, configData, returnData);
                 } else if (/\.json$/.test(item.replace(/\.js$/, '.json'))) {
-                    watchFiles([dirpath + '/' + item.replace(/\.js$/, '.json'),dirpath + '/' + item.replace(/\.json$/, '.js')], function (json,js) {
-                        var data = JSON.parse(json||'{}');
-                        var javascript = eval('(function(){var module = {};'+(js||'module.exports={};')+';return module.exports;})()');
+                    watchFiles([dirpath + '/' + item.replace(/\.js$/, '.json'), dirpath + '/' + item.replace(/\.json$/, '.js')], function (json, js) {
+                        try {
+                            var data = JSON.parse(json || '{}');
+                            var javascript = eval('(function(){var module = {};' + (js || 'module.exports={};') + ';return module.exports;})()');
 
-                        configData[dirpath + '/' + item.replace(/\.js(on)?$/, '')] = Object.assign({},javascript,JSON.parse(JSON.stringify(data).replace(/</g, '&lt;').replace(/>/g, '&gt;')));
-                        
-                        Object.keys(data).concat(Object.keys(javascript)).forEach(function (key) {
-                            returnData[key] = {
-                                data: data[key],
-                                js: javascript[key]
-                            };
-                        });
+                            configData[dirpath + '/' + item.replace(/\.js(on)?$/, '')] = Object.assign({}, javascript, JSON.parse(JSON.stringify(data).replace(/</g, '&lt;').replace(/>/g, '&gt;')));
+
+                            Object.keys(data).concat(Object.keys(javascript)).forEach(function (key) {
+                                returnData[key] = {
+                                    data: data[key],
+                                    js: javascript[key]
+                                };
+                            });
+                        }
+                        catch (e) {
+
+                        }
                     });
                 }
             }

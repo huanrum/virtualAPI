@@ -1,5 +1,7 @@
 var fs = require("fs");
 
+var basePath = __dirname + '/views/!replace/'
+
 module.exports = (function () {
     var files = {};
     var types = {
@@ -29,9 +31,10 @@ module.exports = (function () {
     };
 
 
-    function views(){
-        var dirs = JSON.stringify(fs.readdirSync(__dirname.replace('_dev\\service', '')).map(function (i) { return i.toLocaleLowerCase(); }));
-        
+    function views(_path,index){
+        var replace = _path?_path.replace(basePath.replace('/!replace', '/'),''):'';
+        var dirs = JSON.stringify(fs.readdirSync(_path || basePath.replace('/!replace', '')).map(function (i) { return i.toLocaleLowerCase(); }));
+        index = index || '';
         return `
         <!DOCTYPE html>
         <html lang="en">
@@ -58,7 +61,7 @@ module.exports = (function () {
                         list.append(item);
                         a.innerHTML = dir;
                         a.onclick = function(){
-                            window.open('../'+dir);
+                            window.open('../${replace}/'+dir +'${index}');
                         };
                     });
                 
@@ -71,30 +74,37 @@ module.exports = (function () {
     function isView(request) {
         var url = request.url.split('/').filter(function (i) { return !!i; }).shift() || '';
         var referer = request.headers.referer && request.headers.referer.split('?').shift().replace(/^(http|https):\/\//, '').replace(request.headers.host, '').split('/').filter(function (i) { return !!i; }).shift() || '';
-        var dirs = fs.readdirSync(__dirname.replace('_dev\\service', '')).map(function (i) { return i.toLocaleLowerCase(); });
-        return dirs.indexOf(url.toLocaleLowerCase()) || dirs.indexOf(referer.toLocaleLowerCase());
+        var dirs = fs.readdirSync(basePath.replace('/!replace', '')).map(function (i) { return i.toLocaleLowerCase(); });
+        return  fs.existsSync(basePath.replace('/!replace', '')+url) || fs.existsSync(basePath.replace('/!replace', '')+referer);
     }
 
     function getFile(request, response) {
         var onlyUrl = request.url.split('?').shift();
         var referer = request.headers.referer && request.headers.referer.split('?').shift().replace(/^(http|https):\/\//, '').replace(request.headers.host, '') || '';
         var refererFirst = referer.split('/').filter(function (i) { return !!i; }).shift() || '^$';
-        if (files[referer] && fs.existsSync(__dirname.replace('_dev\\service', files[referer]) + onlyUrl + (/\.\S*/.test(onlyUrl) ? '' : '/index.html'))) {
-            return transverter(response, onlyUrl.split('.').pop(), fs.readFileSync(__dirname.replace('_dev\\service', files[referer]) + onlyUrl + (/\.\S*/.test(onlyUrl) ? '' : '/index.html')));
-        } else if (fs.existsSync(__dirname.replace('_dev\\service', refererFirst) + onlyUrl + (/\.\S*/.test(onlyUrl) ? '' : '/index.html'))) {
+        if (files[referer] && fs.existsSync(basePath.replace('/!replace', files[referer]) + onlyUrl + (/\.\S*/.test(onlyUrl) ? '' : '/index.html'))) {
+            return transverter(response, onlyUrl.split('.').pop(), (basePath.replace('/!replace', files[referer]) + onlyUrl + (/\.\S*/.test(onlyUrl) ? '' : '/index.html')));
+        } else if (fs.existsSync(basePath.replace('/!replace', refererFirst) + onlyUrl + (/\.\S*/.test(onlyUrl) ? '' : '/index.html'))) {
             files[onlyUrl] = refererFirst;
-            return transverter(response, onlyUrl.split('.').pop(), fs.readFileSync(__dirname.replace('_dev\\service', refererFirst) + onlyUrl + (/\.\S*/.test(onlyUrl) ? '' : '/index.html')));
-        } else if (fs.existsSync(__dirname.replace('_dev\\service', '') + onlyUrl + (/\.\S*/.test(onlyUrl) ? '' : '/index.html'))) {
+            return transverter(response, onlyUrl.split('.').pop(), (basePath.replace('/!replace', refererFirst) + onlyUrl + (/\.\S*/.test(onlyUrl) ? '' : '/index.html')));
+        } else if (fs.existsSync(basePath.replace('/!replace', '') + onlyUrl + (/\.\S*/.test(onlyUrl) ? '' : '/index.html'))) {
             files[onlyUrl] = onlyUrl.split('/').filter(function (i) { return !!i; }).shift() || '';
-            return transverter(response, onlyUrl.split('.').pop(), fs.readFileSync(__dirname.replace('_dev\\service', '') + onlyUrl + (/\.\S*/.test(onlyUrl) ? '' : '/index.html')));
-        } else {
+            return transverter(response, onlyUrl.split('.').pop(), (basePath.replace('/!replace', '') + onlyUrl + (/\.\S*/.test(onlyUrl) ? '' : '/index.html')));
+        } else if(fs.existsSync(basePath.replace('/!replace', '') + onlyUrl)){
+            return views(basePath.replace('/!replace', '') + onlyUrl,'/index.html');
+        }else{
             return '';
         }
     }
 
-    function transverter(response, type, data) {
+    function transverter(response, type, file) {
         if (types[type]) {
             response.setHeader("Content-Type", types[type]);
+        }
+
+        var data = fs.readFileSync(file);
+        if(/tng-mobile\/.*\/index\.html/){
+            data = new Buffer(data.toString().replace('</body>','\t<script src="../_dev/dev.js"></script>\n\t</body>'));
         }
 
         if (type === 'svg') {
