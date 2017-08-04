@@ -103,7 +103,7 @@ module.exports = (function () {
         }
 
         var data = fs.readFileSync(file);
-        if(/tng-mobile\/.*\/index\.html/){
+        if(/tng-mobile\/.*\/index\.html/.test(file)){
             data = new Buffer(data.toString().replace('</body>','\t<script src="../_dev/dev.js"></script>\n\t</body>'));
         }
 
