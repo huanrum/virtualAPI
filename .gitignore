@@ -6,12 +6,11 @@ config/demo-mall/
 config/vue-mall/
 config/ng2-mall/
 config/react-mall/
-config/tng-Mobile/
-config/tngMobile/
+*/tng-Mobile/
 websocket/
 log/
 
 start.sh
-mklink.cmd
+mklink-*.cmd
 websocket.js
 analog_data_source.rar
