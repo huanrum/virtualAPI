@@ -33,7 +33,7 @@ module.exports = (function () {
 
     function views(_path,index){
         var replace = _path?_path.replace(basePath.replace('/!replace', '/'),''):'';
-        var dirs = JSON.stringify(fs.readdirSync(_path || basePath.replace('/!replace', '')).map(function (i) { return i.toLocaleLowerCase(); }));
+        var dirs = JSON.stringify(fs.readdirSync(_path || basePath.replace('/!replace', '')).map(function (i) { return i; }));
         index = index || '';
         return `
         <!DOCTYPE html>

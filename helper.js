@@ -97,9 +97,13 @@ module.exports = (function () {
             req.connection.socket.remoteAddress;
     };
 
+    function copy(data){
+        return JSON.parse(JSON.stringify(data));
+    }
+
     function returnResult(key, request, bodyData) {
         var parameters = getParameters(key, request.url.split('?'));
-        var configStr = JSON.stringify(typeof returnData[key].js === 'function' ? returnData[key].js(returnData[key].data, parameters, bodyData) : returnData[key].data);
+        var configStr = JSON.stringify(typeof returnData[key].js === 'function' ? returnData[key].js(copy(returnData[key].data), parameters, bodyData) : returnData[key].data);
         debugFn(request, parameters, bodyData, returnData[key].data, log);
         if (Object.keys(request.headers).indexOf('disable') !== -1) {
             if (request.headers.disable === 'true') {
