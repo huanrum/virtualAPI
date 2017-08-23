@@ -7,6 +7,7 @@ var random = require('./random');
 var helper = require('./helper');
 var cache = require('./cache');
 var views = require('./views');
+var action = require('./action');
 
 
 var createServer = function (port, exits) {
@@ -23,6 +24,8 @@ var createServer = function (port, exits) {
             response.end(JSON.stringify(true));
         } else if (/^\/images\//i.test(request.url)) {
             response.end(fs.readFileSync(__dirname + request.url));
+        } else if (/^\/action\//i.test(request.url)) {
+            response.end(action(request, response));
         } else {
             try {
                 var bodyData = '';
