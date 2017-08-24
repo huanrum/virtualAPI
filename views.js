@@ -32,6 +32,8 @@ module.exports = (function () {
 
 
     function views(_path,index){
+        var actions = _path ? 'Gulp' : 'Commit';
+        //basePath.replace('/!replace', '')
         var replace = _path?_path.replace(basePath.replace('/!replace', '/'),''):'';
         var dirs = JSON.stringify(fs.readdirSync(_path || basePath.replace('/!replace', '')).map(function (i) { return i; }));
         index = index || '';
@@ -47,11 +49,18 @@ module.exports = (function () {
                     #list li{
                         padding:0.2rem 1rem;
                     }
-                   #list li a:first-child{
+                   #list li div{
+                        display:inline-block;
+                        width: 150px;
+                        text-align: center;
                         cursor: pointer;
                         margin:0.5rem;
                         color:green;
                         border:1px solid green;
+                    }
+                    #list li div i{
+                        color:#d3d3d3;
+                        font-size:12px;
                     }
                 </style>
             </head>
@@ -62,20 +71,42 @@ module.exports = (function () {
                     var list = document.getElementById('list');
                     dirs.forEach(function(dir){
                         var item = document.createElement('li');
-                        var action = document.createElement('a');
+                        var action = document.createElement('div');
                         var a = document.createElement('a');
                         item.append(action);
                         item.append(a);
                         list.append(item);
-                        action.innerHTML = 'Gulp Build';
+                        action.innerHTML = '${actions}';
                         a.innerHTML = dir;
                         a.onclick = function(){
                             window.open('../${replace}/'+dir +'${index}');
                         };
                         action.onclick = function(){
-                            fetch('action/?gulp='+dir, {method: 'GET'});
+                            var count = 0,interval = setInterval(function(){
+                                action.innerHTML = '${actions}' + (Array(count++%4+1).join('.'));
+                            },500);
+                            
+                            fetch('action/?parent=${_path}&target='+dir+'&action=${actions}', {method: 'GET'}).then(function(r){return r.text()}).then(function(id){
+                                runMessage(id,function(){
+                                    clearInterval(interval);
+                                    action.innerHTML = '${actions} <i>' + new Date().getHours()+':'+new Date().getMinutes() + '</i>';
+                                });
+                            });
                         };
                     });
+
+                    function runMessage(id,callBack){
+                        fetch('action/?'+id, {method: 'GET'}).then(function(r){return r.text()}).then(function(data){
+                            if(data){
+                                setTimeout(function(){
+                                    runMessage(id,callBack);
+                                },200);
+                                
+                            }else{
+                                callBack();
+                            }
+                        });
+                    }
                 
                 </script>
             </body>

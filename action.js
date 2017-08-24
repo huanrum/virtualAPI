@@ -2,17 +2,27 @@ var fs = require("fs");
 var child_process = require('child_process');
 
 module.exports = (function () {
-    var sourceDiv = 'D:\\Developer\\mvp-frameworks-tng4.0-vuejs\\mvp-frameworks-tng4.0-vuejs\\views\\';
-    var baseDir = __dirname + '/views/tng-mobile/';
+    var dirs = {
+        'tng-mobile': 'D:\\Developer\\mvp-frameworks-tng4.0-vuejs\\mvp-frameworks-tng4.0-vuejs\\views\\'
+    }
+
     var messageList = {};
     return function (request, response) {
         var _actions = request.url.split('?')[1];
-        if (!_actions) {
-            return allModules(baseDir);
-        } else if (/\d+/.test(_actions)) {
+        if (/\d+/.test(_actions)) {
             return message(_actions);
+        } else if (/=/.test(_actions)) {
+            return actions(toObject(_actions.split('&')));
         } else {
-            return actions(_actions.split('='));
+            return allModules(_actions);
+        }
+
+        function toObject(list) {
+            var obj = {};
+            list.forEach(function (ls) {
+                obj[ls.split('=')[0]] = ls.split('=')[1];
+            });
+            return obj;
         }
     };
 
@@ -20,9 +30,9 @@ module.exports = (function () {
         child_process.exec(list.shift(), function (data) {
             runFn(data);
             if (list.length) {
-                setTimeout(function(){
+                setTimeout(function () {
                     runCmd(list, runFn, callback);
-                },1000);
+                }, 1000);
             } else {
                 callback();
             }
@@ -30,7 +40,8 @@ module.exports = (function () {
     }
 
     function allModules(_path) {
-        var dirs = JSON.stringify(fs.readdirSync(_path).map(function (i) { return i; }));
+        var dirs = JSON.stringify(fs.readdirSync(__dirname + '/views/' + (_path || '')).map(function (i) { return i; }));
+        var actions = _path ? (/\//.test(_path)?'\'\'':'\'Gulp\'') : '\'Commit\'';
         return `
         <!DOCTYPE html>
         <html lang="en">
@@ -91,14 +102,17 @@ module.exports = (function () {
                         item.append(message);
                         document.body.append(item);
                         module.innerHTML = dir;
+                        module.onclick = function(){
+                            window.open('action?${_path}/'+dir);
+                        };
 
-                        ['Gulp'].forEach(function(actionName){
+                        [${actions}].forEach(function(actionName){
                             var action = document.createElement('a');
                             actions.append(action);
                             action.innerHTML = actionName;
                             action.onclick = function(){
                                 if(!message.innerHTML){
-                                    fetch('action?'+actionName+'='+dir, {method: 'GET'}).then(function(req){return req.text()}).then(function(id){
+                                    fetch('action?parent=${_path}&target='+dir+'&action='+actionName, {method: 'GET'}).then(function(req){return req.text()}).then(function(id){
                                         useInterval(id,function(data){
                                             message.innerHTML = data;
                                             if(message.innerHTML){
@@ -124,35 +138,68 @@ module.exports = (function () {
 
     function actions(_actions) {
         var id = Date.now() + '';
-        switch (_actions[0].toLocaleLowerCase()) {
+        switch (_actions.action.toLocaleLowerCase()) {
             case 'gulp':
-                gulp(id, _actions[1]);
+                gulp(id, _actions.parent, _actions.target);
+                break;
+            case 'commit':
+                commit(id, _actions.parent, _actions.target);
                 break;
         }
         return id;
     }
 
-    function gulp(id, dir) {
-        messageList[id] = 'gulp';
-        setTimeout(function () {
-            messageList[id] = '切换位置';
-            runCmd([[
-                sourceDiv.split(':')[0] + ':',
-                'cd ' + sourceDiv + dir,
-                'gulp build --prod --test'
-            ].join(' && ')], function (data) {
-                if(!data){
-                    messageList[id] = '....';
-                }else{
-                    messageList[id] = '' + message.message || '......';
-                }
-            }, function () {
-                messageList[id] = '构建完成';
-                setTimeout(function () {
-                    messageList[id] = '';
-                }, 1000);
-            })
-        }, 1000);
+    function gulp(id, parent, target) {
+        if (dirs[parent]) {
+            messageList[id] = 'gulp';
+            setTimeout(function () {
+                messageList[id] = '切换位置';
+                runCmd([[
+                    dirs[parent].split(':')[0] + ':',
+                    'cd ' + dirs[parent] + target,
+                    'gulp build --prod --test'
+                ].join(' && ')], function (data) {
+                    if (!data) {
+                        messageList[id] = '....';
+                    } else {
+                        messageList[id] = '' + message.message || '......';
+                    }
+                }, function () {
+                    messageList[id] = '构建完成';
+                    setTimeout(function () {
+                        messageList[id] = '';
+                    }, 1000);
+                })
+            }, 1000);
+        }
+    }
+
+    function commit(id, parent, target) {
+        if (dirs[target]) {
+            messageList[id] = 'commit';
+            setTimeout(function () {
+                messageList[id] = '切换位置';
+                runCmd([[
+                    dirs[target].split(':')[0] + ':',
+                    'cd ' + dirs[target],
+                    'git add .',
+                    'git commit -m \'update\'',
+                    'git pull origin dev',
+                    'git push origin dev'
+                ].join(' && ')], function (data) {
+                    if (!data) {
+                        messageList[id] = '....';
+                    } else {
+                        messageList[id] = '' + message.message || '......';
+                    }
+                }, function () {
+                    messageList[id] = '提交成功';
+                    setTimeout(function () {
+                        messageList[id] = '';
+                    }, 1000);
+                })
+            }, 1000);
+        }
     }
 
 })();
