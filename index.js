@@ -22,7 +22,7 @@ var createServer = function (port, exits) {
             response.end(helper());
         } else if (request.url.toLocaleLowerCase() === '/test') {
             response.end(JSON.stringify(true));
-        } else if (/^\/images\//i.test(request.url)) {
+        } else if (/^\/(images|document)\//i.test(request.url)) {
             response.end(fs.readFileSync(__dirname + request.url));
         } else if (/^\/action\//i.test(request.url)) {
             response.end(action(request, response));

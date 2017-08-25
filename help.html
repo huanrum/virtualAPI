@@ -15,6 +15,12 @@
             text-align: center;
         }
 
+        .helper{
+            color:#ac5600;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
         .config-group {
             margin: 1em;
         }
@@ -151,11 +157,16 @@
             DELETE: '#FF3333'
         };
 
-        var info = document.createElement('div');
+        var header = document.createElement('div');
+        var info = document.createElement('span');
+        var helper = document.createElement('span');
         var panel = document.createElement('div');
-        info.className = 'text-align-center';
-        document.body.appendChild(info);
+        header.className = 'text-align-center';
+        header.appendChild(info);
+        header.appendChild(helper);
+        document.body.appendChild(header);
         document.body.appendChild(panel);
+        helper.innerHTML = ' - <a class="helper">帮助</a>';
         info.innerHTML = ' URL里面参数越靠后优先级越高,点击API的<strong>Method</strong>可以进行测试,点击<strong>URL</strong>可以打开和关闭返回数据结构。';
         window.configData.forEach(function (item) {
             panel.appendChild(createGroup(item));
@@ -167,6 +178,9 @@
             Array.prototype.forEach.call(panel.children, function (fieldset) {
                 fieldset.lastChild.style.display = close ? 'block' : 'none';
             })
+        };
+        helper.onclick = function(){
+            window.open('document/helper.html');
         };
 
         function createGroup(item) {

@@ -35,7 +35,7 @@ module.exports = (function () {
         var actions = _path ? 'Gulp' : 'Commit';
         //basePath.replace('/!replace', '')
         var replace = _path?_path.replace(basePath.replace('/!replace', '/'),''):'';
-        var dirs = JSON.stringify(fs.readdirSync(_path || basePath.replace('/!replace', '')).map(function (i) { return i; }));
+        var dirs = JSON.stringify(fs.readdirSync(basePath.replace('/!replace', _path||'')).map(function (i) { return i; }));
         index = index || '';
         return `
         <!DOCTYPE html>
@@ -79,7 +79,7 @@ module.exports = (function () {
                         action.innerHTML = '${actions}';
                         a.innerHTML = dir;
                         a.onclick = function(){
-                            window.open('../${replace}/'+dir +'${index}');
+                            window.open('..${replace}/'+dir +'${index}');
                         };
                         action.onclick = function(){
                             var count = 0,interval = setInterval(function(){
@@ -134,7 +134,7 @@ module.exports = (function () {
             files[onlyUrl] = onlyUrl.split('/').filter(function (i) { return !!i; }).shift() || '';
             return transverter(response, onlyUrl.split('.').pop(), (basePath.replace('/!replace', '') + onlyUrl + (/\.\S*/.test(onlyUrl) ? '' : '/index.html')));
         } else if(fs.existsSync(basePath.replace('/!replace', '') + onlyUrl)){
-            return views(basePath.replace('/!replace', '') + onlyUrl,'/index.html');
+            return views(onlyUrl,'/index.html');
         }else{
             return '';
         }

@@ -14,7 +14,7 @@ module.exports = (function () {
         } else if (/=/.test(_actions)) {
             return actions(toObject(_actions.split('&')));
         } else {
-            return allModules(_actions);
+            return allModules((_actions||'').replace(/^\//,''));
         }
 
         function toObject(list) {
@@ -103,7 +103,7 @@ module.exports = (function () {
                         document.body.append(item);
                         module.innerHTML = dir;
                         module.onclick = function(){
-                            window.open('action?${_path}/'+dir);
+                            window.open('?'+('${_path}'?('${_path}/'):'')+dir);
                         };
 
                         [${actions}].forEach(function(actionName){
@@ -140,16 +140,17 @@ module.exports = (function () {
         var id = Date.now() + '';
         switch (_actions.action.toLocaleLowerCase()) {
             case 'gulp':
-                gulp(id, _actions.parent, _actions.target);
+                gulp(id, _actions.parent||'', _actions.target);
                 break;
             case 'commit':
-                commit(id, _actions.parent, _actions.target);
+                commit(id, _actions.parent||'', _actions.target);
                 break;
         }
         return id;
     }
 
     function gulp(id, parent, target) {
+        parent = parent.replace(/^\//,'');
         if (dirs[parent]) {
             messageList[id] = 'gulp';
             setTimeout(function () {

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document -help</title>
+</head>
+<body>
+        <p>
+                DEV服务使用说明<br/>
+            </p>
+            <ol class=" list-paddingleft-2" style="list-style-type: decimal;">
+                <li>
+                    <p>
+                        该服务仅用于代替真实的API测试
+                    </p>
+                </li>
+                <li>
+                    <p>
+                        该服务的数据来源于真实API返回
+                    </p>
+                </li>
+                <li>
+                    <p>
+                        该服务可以代替webService来挂起一个网站
+                    </p>
+                    <p>
+                        <br/>
+                    </p>
+                </li>
+            </ol>
+            <p>
+                <br/>
+            </p>
+            <p>
+                找到目录下面的_dev文件夹，这里的dev.js里面做了一些APP操作模拟，规定了所有的模拟API都要在前面带上tngMobile。接下来打开里面的service目录，这里面的就是服务所需要的文件
+            </p>
+            <p>
+                &nbsp;&nbsp;&nbsp;&nbsp;cache是用于模拟APP/客户端缓存，这个一般不会手动去修改，当然可以删除<br/>
+            </p>
+            <p>
+                &nbsp;&nbsp;&nbsp;&nbsp;config是用来配置API，所有的我们想模拟的API都必须在这里有配置<br/>
+            </p>
+            <p>
+                &nbsp;&nbsp;&nbsp;&nbsp;data是用来存放一些固定的json数据<br/>
+            </p>
+            <p>
+                &nbsp;&nbsp;&nbsp;&nbsp;images是用来存放图片<br/>
+            </p>
+            <p>
+                &nbsp;&nbsp;&nbsp;&nbsp;start.sh是启动服务的文件
+            </p>
+            <p>
+                &nbsp;&nbsp;&nbsp;&nbsp;其他的js/html有兴趣的可以看看，不明白的欢迎来给我讨论<br/>
+            </p>
+            <p>
+                <br/>
+            </p>
+            <p>
+                主要说明下config这个文件夹，里面可以有多层文件结构，这个不影响最终的API，不过建议按模块分文件配置，里面的json文件是主体，所有的API都是在他里面配置的。类似
+            </p>
+            <p>
+                <span style="color: #8da6ce;">&quot;tngMobile/consumer/get-activity-history&quot;</span>: {
+            </p>
+            <p>
+                }
+            </p>
+            <p>
+                这是配置了一个<span style="color: rgb(141, 166, 206);">/consumer/get-activity-history</span>&nbsp; 的API，前面的<span style="color: rgb(141, 166, 206);">tngMobile</span>&nbsp; 是有必要的。至于后面的返回数据我们需要从真实的API那里获取(data.response)，然后复制过来。
+            </p>
+            <p>
+                每个对应的API都可以配置对应的js方法来做动态的处理，json里面也可以配置动态生成属性，对这些有兴趣的可以自行阅读random.js，有问题可以过来跟我讨论。
+            </p>
+</body>
+</html>
