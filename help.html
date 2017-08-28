@@ -15,8 +15,8 @@
             text-align: center;
         }
 
-        .helper{
-            color:#ac5600;
+        .helper {
+            color: #ac5600;
             cursor: pointer;
             font-weight: 700;
         }
@@ -77,6 +77,15 @@
             padding: 2px;
             border-radius: 10px;
             background: #f3f3f3;
+        }
+
+        .common-dialog-back .common-dialog.max-window {
+            width: 96%;
+            height: 96%;
+            left: 2%!important;
+            top: 2%!important;
+            margin-left: 0;
+            transform: none;
         }
 
         .common-dialog-back .common-dialog .common-dialog-header {
@@ -179,8 +188,8 @@
                 fieldset.lastChild.style.display = close ? 'block' : 'none';
             })
         };
-        helper.onclick = function(){
-            window.open('document/helper.html');
+        helper.onclick = function () {
+            window.open('document/help.html');
         };
 
         function createGroup(item) {
@@ -358,6 +367,13 @@
                 close.innerHTML = '&times;';
                 header.appendChild(title);
                 header.appendChild(close);
+                header.ondblclick = function () {
+                    if (/max-window/.test(dialog.className)) {
+                        dialog.className = dialog.className.replace(/\smax-window/, '');
+                    } else {
+                        dialog.className = dialog.className + ' max-window';
+                    }
+                };
                 close.onclick = function () {
                     dialogPanl.parentNode.removeChild(dialogPanl);
                     callback();
@@ -531,6 +547,9 @@
                 var temp = {};
                 canDragElement.addEventListener('mousedown', function (e) {
                     var style = window.getComputedStyle(element);
+                    if (/max-window/.test(element.className)) {
+                        return;
+                    }
                     if (e.clientX < (parseInt(style.left) || 0) + (parseInt(style.width) || 0) - 15 ||
                         e.clientY < (parseInt(style.top) || 0) + (parseInt(style.height) || 0) - 15) {
                         mousedown(e);

@@ -27,9 +27,13 @@ module.exports = (function () {
     return {
         is: isView,
         get: getFile,
-        views:views
+        views:views,
+        biulds:biulds
     };
 
+    function biulds(request){
+        return fs.readFile(basePath.replace('/!replace', _path||'') + request);
+    }
 
     function views(_path,index){
         var actions = _path ? 'Gulp' : 'Commit';

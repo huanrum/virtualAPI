@@ -42,7 +42,15 @@ var createServer = function (port, exits) {
                             response.end(JSON.stringify(randomFn(returnData)));
                         } else {
                             if (/^\/views/i.test(request.url)) {
-                                response.end(views.views());
+                                response.end(views.views(request.url));
+                            }else if (/^\/builds/i.test(request.url)) {
+                                response.end(views.builds());
+                            }else if (/^\/@?tngMobile/i.test(request.url)) {
+                                http.get(request.url.replace(/^\/@?tngMobile/i,'http://10.0.101.248/mockapi/')+'/response.json', function(res) {
+                                    var size = 0,chunks = [];
+                                    res.on('data', function(chunk){size += chunk.length;chunks.push(chunk);});
+                                    res.on('end', function(){response.end(Buffer.concat(chunks, size));});
+                                });
                             } else if (views.is(request)) {
                                 response.end(views.get(request, response), "binary");
                             } else {
