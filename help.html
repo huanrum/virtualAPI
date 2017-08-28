@@ -128,9 +128,12 @@
         }
 
         .common-dialog-back .common-dialog .common-dialog-message {
+            width: calc(100% - 1rem);
+            height: 100%;
             background: #d3d3d3;
             margin: 0.5em;
             max-height: 33em;
+            min-height: 10em;
             overflow: auto;
         }
 
@@ -225,7 +228,7 @@
             var isDisable = isTest ? false : null;
             var parent = document.createElement('div');
             var urlElement = document.createElement('div');
-            var returnElement = document.createElement('div');
+            var returnElement = document.createElement('textarea');
 
             var method = document.createElement('div');
             var url = document.createElement('div');
@@ -239,7 +242,8 @@
 
             url.innerHTML = urlData.split('?')[0].replace(/^\[.*\]/, '');
             returnElement.style.display = 'none';
-            returnElement.innerHTML = linefeed(JSON.stringify(returnData));
+            returnElement.readOnly = true;
+            returnElement.value = linefeed(JSON.stringify(returnData,null,4));
 
             urlElement.appendChild(method);
             urlElement.appendChild(url);
@@ -272,6 +276,7 @@
         }
 
         function linefeed(str) {
+            return str;
             var live = 0, line = false;
             var br = function () { return line ? '' : '<br>'; }
             for (var i = 0; i < str.length; i++) {
@@ -332,11 +337,12 @@
 
             var header = document.createElement('div');
             var content = document.createElement('div');
-            var message = document.createElement('div');
+            var message = document.createElement('textarea');
             var footer = document.createElement('div');
 
             initHeader();
             initFooter(initContent());
+            message.readOnly = true;
 
             document.body.onkeyup = function (e) {
                 if (e.keyCode === 27) {
@@ -370,8 +376,12 @@
                 header.ondblclick = function () {
                     if (/max-window/.test(dialog.className)) {
                         dialog.className = dialog.className.replace(/\smax-window/, '');
+                        message.style.maxWidth = document.body.offsetWidth * 2 / 3 + 'px';
+                        message.style.maxHeight = '';
                     } else {
                         dialog.className = dialog.className + ' max-window';
+                        message.style.maxWidth = 'none';
+                        message.style.maxHeight = dialog.offsetHeight - header.offsetHeight - content.offsetHeight - footer.offsetHeight - 45 + 'px';
                     }
                 };
                 close.onclick = function () {
@@ -473,7 +483,7 @@
                         }
                         return req.text();
                     }).then(function (req) {
-                        message.innerHTML = linefeed(JSON.stringify(req));
+                        message.value = linefeed(JSON.stringify(req,null,4));
                     });
                 };
 
