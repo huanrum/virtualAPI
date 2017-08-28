@@ -42,9 +42,9 @@ var createServer = function (port, exits) {
                             response.end(JSON.stringify(randomFn(returnData)));
                         } else {
                             if (/^\/views/i.test(request.url)) {
-                                response.end(views.views(request.url));
+                                response.end(views.views());
                             }else if (/^\/builds/i.test(request.url)) {
-                                response.end(views.builds());
+                                response.end(views.builds(request.url));
                             }else if (/^\/@?tngMobile/i.test(request.url)) {
                                 http.get(request.url.replace(/^\/@?tngMobile/i,'http://10.0.101.248/mockapi/')+'/response.json', function(res) {
                                     var size = 0,chunks = [];

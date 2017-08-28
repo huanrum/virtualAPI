@@ -28,11 +28,16 @@ module.exports = (function () {
         is: isView,
         get: getFile,
         views:views,
-        biulds:biulds
+        builds:builds
     };
 
-    function biulds(request){
-        return fs.readFile(basePath.replace('/!replace', _path||'') + request);
+    function builds(url){
+        var _path = basePath.replace('/!replace', '/../builds/tng-mobile') + url.replace('/builds/','');
+        if(fs.existsSync(_path)){
+            return fs.readFileSync(_path);
+        }else{
+            return null;
+        }
     }
 
     function views(_path,index){
