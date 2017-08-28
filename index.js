@@ -23,7 +23,11 @@ var createServer = function (port, exits) {
         } else if (request.url.toLocaleLowerCase() === '/test') {
             response.end(JSON.stringify(true));
         } else if (/^\/(images|document)\//i.test(request.url)) {
-            response.end(fs.readFileSync(__dirname + request.url));
+            if(fs.existsSync(__dirname + request.url)){
+                response.end(fs.readFileSync(__dirname + request.url));
+            }else{
+                response.end('The File Not Found');
+            }
         } else if (/^\/action\//i.test(request.url)) {
             response.end(action(request, response));
         } else {
@@ -35,7 +39,10 @@ var createServer = function (port, exits) {
                 request.on('end', function () {
                     if (/^\/cache\//i.test(request.url)) {//用于处理缓存数据
                         response.end(cache(decodeURIComponent(request.url.replace(/^\/cache\//i, '')), bodyData));
-                    } else {
+                    } else if(/^\/random/.test(request.url)){
+                        response.writeHead(200, { 'Content-Type': 'text/plain;charset=utf-8' });
+                        response.end(JSON.stringify(randomFn(JSON.parse(bodyData || '{}'))));
+                    }else {
                         var returnData = helper(request, JSON.parse(bodyData || '{}'));
                         if (returnData) {
                             response.writeHead(200, { 'Content-Type': 'text/plain;charset=utf-8' });
