@@ -53,10 +53,16 @@ var createServer = function (port, exits) {
                             }else if (/^\/builds/i.test(request.url)) {
                                 response.end(views.builds(request.url));
                             }else if (/^\/@?tngMobile/i.test(request.url)) {
-                                http.get(request.url.replace(/^\/@?tngMobile/i,'http://10.0.101.248/mockapi/')+'/response.json', function(res) {
+                                http.get(request.url.split('?').shift().replace(/^\/@?tngMobile/i,'http://10.0.101.248/mockapi/')+'/response.json', function(res) {
                                     var size = 0,chunks = [];
                                     res.on('data', function(chunk){size += chunk.length;chunks.push(chunk);});
-                                    res.on('end', function(){response.end(Buffer.concat(chunks, size));});
+                                    res.on('end', function(){
+                                        if(/^2/.test(res.statusCode)){
+                                            response.end(Buffer.concat(chunks, size));
+                                        }else{
+                                            response.end('{ "status": "success"}');
+                                        }
+                                    });
                                 });
                             } else if (views.is(request)) {
                                 response.end(views.get(request, response), "binary");
