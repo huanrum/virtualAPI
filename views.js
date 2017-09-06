@@ -71,6 +71,30 @@ module.exports = (function () {
                         color:#d3d3d3;
                         font-size:12px;
                     }
+                    .common-dialog-back {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(123, 123, 123, 0.6);
+                    }
+                    .common-dialog-back .common-dialog {
+                        position: absolute;
+                        margin-left: 50%;
+                        top: 50%;
+                        transform: translate(-50%, -50%);
+                        padding: 2px;
+                        border-radius: 10px;
+                        background: #f3f3f3;
+                    }
+                    .common-dialog-back .common-dialog .common-dialog-content textarea{
+                        height: 200px;
+                        width: 300px;
+                    }
+                    .common-dialog-back .common-dialog .common-dialog-footer button{
+                        margin: 1rem;
+                    }
                 </style>
             </head>
             <body>
@@ -91,18 +115,28 @@ module.exports = (function () {
                             window.open('..${replace}/'+dir +'${index}');
                         };
                         action.onclick = function(){
+                            if('Commit' === '${actions}'){
+                                showModal('Git Commit',runAction(dir,action));
+                            }else{
+                                runAction(dir,action);
+                            }
+                        };
+                    });
+
+                    function runAction(dir,action){
+                        return function(message){
                             var count = 0,interval = setInterval(function(){
                                 action.innerHTML = '${actions}' + (Array(count++%4+1).join('.'));
                             },500);
                             
-                            fetch('action/?parent=${_path}&target='+dir+'&action=${actions}', {method: 'GET'}).then(function(r){return r.text()}).then(function(id){
+                            fetch('action/?parent=${_path}&target='+dir+'&action=${actions}&message='+message, {method: 'GET'}).then(function(r){return r.text()}).then(function(id){
                                 runMessage(id,function(){
                                     clearInterval(interval);
                                     action.innerHTML = '${actions} <i>' + new Date().getHours()+':'+new Date().getMinutes() + '</i>';
                                 });
                             });
-                        };
-                    });
+                        }
+                    }
 
                     function runMessage(id,callBack){
                         fetch('action/?'+id, {method: 'GET'}).then(function(r){return r.text()}).then(function(data){
@@ -115,6 +149,53 @@ module.exports = (function () {
                                 callBack();
                             }
                         });
+                    }
+
+                    function showModal(title,callback){
+                        var dialogPanl = document.createElement('div');
+                        var dialog = document.createElement('div');
+            
+                        var header = document.createElement('div');
+                        var content = document.createElement('div');
+                        var text = document.createElement('textarea');
+                        var message = document.createElement('textarea');
+                        var footer = document.createElement('div');
+                        var ok = document.createElement('button');
+                        var cancel = document.createElement('button');
+            
+                        dialogPanl.className = 'common-dialog-back';
+                        dialog.className = 'common-dialog';
+                        header.className = 'common-dialog-header';
+                        content.className = 'common-dialog-content';
+                        footer.className = 'common-dialog-footer';
+                        dialogPanl.appendChild(dialog);
+                        dialog.appendChild(header);
+                        dialog.appendChild(content);
+                        dialog.appendChild(footer);
+                        content.appendChild(text);
+                        footer.appendChild(cancel);
+                        footer.appendChild(ok);
+            
+                        document.body.appendChild(dialogPanl);
+
+
+                        header.innerHTML =  title;
+                        text.value = 'update ';
+                        ok.innerHTML = 'Ok';
+                        cancel.innerHTML = 'Cancel';
+                        text.onkeyup = function(e){
+                            if(e.keyCode === 13 || (e.altKey || e.ctrlKey || e.shiftKey)){
+                                document.body.removeChild(dialogPanl);
+                                callback(text.value);
+                            }
+                        }
+                        ok.onclick = function(){
+                            document.body.removeChild(dialogPanl);
+                            callback(text.value);
+                        };
+                        cancel.onclick = function(){
+                            document.body.removeChild(dialogPanl);
+                        };
                     }
                 
                 </script>

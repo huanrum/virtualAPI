@@ -8,8 +8,8 @@ module.exports = (function () {
 
     var messageList = {};
     return function (request, response) {
-        var _actions = request.url.split('?')[1];
-        if (/\d+/.test(_actions)) {
+        var _actions = decodeURIComponent (request.url.split('?')[1]);
+        if (/^\d+$/.test(_actions)) {
             return message(_actions);
         } else if (/=/.test(_actions)) {
             return actions(toObject(_actions.split('&')));
@@ -143,7 +143,7 @@ module.exports = (function () {
                 gulp(id, _actions.parent||'', _actions.target);
                 break;
             case 'commit':
-                commit(id, _actions.parent||'', _actions.target);
+                commit(id, _actions.parent||'', _actions.target,_actions.message);
                 break;
         }
         return id;
@@ -175,7 +175,7 @@ module.exports = (function () {
         }
     }
 
-    function commit(id, parent, target) {
+    function commit(id, parent, target ,message) {
         if (dirs[target]) {
             messageList[id] = 'commit';
             setTimeout(function () {
@@ -184,7 +184,7 @@ module.exports = (function () {
                     dirs[target].split(':')[0] + ':',
                     'cd ' + dirs[target],
                     'git add .',
-                    'git commit -m \'update\'',
+                    'git commit -m \''+(message||'update')+'\'',
                     'git pull origin dev',
                     'git push origin dev'
                 ].join(' && ')], function (data) {
