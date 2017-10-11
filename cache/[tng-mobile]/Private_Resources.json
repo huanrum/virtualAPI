@@ -1,0 +1,11 @@
+{
+  "status": "success",
+  "errorCode": null,
+  "errorEN": null,
+  "errorZhHK": null,
+  "errorZhCN": null,
+  "action": null,
+  "kycIndexLink": "http://dummy/dummy",
+  "funMoneyAppKey": "2bFFt6pEaHu5Ya4paQ7DUiytbQUPRfAbUqdGAOtZb8tBb8kZw6jGNJ92xTd3",
+  "funMoneyRedirectLink": "http://web.tng.asia:8100/fun_money/openfunmoneyapp.html"
+}

@@ -169,6 +169,7 @@ module.exports = (function () {
                     messageList[id] = '构建完成';
                     setTimeout(function () {
                         messageList[id] = '';
+                        //fs.writeFileSync('\\\\192.168.1.135\\htdocs\\'+target+'.zip',fs.readFileSync(dirs[parent]+'..\\builds\\'+target+'.zip'));
                     }, 1000);
                 })
             }, 1000);

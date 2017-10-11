@@ -1,0 +1,86 @@
+{
+  "status": "success",
+  "errorCode": null,
+  "errorEN": null,
+  "errorZhHK": null,
+  "errorZhCN": null,
+  "action": null,
+  "animations": [{
+    "id": 5,
+    "name": "BookFair16",
+    "zipURL": "http://web.tng.asia:8100/ca/bookFairFreeTicket.zip",
+    "createDatetime": "2016-06-29 11:59:57",
+    "updateDatetime": "2016-06-29 11:59:57"
+  },
+    {
+      "id": 6,
+      "name": "FoodExpo16",
+      "zipURL": "http://web.tng.asia:8100/ca/foodExpoFreeTicket.zip",
+      "createDatetime": "2016-07-21 15:53:00",
+      "updateDatetime": "2016-07-21 15:53:00"
+    },
+    {
+      "id": 1,
+      "name": "001",
+      "zipURL": "http://cdn-sinodynamic-com.s3.amazonaws.com/TNG/m800/animation.zip",
+      "createDatetime": "2015-12-16 03:51:25",
+      "updateDatetime": "2015-12-16 03:51:25"
+    },
+    {
+      "id": 2,
+      "name": "002",
+      "zipURL": "http://cdn-sinodynamic-com.s3.amazonaws.com/TNG/m800/animation002.zip",
+      "createDatetime": "2015-12-16 03:51:25",
+      "updateDatetime": "2015-12-16 03:51:25"
+    },
+    {
+      "id": 3,
+      "name": "003",
+      "zipURL": "http://cdn-sinodynamic-com.s3.amazonaws.com/TNG/m800/animation003.zip",
+      "createDatetime": "2015-12-16 03:51:25",
+      "updateDatetime": "2015-12-16 03:51:25"
+    },
+    {
+      "id": 21,
+      "name": "004",
+      "zipURL": "http://cdn-sinodynamic-com.s3.amazonaws.com/TNG/m800/animation004.zip",
+      "createDatetime": "2016-01-04 16:14:38",
+      "updateDatetime": "2016-01-04 16:14:38"
+    },
+    {
+      "id": 4,
+      "name": "REBATE",
+      "zipURL": "https://entry.tng.asia/animation/rebate_animation.zip",
+      "createDatetime": "2016-01-13 22:40:16",
+      "updateDatetime": "2016-01-13 22:40:16"
+    },
+    {
+      "id": 41,
+      "name": "711topup",
+      "zipURL": "https://entry.tng.asia/animation/CA001.zip",
+      "createDatetime": "2016-09-27 01:18:51",
+      "updateDatetime": "2016-09-27 01:18:51"
+    },
+    {
+      "id": 99,
+      "name": "RootDevice",
+      "zipURL": "https://entry.tng.asia/ca/system_message_jailbreak.zip",
+      "createDatetime": "2016-11-23 16:38:37",
+      "updateDatetime": "2016-11-24 16:38:37"
+    },
+    {
+      "id": 22,
+      "name": "CA001",
+      "zipURL": "https://entry.tng.asia/animation/CA001.zip",
+      "createDatetime": "2016-02-11 16:37:52",
+      "updateDatetime": "2016-02-11 16:37:52"
+    },
+    {
+      "id": 100,
+      "name": "CA_anson_test",
+      "zipURL": "http://192.168.1.213:8080/testzip/__test_CA.zip",
+      "createDatetime": "2016-02-11 16:37:52",
+      "updateDatetime": "2016-02-11 16:37:52"
+    }],
+  "updateDatetime": "2017-08-29 09:43:58"
+}

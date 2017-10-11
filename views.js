@@ -40,12 +40,26 @@ module.exports = (function () {
         }
     }
 
+    function buildsVersion(url){
+        var _path = basePath.replace('/!replace', '/../builds/') + url + '.zip';
+        if(fs.existsSync(_path)){
+            return fs.statSync(_path);
+        }else{
+            return '';
+        }
+    }
+
     function views(_path,index){
         var actions = _path ? 'Gulp' : 'Commit';
         //basePath.replace('/!replace', '')
         var replace = _path?_path.replace(basePath.replace('/!replace', '/'),''):'';
-        var dirs = JSON.stringify(fs.readdirSync(basePath.replace('/!replace', _path||'')).map(function (i) { return i; }));
+        var dirs = {};
+        JSON.stringify(fs.readdirSync(basePath.replace('/!replace', _path||'')).map(function (i) {
+            dirs[i] =_path?buildsVersion(_path+'/'+i):{}; 
+        }));
+        
         index = index || '';
+        dirs = JSON.stringify(dirs,null,4);
         return `
         <!DOCTYPE html>
         <html lang="en">
@@ -55,8 +69,13 @@ module.exports = (function () {
                 <meta http-equiv="X-UA-Compatible" content="ie=edge">
                 <title>View List</title>
                 <style>
+                    #list{
+                        list-style: none;
+                        padding: 0;
+                    }
                     #list li{
                         padding:0.2rem 1rem;
+                        border-bottom: 1px solid #d3d3d3;
                     }
                    #list li div{
                         display:inline-block;
@@ -102,14 +121,17 @@ module.exports = (function () {
                 <script>
                     var dirs = ${dirs};
                     var list = document.getElementById('list');
-                    dirs.forEach(function(dir){
+                    Object.keys(dirs).sort(function(a,b){return a.toLocaleLowerCase()>b.toLocaleLowerCase()?1:-1}).forEach(function(dir){
+                        var version = dirs[dir];
                         var item = document.createElement('li');
                         var action = document.createElement('div');
                         var a = document.createElement('a');
                         item.append(action);
                         item.append(a);
                         list.append(item);
-                        action.innerHTML = '${actions}';
+                        action.title = JSON.stringify(version,null,4);
+                        action.innerHTML = '${actions} <i>'+ times(version.mtime) + '</i>';
+                        action.style.background = Object.keys(version).length?'#9f9f9f':'';
                         a.innerHTML = dir;
                         a.onclick = function(){
                             window.open('..${replace}/'+dir +'${index}');
@@ -118,10 +140,23 @@ module.exports = (function () {
                             if('Commit' === '${actions}'){
                                 showModal('Git Commit',runAction(dir,action));
                             }else{
-                                runAction(dir,action);
+                                runAction(dir,action)();
                             }
                         };
                     });
+
+                    function times(dt){
+                        if(dt){
+                            if(new Date(dt) > new Date(new Date().toLocaleDateString())){
+                                return new Date(dt).getHours()+':'+new Date(dt).getMinutes();
+                            }else{
+                                return new Date(dt).toLocaleDateString();
+                            }
+                        }else{
+                            return '';
+                        }
+                        
+                    }
 
                     function runAction(dir,action){
                         return function(message){
@@ -181,10 +216,10 @@ module.exports = (function () {
 
                         header.innerHTML =  title;
                         text.value = 'update ';
-                        ok.innerHTML = 'Ok';
+                        ok.innerHTML = 'Submit';
                         cancel.innerHTML = 'Cancel';
                         text.onkeyup = function(e){
-                            if(e.keyCode === 13 || (e.altKey || e.ctrlKey || e.shiftKey)){
+                            if(e.keyCode === 13 && (e.altKey || e.ctrlKey || e.shiftKey)){
                                 document.body.removeChild(dialogPanl);
                                 callback(text.value);
                             }
@@ -237,7 +272,20 @@ module.exports = (function () {
 
         var data = fs.readFileSync(file);
         if(/tng-mobile\/.*\/index\.html/.test(file)){
-            data = new Buffer(data.toString().replace('<body>','<body>\t<script src="../_dev/dev.js"></script>\n\t'));
+            var content = data.toString();
+            var macths = data.toString().match(/(<script .*><\/script>)/gi);
+            if(macths){
+                macths.forEach(function(macth){
+                    var _file = /src="(.*)"/.exec(macth)[1].split('"').shift().replace('Template.js','/').replace('.js','/');
+                    var _dir = file.replace(/index\.html/,_file);
+                    if(fs.existsSync(_dir)){
+                        content = content.replace(macth,macth + '\n\t' + fs.readdirSync(_dir).map(function(fi){
+                            return '<script src="@src"></script>\n\t'.replace('@src',_file + fi);
+                        }).join('\n'));
+                    }
+                });
+            }
+            data = new Buffer(content.toString().replace('<body>','<body>\t<script src="../_dev/dev.js"></script>\n\t'));
         }
 
         if (type === 'svg') {

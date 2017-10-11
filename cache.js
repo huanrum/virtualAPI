@@ -4,24 +4,31 @@ module.exports = (function () {
 
     return function (url, value) {
         var key = url.split('?').shift();
-        var parms = {};
-        url.split('?').pop().split('&').map(function (str) {
-            if (str) {
-                parms[str.split('=').shift()] = str.split('=').pop();
-            }
-        });
+        var type = url.split('?').pop();
 
         if (!value) {
-            if (fs.existsSync('cache/' + key + '.json')) {
-                return fs.readFileSync('cache/' + key + '.json').toString();
-            } else {
-                return 'null';
-            }
+            return readFile('cache/' + key + '.json');
         } else {
-            fs.writeFileSync('cache/' + key + '.json', value);
+            switch (type) {
+                case 'append':
+                    var data = JSON.parse(readFile('cache/' + key + '.json')) || {};
+                    fs.writeFileSync('cache/' + key + '.json', JSON.stringify(Object.assign(data, JSON.parse(value)),null,4));
+                    break;
+                default:
+                    fs.writeFileSync('cache/' + key + '.json', JSON.stringify(JSON.parse(value),null,4));
+                    break;
+            }
+
             return value;
         }
     };
 
+    function readFile(_path) {
+        if (fs.existsSync(_path)) {
+            return fs.readFileSync(_path).toString();
+        } else {
+            return 'null';
+        }
+    }
 
 })();

@@ -1,0 +1,32 @@
+[
+  {
+    "crazyAdId": "711topup",
+    "module": "BP",
+    "stage": "IN",
+    "displayMethod": "block"
+  },
+  {
+    "crazyAdId": "711topup",
+    "module": "BP",
+    "stage": "OUT",
+    "displayMethod": "non-block"
+  },
+  {
+    "crazyAdId": "711topup",
+    "module": "bankProfileManagement",
+    "stage": "OUT",
+    "displayMethod": "non-block"
+  },
+  {
+    "crazyAdId": "CA_anson_test",
+    "module": "MAKE_MONEY",
+    "stage": "IN",
+    "displayMethod": "non-block"
+  },
+  {
+    "crazyAdId": "CA_anson_test",
+    "module": "MER_DOLLAR",
+    "stage": "OUT",
+    "displayMethod": "block"
+  }
+]

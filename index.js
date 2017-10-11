@@ -9,29 +9,40 @@ var cache = require('./cache');
 var views = require('./views');
 var action = require('./action');
 
+var tngMobile = null;
+
 
 var createServer = function (port, exits) {
     if (exits) { return; }
+    if (fs.existsSync('tng-mobile.js')) {
+        tngMobile = require('./tng-mobile')
+    }
 
     randomFn = random({ IP: 'http://127.0.0.1', PORT: port });
     http.createServer(function (request, response) {
         response.setHeader('Access-Control-Allow-Origin', '*');
-        response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With,User,Language,IsPc,Token')
-        if (/^[\/\s]*$/.test(request.url)) {
-            response.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8' });
-            response.end(helper());
-        } else if (request.url.toLocaleLowerCase() === '/test') {
-            response.end(JSON.stringify(true));
-        } else if (/^\/(images|document)\//i.test(request.url)) {
-            if(fs.existsSync(__dirname + request.url)){
-                response.end(fs.readFileSync(__dirname + request.url));
-            }else{
-                response.end('The File Not Found');
-            }
-        } else if (/^\/action\//i.test(request.url)) {
-            response.end(action(request, response));
-        } else {
-            try {
+        response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With,User,Language,IsPc,Token');
+        try {
+            if (/^[\/\s]*$/.test(request.url)) {
+                response.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8' });
+                response.end(helper());
+            } else if (request.url.toLocaleLowerCase() === '/test') {
+                response.end(JSON.stringify(true));
+            } else if (/^\/(images|document)\//i.test(request.url)) {
+                if (fs.existsSync(__dirname + request.url)) {
+                    try {
+                        response.end(fs.readFileSync(__dirname + request.url));
+                    }
+                    catch (e) {
+                        response.end('The File Not Found');
+                    }
+                } else {
+                    response.end('The File Not Found');
+                }
+            } else if (/^\/action\//i.test(request.url)) {
+                response.end(action(request, response));
+            } else {
+
                 var bodyData = '';
                 request.on('data', function (chunk) {
                     bodyData += chunk;
@@ -39,10 +50,10 @@ var createServer = function (port, exits) {
                 request.on('end', function () {
                     if (/^\/cache\//i.test(request.url)) {//用于处理缓存数据
                         response.end(cache(decodeURIComponent(request.url.replace(/^\/cache\//i, '')), bodyData));
-                    } else if(/^\/random/.test(request.url)){
+                    } else if (/^\/random/.test(request.url)) {
                         response.writeHead(200, { 'Content-Type': 'text/plain;charset=utf-8' });
                         response.end(JSON.stringify(randomFn(JSON.parse(bodyData || '{}'))));
-                    }else {
+                    } else {
                         var returnData = helper(request, JSON.parse(bodyData || '{}'));
                         if (returnData) {
                             response.writeHead(200, { 'Content-Type': 'text/plain;charset=utf-8' });
@@ -50,20 +61,10 @@ var createServer = function (port, exits) {
                         } else {
                             if (/^\/views/i.test(request.url)) {
                                 response.end(views.views());
-                            }else if (/^\/builds/i.test(request.url)) {
+                            } else if (/^\/builds/i.test(request.url)) {
                                 response.end(views.builds(request.url));
-                            }else if (/^\/@?tngMobile/i.test(request.url)) {
-                                http.get(request.url.split('?').shift().replace(/^\/@?tngMobile/i,'http://10.0.101.248/mockapi/')+'/response.json', function(res) {
-                                    var size = 0,chunks = [];
-                                    res.on('data', function(chunk){size += chunk.length;chunks.push(chunk);});
-                                    res.on('end', function(){
-                                        if(/^2/.test(res.statusCode)){
-                                            response.end(Buffer.concat(chunks, size));
-                                        }else{
-                                            response.end('{ "status": "success"}');
-                                        }
-                                    });
-                                });
+                            } else if (tngMobile && tngMobile.is(request)) {
+                                tngMobile.request(request, response, bodyData);
                             } else if (views.is(request)) {
                                 response.end(views.get(request, response), "binary");
                             } else {
@@ -74,11 +75,10 @@ var createServer = function (port, exits) {
                     }
 
                 });
-
-            } catch (e) {
-                response.writeHead(500, { 'Content-Type': 'text/plain;charset=utf-8' });
-                response.end('500 服务器异常' + e.message);
             }
+        } catch (e) {
+            response.writeHead(500, { 'Content-Type': 'text/plain;charset=utf-8' });
+            response.end('500 服务器异常' + e.message);
         }
     }).listen(port);
 

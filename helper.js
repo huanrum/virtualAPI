@@ -61,7 +61,7 @@ module.exports = (function () {
         var keys = Object.keys(returnData);
         var urls = Object.keys(returnData).filter(function (key) {
             return (!key.match(/\[(.*)\]/) || new RegExp('\[' + request.method + '\]', 'i').test(key))
-                && new RegExp('^\\/*' + key.split('?')[0].replace(/\[(.*)\]/, '').replace(/\//g, '\\/+').replace(/:((?!\/).)*/g, '((?!\\/).)+') + '\\/*$', 'i').test(request.url.split('?')[0])
+                && new RegExp('^\\/*' + key.split('?')[0].replace(/\[(.*)\]/, '').replace(/\//g, '\\/+').replace(/:((?!\/).)*/g, '((?!\\/).)+') + '\\/*$', 'i').test(request.url.split('?').shift())
                 && (Object.keys(request.headers).indexOf('disable') !== -1 || disableList.indexOf(key) === -1);
         });
 
@@ -98,11 +98,11 @@ module.exports = (function () {
     };
 
     function copy(data){
-        return JSON.parse(JSON.stringify(data));
+        return JSON.parse(JSON.stringify(data||''));
     }
 
     function returnResult(key, request, bodyData) {
-        var parameters = getParameters(key, request.url.split('?'));
+        var parameters = getParameters(key, request.url.split('?'),request.headers);
         var configStr = JSON.stringify(typeof returnData[key].js === 'function' ? returnData[key].js(copy(returnData[key].data), parameters, bodyData) : returnData[key].data);
         debugFn(request, parameters, bodyData, returnData[key].data, log);
         if (Object.keys(request.headers).indexOf('disable') !== -1) {
@@ -119,7 +119,7 @@ module.exports = (function () {
         Object.keys(bodyData).forEach(function (parm) {
             configStr = configStr.replace(new RegExp(':' + parm, 'g'), bodyData[parm]);
         });
-        log(new Date(), getClientIp(request), request.headers['referer'], key, request.url, JSON.stringify(bodyData));
+        log(new Date(), getClientIp(request), request.headers['referer'], key, request.url.split('?').shift(),toxml('parameters',parameters), toxml('bodyData',bodyData));
         try {
             return JSON.parse(configStr);
         } catch (e) {
@@ -163,8 +163,8 @@ module.exports = (function () {
     }
 
     // 解析url获取参数
-    function getParameters(key, urlAndParms) {
-        var parameters = {};
+    function getParameters(key, urlAndParms,headers) {
+        var parameters = {test:test};
 
         var keys = key.split('?')[0].replace(/\[.*\]/, '').split('/').filter(function (i) { return !!i; });
         var urls = urlAndParms[0].split('/').filter(function (i) { return !!i; });
@@ -179,20 +179,20 @@ module.exports = (function () {
                 parameters[keys[i].replace(':', '')] = urls[i];
             }
         }
-        return parameters;
+        return Object.assign(parameters,headers);
     }
 
 
     function log() {
         var size = 100 * 1024;
-        var message = '\n' + Array(40).join('*') + '\n' + Array.prototype.join.call(arguments, '\n') + '\n' + Array(40).join('*') + '\n';
+        var message = '\n<log>\n   <item>' + Array.prototype.join.call(arguments, '</item>\n  <item>') + '</item>\n</log>\n';
         fs.readdir('log', function (error, files) {
             if (error) { return; }
             var file = files.find(function (item) {
-                return /\.log$/.test(item) && fs.statSync('log/' + item).size < size;
+                return /\.xml$/.test(item) && fs.statSync('log/' + item).size < size;
             });
             if (!file) {
-                file = Date.now() + '.log';
+                file = Date.now() + '.xml';
             }
             fs.appendFile('log/' + file, message, function (err) {
                 if (err) {
@@ -200,6 +200,17 @@ module.exports = (function () {
                 }
             });
         });
+    }
+
+    function toxml(name,obj){
+        var content = Object.keys(obj).map(function(key){
+            if(typeof obj[key] === 'object'){
+                return toxml(key,obj[key]);
+            }else{
+                return `<${key}>${obj[key]}</${key}>`
+            }
+        })
+        return `<${name}>${content}</${name}>`;
     }
 
 
