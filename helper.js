@@ -164,7 +164,7 @@ module.exports = (function () {
 
     // 解析url获取参数
     function getParameters(key, urlAndParms,headers) {
-        var parameters = {test:test};
+        var parameters = {test:headers.test};
 
         var keys = key.split('?')[0].replace(/\[.*\]/, '').split('/').filter(function (i) { return !!i; });
         var urls = urlAndParms[0].split('/').filter(function (i) { return !!i; });

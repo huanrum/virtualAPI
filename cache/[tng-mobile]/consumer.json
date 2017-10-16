@@ -1,31 +1,10 @@
 {
     "className": "Consumer",
-    "kycStatus": {
-        "idDocStatus": "VALID",
-        "creditCardStatus": "VALID",
-        "bankStatementStatus": "VALID",
-        "recoveryEmailStatus": "VALID",
-        "cddStatus": "NOT_VALID",
-        "alterIdDocStatus": null,
-        "addressProofStatus": null,
-        "mainIdDocStatus": null,
-        "occupationStatus": null,
-        "otherInfoStatus": null,
-        "topUp": true,
-        "topUpCreditCard": true,
-        "txs": true,
-        "cwBankIn": true,
-        "cwBankCashOut": true,
-        "cwGlobalRemittence": true,
-        "cwGlobalBillPayment": true,
-        "cwGlobalSimTopUp": true,
-        "cwForeignExchange": true
-    },
     "status": "success",
-    "errorCode": "",
-    "errorEN": "",
-    "errorZhHK": "",
-    "errorZhCN": "",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
     "action": null,
     "consumer": {
         "id": "9d056c8e-0a12-4241-8bcb-3c6905a39d4f",
@@ -97,15 +76,15 @@
     ],
     "wallets": [
         {
-            "id": 18879306,
-            "consumerId": "d9e60277-9f75-40bf-83b5-3f65be39012c",
+            "id": 18875329,
+            "consumerId": "d49375c1-1c0b-4d08-98f0-a3bdc0a3bed1",
             "currencyId": "TNG",
-            "prevBalance": 316575.7,
-            "changeBalance": -19,
-            "currBalance": 316556.7,
-            "actualBalance": 9969858.2,
-            "lastTx": 18862299,
-            "txDate": 1487924123221,
+            "prevBalance": 99442,
+            "changeBalance": 100,
+            "currBalance": 99542,
+            "actualBalance": -456.4,
+            "lastTx": 18860345,
+            "txDate": 1487761384146,
             "dailyPaymentAmount": null,
             "dailyP2pAmount": null,
             "dailyTopupAmount": null,
@@ -233,10 +212,21 @@
             "visible": true
         }
     },
-    "cnName": {
-        "chineseFirstName": "**",
-        "chineseLastName": "林",
-        "firstName": "B*",
-        "lastName": "L*"
+    "kycStatus": {
+        "id": 65,
+        "idDocStatus": "NOT_VALID",
+        "creditCardStatus": "NOT_VALID",
+        "bankStatementStatus": "NOT_VALID",
+        "recoveryEmailStatus": "VALID",
+        "cddStatus": "NOT_VALID",
+        "topUp": true,
+        "topUpCreditCard": false,
+        "txs": true,
+        "cwBankIn": false,
+        "cwBankCashOut": false,
+        "cwGlobalRemittence": false,
+        "cwGlobalBillPayment": false,
+        "cwGlobalSimTopUp": false,
+        "cwForeignExchange": false
     }
 }

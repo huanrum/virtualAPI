@@ -147,10 +147,11 @@ module.exports = (function () {
 
                     function times(dt){
                         if(dt){
-                            if(new Date(dt) > new Date(new Date().toLocaleDateString())){
-                                return new Date(dt).getHours()+':'+new Date(dt).getMinutes();
+                            dt = new Date(dt);
+                            if(dt > new Date(new Date().toLocaleDateString())){
+                                return (dt.getHours()<10?'0':'')+dt.getHours()+':'+(dt.getMinutes()<10?'0':'')+dt.getMinutes();
                             }else{
-                                return new Date(dt).toLocaleDateString();
+                                return dt.toLocaleDateString();
                             }
                         }else{
                             return '';
@@ -162,12 +163,14 @@ module.exports = (function () {
                         return function(message){
                             var count = 0,interval = setInterval(function(){
                                 action.innerHTML = '${actions}' + (Array(count++%4+1).join('.'));
+                                action.style.background = '#99ff99';
                             },500);
                             
                             fetch('action/?parent=${_path}&target='+dir+'&action=${actions}&message='+message, {method: 'GET'}).then(function(r){return r.text()}).then(function(id){
                                 runMessage(id,function(){
                                     clearInterval(interval);
-                                    action.innerHTML = '${actions} <i>' + new Date().getHours()+':'+new Date().getMinutes() + '</i>';
+                                    action.innerHTML = '${actions} <i>' + times(new Date()) + '</i>';
+                                    action.style.background = '#9f9f9f';
                                 });
                             });
                         }
@@ -276,12 +279,24 @@ module.exports = (function () {
             var macths = data.toString().match(/(<script .*><\/script>)/gi);
             if(macths){
                 macths.forEach(function(macth){
-                    var _file = /src="(.*)"/.exec(macth)[1].split('"').shift().replace('Template.js','/').replace('.js','/');
+                    var _file = /src="(.*)"/.exec(macth)[1].split('"').shift().replace('Template.js','/').replace('.js','/').replace('.css','/');
                     var _dir = file.replace(/index\.html/,_file);
                     if(fs.existsSync(_dir)){
-                        content = content.replace(macth,macth + '\n\t' + fs.readdirSync(_dir).map(function(fi){
+                        content = content.replace(macth,macth + '\n\t,' + fs.readdirSync(_dir).map(function(fi){
                             return '<script src="@src"></script>\n\t'.replace('@src',_file + fi);
                         }).join('\n'));
+                    }
+                });
+            }
+            macths = data.toString().match(/(\[\s*"(js|css)"\s*,\s*".*"\s*\])/gi);
+            if(macths){
+                macths.forEach(function(macth){
+                    var _file = JSON.parse(macth).pop().replace('Template.js','/').replace('.js','/').replace('.css','/');
+                    var _dir = file.replace(/index\.html/,_file);
+                    if(fs.existsSync(_dir)){
+                        content = content.replace(macth,macth + '\n,' + fs.readdirSync(_dir).map(function(fi){
+                            return "['@type','@src']\n\t".replace('@type',JSON.parse(macth).shift()).replace('@src',_file + fi);
+                        }).join(',\n'));
                     }
                 });
             }
