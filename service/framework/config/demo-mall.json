@@ -1,0 +1,52 @@
+{
+    "/mall/:type?type=date": {
+        "returnCode": "0",
+        "data": "[:type]"
+    },
+    "[post]/mall/login?user=nobody": {
+        "returnCode": "0",
+        "data": ":user,登录成功"
+    },
+    "/mall/book/lookup":{
+        "returnCode": "0",
+        "data": {
+            "classFk:13":{
+                "id":"[+]",
+                "name":"[都市+历史+末世+游戏+异界+基础+函数+方程+高数+线性代数+微积分+平面几何+立体几何]"
+            }
+        }
+    },
+    "/mall/book/story?pageNumber=1&pageSize=13": {
+        "returnCode": "0",
+        "data": {
+            "pageNumber": ":pageNumber",
+            "totalPage":"10",
+            "list::pageSize": {
+                "id": "[+]",
+                "name": "[(A-Z)1][(a-z)6-10]",
+                "author": "[(@)2-4]",
+                "price": "$[12-25]",
+                "email": "[(0-z)6-10]@[(a-z)2-3].[(a-z)2-4]",
+                "date": "[1960-2012]-[01-12]-[01-30]",
+                "classFk": "[1-5]"
+            }
+        }
+    },
+    "/mall/book/math?pageNumber=1&pageSize=13": {
+        "returnCode": "0",
+        "totalPage":"20",
+        "data": {
+            "pageNumber": ":pageNumber",
+            "list::pageSize": {
+                "id": "[+]",
+                "name": "[(A-Z)1][(a-z)6-10]",
+                "author": "[(@)2-4]",
+                "price": "$[12-25]",
+                "email": "[(0-z)6-10]@[(a-z)2-3].[(a-z)2-4]",
+                "date": "[1960-2012]-[01-12]-[01-30]",
+                "difficulty": "[(0-9)1]",
+                "classFk": "[6-13]"
+            }
+        }
+    }
+}

@@ -1,0 +1,43 @@
+{
+  "tngMobile/sms-validation/create": {
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "action": null,
+    "prefix": "[ABC]"
+  },
+  "tngMobile/sms-validation/validate": {
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "action": null
+  },
+  "tngMobile/settings/valid-reset-password": {
+    "status": "success",
+    "errorCode": "",
+    "errorEN": "",
+    "errorZhHK": "",
+    "errorZhCN": "",
+    "action": {
+      "type": "",
+      "resource": "",
+      "param": ""
+    }
+  },
+  "tngMobile/settings/reset-pw": {
+    "status": "success",
+    "errorCode": "",
+    "errorEN": "",
+    "errorZhHK": "",
+    "errorZhCN": "",
+    "action": {
+      "type": "",
+      "resource": "",
+      "param": ""
+    }
+  }
+}

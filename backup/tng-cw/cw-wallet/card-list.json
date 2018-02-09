@@ -1,0 +1,29 @@
+{
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "creditCardList": [
+        {
+            "cardId": "KfI4L-IyrUSyW4re3jGaLFbYIoYRy2udB8-lYR8JRTE7kro0t_YVfGlfQgZ4P-lIqPauXPjvmvMU3smS64gjJ8Z84DvuKjM2GCORCYGNqX0U-LImCQwljVd70yd7tmpM",
+            "cardName": "11111111----2221",
+            "cardNo": "************7655",
+            "cardType": "VISA",
+            "expired": false,
+            "expiryDate": "2018-05",
+            "lastUpdateTime": "2018-01-23 19:40:19"
+        },
+        {
+            "cardId": "jn_VHPsJOAPRVv6oGBDbK2rQdg5N4cCk-DTYd0FrjevZBK1h8M496keRAPP18D7EYhufEfblcJqNq1xU-qudiJM1tBDDkYtseEfTnLwS8raaV_Fv4KlZheTlxIrkmlVA",
+            "cardName": "Hong Kong - VISA 3333",
+            "cardNo": "************3333",
+            "cardType": "VISA",
+            "expired": false,
+            "expiryDate": "2018-03",
+            "lastUpdateTime": "2018-01-08 17:59:21"
+        }
+    ],
+    "previousCreditCard": "KfI4L-IyrUSyW4re3jGaLFbYIoYRy2udB8-lYR8JRTE7kro0t_YVfGlfQgZ4P-lIqPauXPjvmvMU3smS64gjJ8Z84DvuKjM2GCORCYGNqX0U-LImCQwljVd70yd7tmpM",
+    "chargeRate": 0.025
+}

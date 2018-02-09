@@ -1,0 +1,52 @@
+{
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "action": null,
+    "adBanners": [
+        {
+            "name": "SASA",
+            "ad_banner_en": "http://web.tng.asia:8100/merchantDollar/mc_banner_sample.png",
+            "ad_banner_sc": "http://web.tng.asia:8100/merchantDollar/mc_banner_sample.png",
+            "ad_banner_tc": "http://web.tng.asia:8100/merchantDollar/mc_banner_sample.png",
+            "merchantId": 100
+        },
+        {
+            "name": "CROSTINI",
+            "ad_banner_en": "http://web.tng.asia:8100/merchantDollar/banner002.png",
+            "ad_banner_sc": "http://web.tng.asia:8100/merchantDollar/banner002.png",
+            "ad_banner_tc": "http://web.tng.asia:8100/merchantDollar/banner002.png",
+            "merchantId": 102
+        },
+        {
+            "name": "Crositini",
+            "ad_banner_en": "http://web.tng.asia:8100/merchantDollar/banner002.png",
+            "ad_banner_sc": "http://web.tng.asia:8100/merchantDollar/banner002.png",
+            "ad_banner_tc": "http://web.tng.asia:8100/merchantDollar/banner002.png",
+            "merchantId": 127
+        },
+        {
+            "name": "PRICERITE",
+            "ad_banner_en": "http://wwwe,adBannerEn4.com.hk",
+            "ad_banner_sc": "http://wwwe,adBannerSc4.com.hk",
+            "ad_banner_tc": "http://wwwe,adBannerTc4.com.hk",
+            "merchantId": 103
+        },
+        {
+            "name": "BONJOUR",
+            "ad_banner_en": "http://wwwe,adBannerEn5.com.hk",
+            "ad_banner_sc": "http://wwwe,adBannerSc5.com.hk",
+            "ad_banner_tc": "http://wwwe,adBannerTc5.com.hk",
+            "merchantId": 104
+        },
+        {
+            "name": "MAXIM",
+            "ad_banner_en": "http://wwwe,adBannerEn6.com.hk",
+            "ad_banner_sc": "http://wwwe,adBannerSc6.com.hk",
+            "ad_banner_tc": "http://wwwe,adBannerTc6.com.hk",
+            "merchantId": 105
+        }
+    ]
+}

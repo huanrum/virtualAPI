@@ -1,0 +1,141 @@
+{
+    "tngMobile/request-payment/waiting-request":{
+        "status": "success",
+        "errorCode": null,
+        "errorEN": null,
+        "errorZhHK": null,
+        "errorZhCN": null,
+        "action": null,
+        "requests": [
+            {
+                "id": 1,
+                "name": "Kent's party",
+                "amount": "5200",
+                "submitDate": "2017-07-10 11:04:00",
+                "dueDate": "2017-07-18 11:04:00",
+                "paymentStatus": "PENDING",
+                "remarks": "Remarks",
+                "imageRemarks": "http://api.tng.asia:8101/tng/file/8ef73f5f50d14333ba77a5e26d0d36ed.jpg",
+                "audioRemarks": "http://api.tng.asia:8101/tng/file/8ef73f5f50d14333ba77a5e26d0d36ed.mp4",
+                "receiverRequests": [
+                    {
+                        "id": 101,
+                        "fromTngNo": "8561111110",
+                        "toTngNo": "85261111111",
+                        "amount": 3200,
+                        "activityHistoryId": 326,
+                        "remarks": "good",
+                        "paymentStatus": "ACCEPTED"
+                    },
+                    {
+                        "id": 102,
+                        "fromTngNo": "8561111110",
+                        "toTngNo": "85261111112",
+                        "amount": 1000,
+                        "activityHistoryId": 327,
+                        "remarks": "",
+                        "paymentStatus": "ACCEPTED"
+                    },
+                    {
+                        "id": 103,
+                        "fromTngNo": "8561111110",
+                        "toTngNo": "85261111113",
+                        "amount": 1000,
+                        "activityHistoryId": 328,
+                        "remarks": "",
+                        "paymentStatus": "ACCEPTED"
+                    }
+                ]
+            },
+            {
+                "id": 0,
+                "name": "Kent's party",
+                "amount": "5000",
+                "submitDate": "2017-07-10 11:04:00",
+                "dueDate": "2017-07-18 11:04:00",
+                "paymentStatus": "PENDING",
+                "remarks": "Remarks",
+                "imageRemarks": "http://api.tng.asia:8101/tng/file/8ef73f5f50d14333ba77a5e26d0d36ed.jpg",
+                "audioRemarks": "http://api.tng.asia:8101/tng/file/8ef73f5f50d14333ba77a5e26d0d36ed.mp4",
+                "receiverRequests": [
+                    {
+                        "id": 101,
+                        "fromTngNo": "8561111110",
+                        "toTngNo": "85261111111",
+                        "amount": 1000,
+                        "activityHistoryId": 326,
+                        "remarks": "good",
+                        "paymentStatus": "REJECT"
+                    },
+                    {
+                        "id": 102,
+                        "fromTngNo": "8561111110",
+                        "toTngNo": "85261111112",
+                        "amount": 3000,
+                        "activityHistoryId": 327,
+                        "remarks": "",
+                        "paymentStatus": "ACCEPTED"
+                    },
+                    {
+                        "id": 103,
+                        "fromTngNo": "8561111110",
+                        "toTngNo": "85261111113",
+                        "amount": 1000,
+                        "activityHistoryId": 328,
+                        "remarks": "",
+                        "paymentStatus": "PENDING"
+                    }
+                ]
+            }
+        ]
+    },
+    "tngMobile/tx/consumer/request-payment-transfer":{
+        "status": "success",
+        "errorCode": null,
+        "errorEN": null,
+        "errorZhHK": null,
+        "errorZhCN": null,
+        "action": null,
+        "activityHistoryId": 20642303,
+        "requestPaymentId":0,
+        "result": {
+            "result": "SUCCESS",
+            "activity_history_id": "20642303"
+        }
+    },
+    "tngMobile/request-payment/get-request-detail":{
+        "status": "success",
+        "errorCode": null,
+        "errorEN": null,
+        "errorZhHK": null,
+        "errorZhCN": null,
+        "action": null,
+        "id": 101,
+        "fromTngNo": "8561111110",
+        "toTngNo": "85261111111",
+        "amount": 3200,
+        "activityHistoryId": 326,
+        "submitDate": "2017-07-10 11:04:00",
+        "dueDate": "2017-07-18 11:04:00",
+        "remarks": "Remarks",
+        "imageRemarks": "http://api.tng.asia:8101/tng/file/8ef73f5f50d14333ba77a5e26d0d36ed.jpg",
+        "audioRemarks": "http://api.tng.asia:8101/tng/file/8ef73f5f50d14333ba77a5e26d0d36ed.mp4",
+        "paymentStatus": "PENDING"
+    },
+    "tngMobile/request-payment/remind-request":{
+        "status": "success",
+        "errorCode": null,
+        "errorEN": null,
+        "errorZhHK": null,
+        "errorZhCN": null,
+        "action": null
+    },
+    "tngMobile/request-payment/end-event":{
+        "status": "success",
+        "errorCode": null,
+        "errorEN": null,
+        "errorZhHK": null,
+        "errorZhCN": null,
+        "action": null
+    }
+}

@@ -1,0 +1,423 @@
+{
+  "_tngMobile/bill/available-hk-bill": {
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "action": null,
+    "billPayments": [
+      {
+        "id": 308,
+        "nameEN": "TNG New Merchant Sign Up",
+        "nameZhHK": "TNG「特約商戶」加盟",
+        "nameZhCN": "TNG「特约商户」加盟",
+        "merchantId": 1,
+        "area": "HK",
+        "instantBillPayment": false,
+        "receiveIBPEmail": true,
+        "maxPerTx": 0,
+        "minPerTx": 0,
+        "categories": [
+          "Other"
+        ],
+        "rank": 2,
+        "hotItem": false
+      },
+      {
+        "id": 309,
+        "nameEN": "The Hong Kong and China Gas Company Limited",
+        "nameZhHK": "香港中華煤氣有限公司",
+        "nameZhCN": "香港中华煤气有限公司",
+        "merchantId": 106,
+        "area": "HK",
+        "instantBillPayment": false,
+        "receiveIBPEmail": true,
+        "maxPerTx": 0,
+        "minPerTx": 0,
+        "categories": [
+          "Telco"
+        ],
+        "rank": 3,
+        "hotItem": true
+      },
+      {
+        "id": 65,
+        "nameEN": "Sign up as TNG “Charity”",
+        "nameZhHK": "成為TNG「慈善機構」",
+        "nameZhCN": "成为TNG「慈善机构」",
+        "merchantId": 1,
+        "area": "HK",
+        "instantBillPayment": true,
+        "receiveIBPEmail": true,
+        "maxPerTx": 0,
+        "minPerTx": 0,
+        "categories": [
+          "Donation"
+        ],
+        "rank": 1,
+        "hotItem": false
+      },
+      {
+        "id": 84,
+        "nameEN": "HONG KONG SEEING EYE DOG SERVICES",
+        "nameZhHK": "香港導盲犬服務中心",
+        "nameZhCN": "香港导盲犬服务中心",
+        "merchantId": 228,
+        "area": "HK",
+        "instantBillPayment": true,
+        "receiveIBPEmail": true,
+        "maxPerTx": 0,
+        "minPerTx": 0,
+        "categories": [
+          "Others"
+        ],
+        "rank": 4,
+        "hotItem": true
+      }
+    ]
+  },
+  "_tngMobile/merchant/updated-merchant": {
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "action": null,
+    "merchants": [
+      {
+        "id": 308,
+        "displayName": "Group N Ship Limited",
+        "displayNameEN": "Group N Ship Limited",
+        "displayNameZhHK": "Group N Ship Limited",
+        "displayNameZhCN": "Group N Ship Limited",
+        "logo": "https://entry.tng.asia/logos/gnc.png",
+        "banner": "https://entry.tng.asia/logos/gnc.png",
+        "updateDatetime": "2017-06-20 10:28:22"
+      },
+      {
+        "id": 309,
+        "displayName": "Lucky Dessert",
+        "displayNameEN": "Lucky Dessert",
+        "displayNameZhHK": "香港發記甜品",
+        "displayNameZhCN": "香港发记甜品",
+        "logo": "https://entry.tng.asia/logos/ldt.png",
+        "banner": "https://entry.tng.asia/logos/ldt.png",
+        "updateDatetime": "2017-06-20 10:28:22"
+      },
+      {
+        "id": 317,
+        "displayName": "L2 Locker Life Limited",
+        "displayNameEN": "L2 Locker Life Limited",
+        "displayNameZhHK": "L2 Locker Life Limited",
+        "displayNameZhCN": "L2 Locker Life Limited",
+        "logo": null,
+        "banner": null,
+        "updateDatetime": "2017-06-20 10:28:22"
+      }
+    ]
+  },
+  "_tngMobile/bill-payment/get-global-bill-payment-country-merchant-list": {
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "action": null,
+    "countries": [
+      {
+        "id": 3,
+        "countryCode": "PH",
+        "countryCode2": "PHL",
+        "dialingCode": "63",
+        "currencyCode": "PHP",
+        "descEN": "Philippines",
+        "descZhHK": "菲律賓",
+        "descZhCN": "菲律宾",
+        "flagLink": "https://entry.tng.asia/countryflag/Philippines.png",
+        "currencyDP": 4,
+        "showExtra": false,
+        "merchants": [
+          {
+            "id": 883176,
+            "code": "61119",
+            "name": "Allied Bank MC",
+            "refLink": null,
+            "noticeEn": "Authorized account numbers should begin with 512634, 513208, 540076, 625013, 521387, 545143, 552280, 533639, 553294, 543761, 622145, 533653, 524046, 548509, 488907, or 488908.",
+            "noticeZhHk": "賬單號碼首六位數字應為512634, 513208, 540076, 625013, 521387, 545143, 552280, 533639, 553294, 543761, 622145, 533653, 524046, 548509, 488907, 或 488908 ",
+            "noticeZhCn": "账单号码首六位数字应为512634, 513208, 540076, 625013, 521387, 545143, 552280, 533639, 553294, 543761, 622145, 533653, 524046, 548509, 488907, 或 488908",
+            "logo": "https://entry.tng.asia/countryflag/Philippines.png",
+            "banner": "https://entry.tng.asia/countryflag/Philippines.png",
+            "categories": [
+              "Others"
+            ],
+            "rank": 1,
+            "hotItem": true
+          },
+          {
+            "id": 919224,
+            "code": "61187",
+            "name": "Ateneo de Manila University",
+            "refLink": null,
+            "noticeEn": "Last 6 characters of account number is the Due Date (YYMMDD).  Transaction is rejected when system date is after the due date.",
+            "noticeZhHk": "最尾六位數字是到期日 (YYMMDD)。所有在到期日後收到的款項將不獲接納。",
+            "noticeZhCn": "最尾六位数字是到期日 (YYMMDD)。所有在到期日后收到的款项将不获接纳。",
+            "logo": "https://entry.tng.asia/countryflag/Philippines.png",
+            "banner": "https://entry.tng.asia/countryflag/Philippines.png",
+            "categories": [
+              "Others"
+            ]
+          },
+          {
+            "id": 913216,
+            "code": "61177",
+            "name": "Axa Life Philippines",
+            "refLink": null,
+            "noticeEn": "Account number should contain 10 characters only.",
+            "noticeZhHk": "賬單號碼長度應為10字節",
+            "noticeZhCn": "账单号码长度应为10字节",
+            "logo": "https://entry.tng.asia/countryflag/Philippines.png",
+            "banner": "https://entry.tng.asia/countryflag/Philippines.png",
+            "categories": [
+              "Others"
+            ],
+            "rank": 2,
+            "hotItem": true
+          },
+          {
+            "id": 923730,
+            "code": "61193",
+            "name": "BALESIN CLUB - ABICI",
+            "refLink": null,
+            "noticeEn": "Account number should contain 10 characters only.",
+            "noticeZhHk": "賬單號碼長度應為10字節",
+            "noticeZhCn": "账单号码长度应为10字节",
+            "logo": "https://entry.tng.asia/countryflag/Philippines.png",
+            "banner": "https://entry.tng.asia/countryflag/Philippines.png",
+            "categories": [
+              "Others"
+            ],
+            "rank": 3,
+            "hotItem": true
+          }
+        ]
+      }
+    ]
+  },
+  "_tngMobile/bill/bill-html": {
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "action": null,
+    "buyingFlow": {
+      "id": 4,
+      "productId": 1,
+      "link": "https://entry.tng.asia/newzip_phase1/buying_flow/bp1.zip",
+      "staticPage": true,
+      "version": "2",
+      "effectiveDate": 1444240459871,
+      "createDatetime": "2015-10-08 01:54:19",
+      "updateDatetime": "2015-10-08 01:54:19",
+      "type": "BILL"
+    }
+  },
+  "_tngMobile/sim-topup/get-country-and-telco-list": {
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "action": null,
+    "countries": [
+      {
+        "id": 3,
+        "countryCode": "PH",
+        "countryCode2": "PHL",
+        "dialingCode": "63",
+        "currencyCode": "PHP",
+        "descEN": "Philippines",
+        "descZhHK": "菲律賓",
+        "descZhCN": "菲律宾",
+        "flagLink": "https://entry.tng.asia/countryflag/Philippines.png",
+        "currencyDP": 4,
+        "showExtra": false,
+        "telcos": [
+          {
+            "id": 12,
+            "code": "GL",
+            "descEN": "Philippines Globe Telecom",
+            "descZhHK": "Philippines Globe Telecom",
+            "descZhCN": "Philippines Globe Telecom",
+            "logo": "https://entry.tng.asia/countryflag/Philippines.png",
+            "banner": "https://entry.tng.asia/countryflag/Philippines.png",
+            "categories": [
+              "Telco"
+            ],
+            "rank": 1,
+            "hotItem": true
+          },
+          {
+            "id": 13,
+            "code": "PH_MD",
+            "descEN": "Philippines Generika MedPadala",
+            "descZhHK": "Philippines Generika MedPadala",
+            "descZhCN": "Philippines Generika MedPadala",
+            "logo": "https://entry.tng.asia/countryflag/Philippines.png",
+            "banner": "https://entry.tng.asia/countryflag/Philippines.png",
+            "categories": [
+              "Telco"
+            ],
+            "rank": 2,
+            "hotItem": false
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "countryCode": "SG",
+        "countryCode2": "SGP",
+        "dialingCode": "65",
+        "currencyCode": "SGD",
+        "descEN": "Singapore",
+        "descZhHK": "新加坡",
+        "descZhCN": "新加坡",
+        "flagLink": "https://entry.tng.asia/countryflag/Singapore.png",
+        "currencyDP": 4,
+        "showExtra": false,
+        "telcos": [
+          {
+            "id": 42,
+            "code": "SG_M1",
+            "descEN": "Singapore M1",
+            "descZhHK": "Singapore M1",
+            "descZhCN": "Singapore M1",
+            "logo": "https://entry.tng.asia/countryflag/Philippines.png",
+            "banner": "https://entry.tng.asia/countryflag/Philippines.png",
+            "categories": [
+              "Telco"
+            ],
+            "rank": 1,
+            "hotItem": true
+          },
+          {
+            "id": 43,
+            "code": "SG_SH",
+            "descEN": "Singapore Starhub",
+            "descZhHK": "Singapore Starhub",
+            "descZhCN": "Singapore Starhub",
+            "logo": "https://entry.tng.asia/countryflag/Philippines.png",
+            "banner": "https://entry.tng.asia/countryflag/Philippines.png",
+            "categories": [
+              "Telco"
+            ],
+            "rank": 2,
+            "hotItem": true
+          },
+          {
+            "id": 44,
+            "code": "SG_ST",
+            "descEN": "Singapore SingTel",
+            "descZhHK": "Singapore SingTel",
+            "descZhCN": "Singapore SingTel",
+            "logo": "https://entry.tng.asia/countryflag/Philippines.png",
+            "banner": "https://entry.tng.asia/countryflag/Philippines.png",
+            "categories": [
+              "Telco"
+            ],
+            "rank": 3,
+            "hotItem": false
+          }
+        ]
+      }
+    ]
+  },
+  "_tngMobile/bill-payment/get-merchant-detail-fields": {
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "info": {
+      "transID": "1001001",
+      "description": "QA_TESTING",
+      "billType": null,
+      "customInfo1": "77771",
+      "customInfo2": "8888",
+      "customInfo3": "9999",
+      "customInfo4": null,
+      "customInfo5": null,
+      "customInfo6": null,
+      "customInfo7": null,
+      "customInfo8": null,
+      "customInfo9": null,
+      "customInfo10": null,
+      "inquiryStatus": "000",
+      "accountName": "MICHAEL LAU",
+      "statementDate": "10/10/2017",
+      "dueDate": "01/01/2017",
+      "amount": "1"
+    }
+  },
+  "_ngMobile/global-service/get-market-ratio-by-country-service-id": {
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "action": null,
+    "hkdToUsdRatio": 0.13,
+    "usdToTargetRatio": 80.5294,
+    "feeAmount": 0,
+    "feePercentage": 0,
+    "txFee": 3.4,
+    "handlingFee": 2.47,
+    "markupPips": 0.0001,
+    "markupCount": 4525,
+    "minAmount": 100,
+    "maxAmount": 1000000,
+    "currencyDP": 4,
+    "extraFieldLimitAmount": 7999.99,
+    "enableTxFee": false,
+    "availableAmount": 100000,
+    "csCheckingAmount": 50000,
+    "targetCountryDefaultValue": 10500
+  },
+  "_tngMobile/sim-topup/get-telco-product-list": {
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "action": null,
+    "products": [
+      {
+        "currency": "PH_SD",
+        "balance": "10.0000",
+        "balanceAfterTax": "10.0000",
+        "deduceWalletCurrency": "USD",
+        "deduceWalletBalance": "1.0000",
+        "fixedAmtLevel1": "0.1",
+        "ratioLevel1": "3",
+        "fixedAmtLevel2": "0.1",
+        "ratioLevel2": "30",
+        "platformRatio": "7.8",
+        "platformAmount": "12.23"
+      },
+      {
+        "currency": "PH_SD",
+        "balance": "100.0000",
+        "balanceAfterTax": "100.0000",
+        "deduceWalletCurrency": "USD",
+        "deduceWalletBalance": "2.0000",
+        "fixedAmtLevel1": "0.1",
+        "ratioLevel1": "3",
+        "fixedAmtLevel2": "0.1",
+        "ratioLevel2": "30",
+        "platformRatio": "7.8",
+        "platformAmount": "22.68"
+      }
+    ]
+  }
+}

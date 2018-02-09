@@ -1,0 +1,92 @@
+{
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "errorIND": null,
+    "errorPHI": null,
+    "action": null,
+    "relationships": [
+        {
+            "id": 3,
+            "descEN": "Husband / Wife",
+            "descZhHK": "配偶",
+            "descZhCN": "配偶",
+            "descIDN": "Suami / Istri",
+            "descPHL": "Asawa"
+        },
+        {
+            "id": 4,
+            "descEN": "Father / Mother",
+            "descZhHK": "父母",
+            "descZhCN": "父母",
+            "descIDN": "Ayah / Ibu",
+            "descPHL": "Magulang"
+        },
+        {
+            "id": 5,
+            "descEN": "Kid / Boy / Girl",
+            "descZhHK": "子女",
+            "descZhCN": "子女",
+            "descIDN": "Anak",
+            "descPHL": "Anak"
+        },
+        {
+            "id": 6,
+            "descEN": "Brother / Sister",
+            "descZhHK": "兄弟姐妹",
+            "descZhCN": "兄弟姐妹",
+            "descIDN": "Kakak / Adik",
+            "descPHL": "Kapatid"
+        },
+        {
+            "id": 7,
+            "descEN": "Other Family Members",
+            "descZhHK": "其他家庭成員",
+            "descZhCN": "其他家庭成员",
+            "descIDN": "Anggota Keluarga Lainnya",
+            "descPHL": "Ibang myembro ng pamilya"
+        },
+        {
+            "id": 2,
+            "descEN": "Friend",
+            "descZhHK": "朋友",
+            "descZhCN": "朋友",
+            "descIDN": "Teman",
+            "descPHL": "Kaibigan"
+        },
+        {
+            "id": 9,
+            "descEN": "Self Transfer",
+            "descZhHK": "同名帳戶",
+            "descZhCN": "同名帐户",
+            "descIDN": "Transfer Pribadi",
+            "descPHL": "Pansariling account"
+        },
+        {
+            "id": 8,
+            "descEN": "Business Partner",
+            "descZhHK": "商業合作伙伴",
+            "descZhCN": "商业合作伙伴",
+            "descIDN": "Mitra bisnis",
+            "descPHL": "Katuwang sa negosyo"
+        },
+        {
+            "id": 14,
+            "descEN": "Customer",
+            "descZhHK": "顧客",
+            "descZhCN": "顾客",
+            "descIDN": "Pelanggan",
+            "descPHL": "Customer"
+        },
+        {
+            "id": 18,
+            "descEN": "Supplier",
+            "descZhHK": "供應商",
+            "descZhCN": "供应商",
+            "descIDN": "Pemasok",
+            "descPHL": "Supplier"
+        }
+    ]
+}

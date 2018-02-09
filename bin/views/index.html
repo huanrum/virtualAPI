@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>View List</title>
+    <style>
+        #toolbar {
+            padding: 1rem;
+        }
+
+        #toolbar>* {
+            margin: 0.2rem 1rem;
+            padding: 0.1rem 0.5rem;
+            border: 1px solid green;
+            position: relative;
+            display: inline-block;
+        }
+
+        #toolbar>*>ol {
+            display: none;
+        }
+
+        #toolbar>*:hover>ol {
+            z-index: 1;
+            display: block;
+            position: absolute;
+            background: #83b3e6;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            top: 0.6rem;
+        }
+
+        #list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #list li {
+            padding: 0.2rem 1rem;
+            border-bottom: 1px solid #d3d3d3;
+        }
+
+        #list li div {
+            display: inline-block;
+            width: 160px;
+            text-align: center;
+            cursor: pointer;
+            margin: 0.5rem;
+            color: green;
+            border: 1px solid green;
+        }
+
+        #list li div i {
+            color: #d3d3d3;
+            font-size: 12px;
+        }
+
+        .friends {
+            position: fixed;
+            top: 0;
+            right: 100px;
+        }
+
+        .dialogBack {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .dialog {
+            position: absolute;
+            margin-left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            padding: 2px;
+            border-radius: 10px;
+            background: #f3f3f3;
+        }
+
+        .dialog .header {
+            height: 1.2em;
+            background: #666699;
+            padding: 0.5em;
+        }
+
+        .dialog .header a {
+            font-size: 2rem;
+            float: right;
+            line-height: 1.2rem;
+            color: #ff3333;
+            cursor: pointer;
+        }
+
+        .dialog .header a:hover {
+            color: #d3d3d3;
+        }
+
+        .dialog .content {
+            max-height: 33em;
+            min-width: 12em;
+            padding: 1rem;
+            min-height: 4rem;
+            overflow: auto;
+        }
+
+        .dialog .footer {
+            border-top: 1px solid #d3d3d3;
+            text-align: center;
+            padding: 2px;
+        }
+
+        .dialog .footer a {
+            border: 1px solid #666699;
+            margin: 2px 1rem;
+            padding: 1px;
+            cursor: pointer;
+        }
+
+        .content-self div {
+            display: inline-block;
+            cursor: pointer;
+            margin: 0.5rem 1rem;
+            border: 1px solid #c55388;
+        }
+
+        .content-self div.active {
+            background: #666699;
+        }
+
+        .content-self select {
+            width: 100%;
+            padding: 0.2rem;
+            margin: 0.2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="toolbar"></div>
+    <ul id="list"></ul>
+    <script>
+        window.$data = {};
+    </script>
+    <script>
+        var selectList = [];
+        var dirs = window.$data.dirs;
+        var list = document.getElementById('list');
+        var toolbars = document.getElementById('toolbar');
+
+
+        ['Remote','Push'].forEach(function(val,index){
+            var toolbar = document.createElement('div');
+            toolbar.innerHTML = 'Open '+ val +' Debug';
+            toolbars.append(toolbar);
+            toolbar.onclick = function () {
+                var url = 'http://' + window.$data.options.ip + ':' + window.$data.options.weinre + '/client/#anonymous';
+                if(index){
+                    url = 'http://' + window.$data.options.ip + ':' + window.$data.options.port +'/bin/websocket/index.html'
+                }
+                window.open(url);
+            };
+        });
+    
+        /*addToolbar:(function(){})();*/
+
+        Object.keys(dirs).sort(function (a, b) { return a.toLocaleLowerCase() > b.toLocaleLowerCase() ? 1 : -1 }).forEach(function (dir) {
+            var version = dirs[dir];
+
+            var item = document.createElement('li');
+            var action = document.createElement('div');
+            var a = document.createElement('a');
+            item.append(action);
+            item.append(a);
+            list.append(item);
+            action.title = JSON.stringify(version, null, 4);
+            action.innerHTML = 'Gulp Build <i>' + times(version.mtime) + '</i>';
+            action.style.background = Object.keys(version).length ? '#9f9f9f' : '';
+            a.innerHTML = dir;
+
+            a.onclick = function () {
+                window.open('http://' + window.$data.replace.replace(/\/\//g,'/') + '/' + dir);
+                fetch(location.origin + '/action/?scss=' + window.$data._path + '/' + dir, { method: 'GET' })
+            };
+            action.onclick = function () {
+                var count = 0, interval = setInterval(function () {
+                    action.innerHTML = 'Build ' + (Array(count++ % 4 + 1).join('.'));
+                    action.style.background = '#99ff99';
+                }, 500);
+
+                fetch(location.origin + '/action/?gulp=' + window.$data._path + '/' + dir, { method: 'GET' }).then(function (r) { return r.text() }).then(function (id) {
+                    runMessage(id, null, function () {
+                        clearInterval(interval);
+                        dirs[dir] = new Date();
+                        action.innerHTML = 'Gulp Build <i>' + times(new Date()) + '</i>';
+                        action.style.background = '#9f9f9f';
+                    });
+                });
+            };
+        });
+
+        function times(dt) {
+            if (dt) {
+                dt = new Date(dt);
+                if (dt > new Date(new Date().toLocaleDateString())) {
+                    return (dt.getHours() < 10 ? '0' : '') + dt.getHours() + ':' + (dt.getMinutes() < 10 ? '0' : '') + dt.getMinutes();
+                } else {
+                    return dt.toLocaleDateString();
+                }
+            } else {
+                return '';
+            }
+        }
+
+        function runMessage(id, msEl, callBack) {
+            fetch(location.origin + '/action/?' + id, { method: 'GET' }).then(function (r) { return r.json() }).then(function (data) {
+                data = data || [];
+                if (msEl) {
+                    data.forEach(i => {
+                        var li = document.createElement('li');
+                        li.innerHTML = /^!!/.test(i)?'':i;
+                        msEl.appendChild(li);
+                    });
+                }
+                if (!data.filter(i => /^!!/.test(i)).length) {
+                    setTimeout(() => runMessage(id, msEl, callBack), 500);
+                } else {
+                    callBack(data);
+                }
+            });
+        }
+
+        function runBuild(bar, text, parms, toolbar, a, message, callback) {
+
+            var count = 0, interval = setInterval(function () {
+                a.innerHTML = bar + ' ' + (Array(count++ % 4 + 1).join('.'));
+                toolbar.style.background = '#99ff99';
+            }, 500);
+
+            fetch(location.origin + '/action/?' + parms, { method: 'GET' }).then(function (r) { return r.text() }).then(function (id) {
+                message.innerHTML = '';
+                runMessage(id, message, function (data) {
+                    clearInterval(interval);
+                    a.innerHTML = text + ' <i>' + times(new Date()) + '</i>';
+                    toolbar.style.background = '#9f9f9f';
+                    if(callback){
+                        callback(data);
+                    }
+                });
+            });
+        }
+
+        function showDialog(title, message, btns, callback) {
+            var dialogBack = document.createElement('div');
+            var dialog = document.createElement('div');
+            var header = document.createElement('div');
+            var content = document.createElement('div');
+            var footer = document.createElement('div');
+
+            dialogBack.className = 'dialogBack';
+            dialog.className = 'dialog';
+            header.className = 'header';
+            content.className = 'content';
+            footer.className = 'footer';
+
+            dialog.appendChild(header);
+            dialog.appendChild(content);
+            dialog.appendChild(footer);
+            dialogBack.appendChild(dialog);
+            document.body.appendChild(dialogBack);
+
+            header.innerHTML = title + ' <a>&times;</a>';
+            if (typeof message === 'string') {
+                content.innerHTML = message;
+            } else {
+                content.appendChild(message);
+            }
+            header.onclick = function () {
+                document.body.removeChild(dialogBack);
+            };
+
+            ['Cancel', ...btns].forEach(function (btn, index) {
+                var button = document.createElement('a');
+                button.innerHTML = btn;
+                footer.appendChild(button);
+                button.onclick = function () {
+                    if (index) {
+                        callback(index);
+                    }
+                    document.body.removeChild(dialogBack);
+                };
+            });
+
+            return function () {
+                if (dialogBack.parentNode) {
+                    dialogBack.parentNode.removeChild(dialogBack);
+                }
+            };
+        }
+
+    </script>
+    <script>
+        fetch('/websocket?ip=' + location.hostname).then(function (req) { return req.json(); }).then(req => {
+            var ws = new WebSocket(req.message);
+            ws.onopen = function (e) {
+                ws.send(JSON.stringify({ data: Date.now(), action: 'login' }));
+            }
+            ws.onmessage = function (e) {
+                var data = JSON.parse(e.data).data;
+                if (data && data.url) {
+                    setTimeout(showDialog('Open web', data.url, ['Confirm'], function () {
+                        window.open(data.url);
+                    }), 2000);
+                }
+                if (data && data.friends) {
+                    updateFriends(data.friends);
+                }
+            };
+            window.addEventListener("beforeunload", function () {
+                ws.send(JSON.stringify({
+                    action: 'logout'
+                }));
+            });
+        });
+    </script>
+
+    <script>
+        var friends = document.createElement('div');
+        friends.className = 'friends';
+        document.body.appendChild(friends);
+
+        function updateFriends(list) {
+            friends.innerHTML = '';
+            list.forEach(function (i) {
+                var item = document.createElement('div');
+                friends.appendChild(item);
+                item.innerHTML = i;
+            })
+        }
+    </script>
+</body>
+
+</html>

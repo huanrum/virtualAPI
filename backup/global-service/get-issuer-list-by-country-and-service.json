@@ -1,0 +1,915 @@
+{
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "errorIND": null,
+    "errorPHI": null,
+    "action": null,
+    "issuers": [
+        {
+            "id": 151,
+            "code": "531",
+            "name": "Anglomas",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 142,
+            "code": "494",
+            "name": "BANK AGRONIAGA",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 174,
+            "code": "622",
+            "name": "BANK ANZ",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 153,
+            "code": "542",
+            "name": "BANK ARTOS INDONESIA",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 115,
+            "code": "133",
+            "name": "BANK BENGKULU",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 111,
+            "code": "129",
+            "name": "BANK BPD BALI",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 94,
+            "code": "112",
+            "name": "BANK BPD DIY",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 131,
+            "code": "422",
+            "name": "BANK BRI SYARIAH",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 127,
+            "code": "200",
+            "name": "BANK BTN",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 129,
+            "code": "213",
+            "name": "BANK BTPN",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 134,
+            "code": "441",
+            "name": "BANK BUKOPIN",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 81,
+            "code": "054",
+            "name": "BANK CAPITAL",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 66,
+            "code": "022",
+            "name": "BANK CIMB NIAGA",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 187,
+            "code": "950",
+            "name": "BANK COMMONWEALTH",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 62,
+            "code": "011",
+            "name": "BANK DANAMON",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 93,
+            "code": "111",
+            "name": "BANK DKI",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 124,
+            "code": "161",
+            "name": "BANK GANESHA",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 74,
+            "code": "041",
+            "name": "BANK HSBC",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 146,
+            "code": "513",
+            "name": "BANK INA PERDANA",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 157,
+            "code": "555",
+            "name": "BANK INDEX",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 132,
+            "code": "425",
+            "name": "BANK JABAR SYARIAH",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 95,
+            "code": "113",
+            "name": "BANK JATENG",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 96,
+            "code": "114",
+            "name": "BANK JATIM",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 90,
+            "code": "095",
+            "name": "BANK JTRUST INDONESIA",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 126,
+            "code": "167",
+            "name": "BANK KESAWAN",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 152,
+            "code": "535",
+            "name": "BANK KESEJAHTERAAN",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 103,
+            "code": "121",
+            "name": "BANK LAMPUNG",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 113,
+            "code": "131",
+            "name": "BANK MALUKU",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 60,
+            "code": "008",
+            "name": "BANK MANDIRI",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 161,
+            "code": "564",
+            "name": "BANK MANTAP",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 91,
+            "code": "097",
+            "name": "BANK MAYAPADA INTERNASIONAL",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 156,
+            "code": "553",
+            "name": "BANK MAYORA",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 133,
+            "code": "426",
+            "name": "BANK MEGA",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 121,
+            "code": "151",
+            "name": "BANK MESTIKA",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 120,
+            "code": "147",
+            "name": "BANK MUAMALAT",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 61,
+            "code": "009",
+            "name": "BANK NEGARA INDONESIA",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 110,
+            "code": "128",
+            "name": "BANK NUSA TENGGARA BARAT",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 112,
+            "code": "130",
+            "name": "BANK NUSA TENGGARA TIMUR",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 118,
+            "code": "145",
+            "name": "BANK NUSANTARA PARAHYANGAN",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 68,
+            "code": "028",
+            "name": "BANK OCBC NISP",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 71,
+            "code": "033",
+            "name": "BANK OF AMERICA (Indonesia)",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 65,
+            "code": "019",
+            "name": "BANK PANIN",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 114,
+            "code": "132",
+            "name": "BANK PAPUA",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 63,
+            "code": "013",
+            "name": "BANK PERMATA",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 158,
+            "code": "558",
+            "name": "BANK PUNDI",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 59,
+            "code": "002",
+            "name": "BANK RAKYAT INDONESIA",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 101,
+            "code": "119",
+            "name": "BANK RIAU",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 123,
+            "code": "153",
+            "name": "BANK SINARMAS",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 116,
+            "code": "134",
+            "name": "BANK SULTENG",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 109,
+            "code": "127",
+            "name": "BANK SULUT",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 99,
+            "code": "117",
+            "name": "BANK SUMUT",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 119,
+            "code": "146",
+            "name": "BANK SWADESI",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 135,
+            "code": "451",
+            "name": "BANK SYARIAH MANDIRI",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 145,
+            "code": "506",
+            "name": "BANK SYARIAH MEGA",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 67,
+            "code": "023",
+            "name": "BANK UOB INDONESIA",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 176,
+            "code": "624",
+            "name": "BCA",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 64,
+            "code": "016",
+            "name": "BII Maybank",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 177,
+            "code": "626",
+            "name": "BNI Syariah",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 82,
+            "code": "057",
+            "name": "BNP Paribas Indonesia",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 98,
+            "code": "116",
+            "name": "BPD ACEH",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 97,
+            "code": "115",
+            "name": "BPD JAMBI",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 105,
+            "code": "123",
+            "name": "BPD KALIMANTAN BARAT",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 104,
+            "code": "122",
+            "name": "BPD KALIMANTAN SELATAN",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 107,
+            "code": "125",
+            "name": "BPD KALIMANTAN TENGAH",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 106,
+            "code": "124",
+            "name": "BPD KALIMANTAN TIMUR",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 178,
+            "code": "627",
+            "name": "BPD Kalsel Syariah",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 108,
+            "code": "126",
+            "name": "BPD SULAWESI SELATAN",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 117,
+            "code": "135",
+            "name": "BPD SULAWESI TENGGARA",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 179,
+            "code": "628",
+            "name": "BPD Sumut Syariah",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 1502,
+            "code": "62012",
+            "name": "BPR EKA",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 84,
+            "code": "061",
+            "name": "Bank ANZ PANIN",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 185,
+            "code": "945",
+            "name": "Bank Agris",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 170,
+            "code": "609",
+            "name": "Bank Antar Daerah",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 72,
+            "code": "037",
+            "name": "Bank Artha Graha Internasional",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 3004,
+            "code": "62525",
+            "name": "Bank BARCLAYS",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 87,
+            "code": "069",
+            "name": "Bank BOC Indonesia",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 182,
+            "code": "688",
+            "name": "Bank BPR KS",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 136,
+            "code": "459",
+            "name": "Bank Bisnis International",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 76,
+            "code": "046",
+            "name": "Bank DBS",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 175,
+            "code": "623",
+            "name": "Bank DKI Syariah",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 183,
+            "code": "699",
+            "name": "Bank Eka Bumi Arta",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 88,
+            "code": "087",
+            "name": "Bank Ekonomi",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 751,
+            "code": "62002",
+            "name": "Bank Ekonomi Raharja",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 138,
+            "code": "484",
+            "name": "Bank Hana",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 139,
+            "code": "485",
+            "name": "Bank ICB Bumiputera Indonesia",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 92,
+            "code": "110",
+            "name": "Bank Jabar Banten",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 144,
+            "code": "503",
+            "name": "Bank Nobubank",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 181,
+            "code": "632",
+            "name": "Bank Of Tokyo Mitsubishi",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 143,
+            "code": "501",
+            "name": "Bank Royal Indonesia",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 149,
+            "code": "523",
+            "name": "Bank Sahabat Sampoerna",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 102,
+            "code": "120",
+            "name": "Bank Sumsel Babel",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 169,
+            "code": "608",
+            "name": "Bank Tabungan Negara Syariah",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 130,
+            "code": "405",
+            "name": "Bank Victoria Syariah",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 86,
+            "code": "068",
+            "name": "Bank Woori Indonesia",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 128,
+            "code": "212",
+            "name": "Bank Woori Saudara",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 180,
+            "code": "630",
+            "name": "Bukopin Syariah",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 69,
+            "code": "031",
+            "name": "CITIBANK (Indonesia)",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 159,
+            "code": "559",
+            "name": "Centratama Nasional",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 171,
+            "code": "610",
+            "name": "Chinatrust Indonesia",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 173,
+            "code": "612",
+            "name": "Danamon Syariah",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 85,
+            "code": "067",
+            "name": "Deutsche Bank",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 160,
+            "code": "562",
+            "name": "Fama International",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 162,
+            "code": "567",
+            "name": "Harda International",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 125,
+            "code": "164",
+            "name": "ICBC Indonesia",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 2253,
+            "code": "62013",
+            "name": "INDOSAT (DOMPETKU)",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 163,
+            "code": "600",
+            "name": "Indomonex",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 70,
+            "code": "032",
+            "name": "JP Morgan Chase",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 164,
+            "code": "601",
+            "name": "Jasa Jakarta",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 150,
+            "code": "526",
+            "name": "Liman",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 165,
+            "code": "603",
+            "name": "Maspion",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 186,
+            "code": "947",
+            "name": "Maybank Syariah Indonesia",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 122,
+            "code": "152",
+            "name": "Metro Ekspress",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 141,
+            "code": "491",
+            "name": "Mitraniaga",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 78,
+            "code": "048",
+            "name": "Mizuho Indonesia",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 155,
+            "code": "548",
+            "name": "Multiarta Sentosa",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 147,
+            "code": "517",
+            "name": "Panin Bank Syariah",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 166,
+            "code": "605",
+            "name": "Permata Syariah",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 148,
+            "code": "520",
+            "name": "Prima Master",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 154,
+            "code": "547",
+            "name": "Purba Danarta",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 89,
+            "code": "089",
+            "name": "RABOBANK",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 77,
+            "code": "047",
+            "name": "Resona Perdania",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 80,
+            "code": "052",
+            "name": "Royal Bank Of Scotland",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 79,
+            "code": "050",
+            "name": "STANDARD CHARTERED BANK",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 75,
+            "code": "045",
+            "name": "Sumitomo Mitsui Indonesia",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 184,
+            "code": "911",
+            "name": "TCASH",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 167,
+            "code": "606",
+            "name": "UIB",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 168,
+            "code": "607",
+            "name": "Victoria",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 172,
+            "code": "611",
+            "name": "Windu Kentjana International",
+            "refLink": null,
+            "branchCount": 0
+        },
+        {
+            "id": 140,
+            "code": "490",
+            "name": "Yudha Bhakti",
+            "refLink": null,
+            "branchCount": 0
+        }
+    ]
+}

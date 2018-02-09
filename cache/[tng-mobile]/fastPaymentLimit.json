@@ -1,0 +1,16 @@
+{
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "errorIND": null,
+    "errorPHI": null,
+    "action": null,
+    "frozeTime": 0,
+    "limitPerTx": 2000,
+    "limitPerDay": 3000,
+    "maximumPerTx": 100,
+    "maximumPerDay": 1000,
+    "enable": true
+}

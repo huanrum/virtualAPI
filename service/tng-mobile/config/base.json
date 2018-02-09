@@ -1,0 +1,53 @@
+{
+    "tngMobile":{
+        "status": "success",
+        "errorCode": "",
+        "errorEN": "",
+        "errorZhHK": "",
+        "errorZhCN": ""
+    },
+    "tngMobile/:name":{
+        "status": "success",
+        "message":"[:name], this method is undefined.",
+        "data": {},
+        "errorCode": "",
+        "errorEN": "",
+        "errorZhHK": "",
+        "errorZhCN": ""
+    },
+    "tngMobile/pushType": "[../data/pushType.json]",
+    "tngMobile/getMenuItems":{
+        "status": "success",
+        "menuItems":[]
+    },
+    "_tngMobile/consumer/wallet":{
+        "status": "success",
+        "wallets":[]
+    },
+    "tngMobile/consumer/v5/pre-pay": {
+        "status": "success",
+        "errorCode": "",
+        "errorEN": "",
+        "errorZhHK": "",
+        "errorZhCN": ""
+    },
+    "tngMobile/encode": {
+        "status": "success",
+        "errorCode": "",
+        "errorEN": "",
+        "errorZhHK": "",
+        "errorZhCN": "",
+        "encryptedData": ""
+    },
+    "_tngMobile/consumer/v2/refresh-token": {
+        "status": "success",
+        "errorCode": "",
+        "errorEN": "",
+        "errorZhHK": "",
+        "errorZhCN": ""
+    },
+    "tngMobile/district/districts": "[../data/districts.json]",
+    "tngMobile/meueItem": "[../data/meueItem.JSON]",
+    "—tngMobile/consumer/get-user-permission": "[../data/consumer.json]",
+    "tngMobile/global-service/remittance/get-bank-cash-pickup-countries":"[../data/get-bank-cash-pickup-countries.json]"
+}

@@ -1,0 +1,13 @@
+{
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "errorIND": null,
+    "errorPHI": null,
+    "action": null,
+    "minAmount": 100,
+    "maxAmount": 100000000,
+    "adminPercent": 0
+}

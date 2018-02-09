@@ -1,0 +1,24 @@
+{
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "errorIND": null,
+    "errorPHI": null,
+    "action": null,
+    "crazyAdList": [
+        {
+            "crazyAdId": "CA_BANK_EN",
+            "module": "BANK_DISAPPROVE",
+            "stage": "IN",
+            "displayMethod": "block"
+        },
+        {
+            "crazyAdId": "CA_CC_EN",
+            "module": "KYC_CREDIT_DISAPPROVE",
+            "stage": "IN",
+            "displayMethod": "block"
+        }
+    ]
+}

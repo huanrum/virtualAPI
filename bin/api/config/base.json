@@ -1,0 +1,66 @@
+{
+    "websocket": {
+        "returnCode": "0",
+        "message": "ws://:ip:[WEBSOCKET]"
+    },
+    "device":{
+        "returnCode": "0",
+        "message": "[device]/[IP]"  
+    },
+    "login": {
+        "returnCode": "0",
+        "message": ":user,login succeed!!!"
+    },
+    "[GET]login/user/location": {
+        "returnCode": "0",
+        "message": "GET login/user/location!"
+    },
+    "[PUT]login/user/location": {
+        "returnCode": "0",
+        "message": "PUT login/user/location!"
+    },
+    "[DELETE]login/user/location": {
+        "returnCode": "0",
+        "message": "DELETE login/user/location!"
+    },
+    "[POST]login/user/location": {
+        "returnCode": "0",
+        "message": "POST login/user/location!"
+    },
+    "test/parent/child": {
+        "returnCode": "0",
+        "message": "没有参数!"
+    },
+    "test/parent/:child?child=child": {
+        "returnCode": "0",
+        "message": "末尾参数!"
+    },
+    "test/:parent/child?parent=parent": {
+        "returnCode": "0",
+        "message": "中间参数!"
+    },
+    "test/:parent/:child?parent=parent&child=child": {
+        "returnCode": "0",
+        "message": "两个参数!"
+    },
+    "test/:user/ana": {
+        "returnCode": "0",
+        "message": "login/--/ana!",
+        "data":"[../data/test.json]"
+    },
+    "/test/:user": {
+        "returnCode": "0",
+        "data": {
+            "pageNumber": ":pageNumber",
+            "list::pageSize": {
+                "id": "[+]",
+                "name": "[()6-10]",
+                "price":"-[1-9].[(0-9)2]",
+                "date": "[1960-2012]-[01-12]-[01-30]",
+                "user": ":user",
+                "ip": "192.168.1.[1-255]",
+                "message":"[(A-Z){4}5]"
+            }
+        }
+    }
+}

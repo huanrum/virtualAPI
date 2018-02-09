@@ -1,0 +1,906 @@
+{
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "errorIND": null,
+    "errorPHI": null,
+    "action": null,
+    "methods": [
+        {
+            "sender": "NORMAL",
+            "receiver": "ME",
+            "currencyPaymentMethodsMap": [
+                {
+                    "currency": "HKD",
+                    "paymentMethods": [
+                        "LCW-1E",
+                        "LCW-711",
+                        "LBT"
+                    ]
+                }
+            ]
+        },
+        {
+            "sender": "NORMAL",
+            "receiver": "NON_TNG",
+            "currencyPaymentMethodsMap": [
+                {
+                    "currency": "PHP",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "AUD",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "CNY",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "SGD",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "IDR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "MYR",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "INR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "VND",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "BDT",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "LKR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "PKR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "NPR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "THB",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                }
+            ]
+        },
+        {
+            "sender": "NORMAL",
+            "receiver": "TNG",
+            "currencyPaymentMethodsMap": [
+                {
+                    "currency": "HKD",
+                    "paymentMethods": [
+                        "P2P"
+                    ]
+                },
+                {
+                    "currency": "PHP",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "AUD",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "CNY",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "SGD",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "IDR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "MYR",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "INR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "VND",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "BDT",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "LKR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "PKR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "NPR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "THB",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                }
+            ]
+        },
+        {
+            "sender": "SVIP",
+            "receiver": "TNG",
+            "currencyPaymentMethodsMap": [
+                {
+                    "currency": "HKD",
+                    "paymentMethods": [
+                        "P2P"
+                    ]
+                },
+                {
+                    "currency": "PHP",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "AUD",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "CNY",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "SGD",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "IDR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "MYR",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "INR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "VND",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "BDT",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "LKR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "PKR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "NPR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "THB",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                }
+            ]
+        },
+        {
+            "sender": "SVIP",
+            "receiver": "ME",
+            "currencyPaymentMethodsMap": [
+                {
+                    "currency": "HKD",
+                    "paymentMethods": [
+                        "LCW-1E",
+                        "LCW-711",
+                        "LBT"
+                    ]
+                },
+                {
+                    "currency": "PHP",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW",
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "AUD",
+                    "paymentMethods": [
+                        "GBT",
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "CAD",
+                    "paymentMethods": [
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "CNY",
+                    "paymentMethods": [
+                        "GBT",
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "EUR",
+                    "paymentMethods": [
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "GBP",
+                    "paymentMethods": [
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "JPY",
+                    "paymentMethods": [
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "KRW",
+                    "paymentMethods": [
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "SGD",
+                    "paymentMethods": [
+                        "GBT",
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "TWD",
+                    "paymentMethods": [
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "USD",
+                    "paymentMethods": [
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "IDR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW",
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "MYR",
+                    "paymentMethods": [
+                        "GBT",
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "CHF",
+                    "paymentMethods": [
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "INR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "VND",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "BDT",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "LKR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "PKR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "NPR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "THB",
+                    "paymentMethods": [
+                        "GBT",
+                        "LCW-FX"
+                    ]
+                }
+            ]
+        },
+        {
+            "sender": "SVIP",
+            "receiver": "NON_TNG",
+            "currencyPaymentMethodsMap": [
+                {
+                    "currency": "PHP",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "AUD",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "CNY",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "SGD",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "IDR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "MYR",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "INR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "VND",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "BDT",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "LKR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "PKR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "NPR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "THB",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                }
+            ]
+        },
+        {
+            "sender": "VIP",
+            "receiver": "TNG",
+            "currencyPaymentMethodsMap": [
+                {
+                    "currency": "HKD",
+                    "paymentMethods": [
+                        "P2P"
+                    ]
+                },
+                {
+                    "currency": "PHP",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "AUD",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "CNY",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "SGD",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "IDR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "MYR",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "INR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "VND",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "BDT",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "LKR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "PKR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "NPR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "THB",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                }
+            ]
+        },
+        {
+            "sender": "VIP",
+            "receiver": "ME",
+            "currencyPaymentMethodsMap": [
+                {
+                    "currency": "HKD",
+                    "paymentMethods": [
+                        "LCW-1E",
+                        "LCW-711",
+                        "LBT"
+                    ]
+                },
+                {
+                    "currency": "PHP",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW",
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "AUD",
+                    "paymentMethods": [
+                        "GBT",
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "CAD",
+                    "paymentMethods": [
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "CNY",
+                    "paymentMethods": [
+                        "GBT",
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "EUR",
+                    "paymentMethods": [
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "GBP",
+                    "paymentMethods": [
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "JPY",
+                    "paymentMethods": [
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "KRW",
+                    "paymentMethods": [
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "SGD",
+                    "paymentMethods": [
+                        "GBT",
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "TWD",
+                    "paymentMethods": [
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "USD",
+                    "paymentMethods": [
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "IDR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW",
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "MYR",
+                    "paymentMethods": [
+                        "GBT",
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "CHF",
+                    "paymentMethods": [
+                        "LCW-FX"
+                    ]
+                },
+                {
+                    "currency": "INR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "VND",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "BDT",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "LKR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "PKR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "NPR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "THB",
+                    "paymentMethods": [
+                        "GBT",
+                        "LCW-FX"
+                    ]
+                }
+            ]
+        },
+        {
+            "sender": "VIP",
+            "receiver": "NON_TNG",
+            "currencyPaymentMethodsMap": [
+                {
+                    "currency": "PHP",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "AUD",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "CNY",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "SGD",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "IDR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "MYR",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                },
+                {
+                    "currency": "INR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "VND",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "BDT",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "LKR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "PKR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "NPR",
+                    "paymentMethods": [
+                        "GBT",
+                        "GCW"
+                    ]
+                },
+                {
+                    "currency": "THB",
+                    "paymentMethods": [
+                        "GBT"
+                    ]
+                }
+            ]
+        }
+    ]
+}

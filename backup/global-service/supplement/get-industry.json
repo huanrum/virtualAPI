@@ -1,0 +1,165 @@
+{
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "errorIND": null,
+    "errorPHI": null,
+    "action": null,
+    "industries": [
+        {
+            "id": 17,
+            "nameEn": "Housemaker",
+            "nameTc": "家庭事務",
+            "nameSc": "家庭事务",
+            "nameId": "Urus Rumah Tangga",
+            "namePHL": "Kasambahay",
+            "ordering": 1
+        },
+        {
+            "id": 1,
+            "nameEn": "Agriculture / Fishing",
+            "nameTc": "農業 / 漁業",
+            "nameSc": "农业 / 渔业",
+            "nameId": "Agrikultura / Nelayan",
+            "namePHL": "Agriculture / Fishing",
+            "ordering": 2
+        },
+        {
+            "id": 2,
+            "nameEn": "Communication / IT",
+            "nameTc": "通訊 / 資訊科技",
+            "nameSc": "通讯 / 资讯科技",
+            "nameId": "Telekomunikasi / TI Teknologi Informasi",
+            "namePHL": "Communication / IT ",
+            "ordering": 3
+        },
+        {
+            "id": 3,
+            "nameEn": "Catering",
+            "nameTc": "飲食",
+            "nameSc": "饮食",
+            "nameId": "Katering",
+            "namePHL": "Catering",
+            "ordering": 4
+        },
+        {
+            "id": 4,
+            "nameEn": "Government",
+            "nameTc": "政府 / 公營機構",
+            "nameSc": "政府 / 公营机构",
+            "nameId": "Pemerintahan / Fasilitas Umum",
+            "namePHL": "Government / Public Utilities",
+            "ordering": 5
+        },
+        {
+            "id": 5,
+            "nameEn": "Construction / Engineering",
+            "nameTc": "建築及工程",
+            "nameSc": "建筑及工程",
+            "nameId": "Teknik / Konstruksi",
+            "namePHL": "Construction / Engineering",
+            "ordering": 6
+        },
+        {
+            "id": 6,
+            "nameEn": "Education",
+            "nameTc": "教育",
+            "nameSc": "教育",
+            "nameId": "Pendidikan",
+            "namePHL": "Education",
+            "ordering": 7
+        },
+        {
+            "id": 7,
+            "nameEn": "Finance",
+            "nameTc": "金融",
+            "nameSc": "金融",
+            "nameId": "Keuangan",
+            "namePHL": "Finance",
+            "ordering": 8
+        },
+        {
+            "id": 8,
+            "nameEn": "Media / Printing / Publishing",
+            "nameTc": "傳媒 / 印刷 / 出版",
+            "nameSc": "传媒 / 印刷 / 出版",
+            "nameId": "Media / Percetakan / Penerbitan",
+            "namePHL": "Media / Printing / Publishing",
+            "ordering": 9
+        },
+        {
+            "id": 9,
+            "nameEn": "Medical Service",
+            "nameTc": "醫療服務",
+            "nameSc": "医疗服务",
+            "nameId": "Layanan Medis / Kesehatan",
+            "namePHL": "Medical Service",
+            "ordering": 10
+        },
+        {
+            "id": 10,
+            "nameEn": "Legal Service",
+            "nameTc": "法律服務",
+            "nameSc": "法律服务",
+            "nameId": "Layanan Bantuan Hukum",
+            "namePHL": "Legal Service",
+            "ordering": 11
+        },
+        {
+            "id": 11,
+            "nameEn": "Tourism, Hotel, Hospitality",
+            "nameTc": "旅遊 / 酒店服務",
+            "nameSc": "旅游/ 酒店服务",
+            "nameId": "Turisme, Hotel, Perhotelan",
+            "namePHL": "Tourism, Hotel, Hospitality",
+            "ordering": 12
+        },
+        {
+            "id": 12,
+            "nameEn": "Trading",
+            "nameTc": "進出口貿易",
+            "nameSc": "进出口贸易",
+            "nameId": "Impor / Ekspor / Perdagangan",
+            "namePHL": "Trading",
+            "ordering": 13
+        },
+        {
+            "id": 13,
+            "nameEn": "Transportation / Logistics",
+            "nameTc": "運輸 / 物流",
+            "nameSc": "运输 / 物流",
+            "nameId": "Transportasi / Logistik",
+            "namePHL": "Transportation / Logistics",
+            "ordering": 14
+        },
+        {
+            "id": 14,
+            "nameEn": "Manufacturing",
+            "nameTc": "製造業",
+            "nameSc": "制造业",
+            "nameId": "Manufaktur / Pabrik",
+            "namePHL": "Manufacturing",
+            "ordering": 15
+        },
+        {
+            "id": 15,
+            "nameEn": "Wholesale / Retail",
+            "nameTc": "批發 / 零售",
+            "nameSc": "批发 / 零售",
+            "nameId": "Grosir / Eceran",
+            "namePHL": "Wholesale / Retail",
+            "ordering": 16
+        },
+        {
+            "id": 16,
+            "nameEn": "Others",
+            "nameTc": "其他",
+            "nameSc": "其他",
+            "nameId": "Lain-lain",
+            "namePHL": "Others",
+            "ordering": 17
+        }
+    ]
+}

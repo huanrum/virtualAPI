@@ -1,0 +1,219 @@
+{
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "action": null,
+    "locations": [
+      {
+        "id": 216,
+        "couponId": 45,
+        "primaryLoc": true,
+        "merchantLocation": {
+          "id": 2975,
+          "merchantId": 7,
+          "nameEN": "Unit 607-608, 6/F., Miramar Tower, 132 Nathan Road, Tsim Sha Tsui",
+          "nameZhHK": "尖沙咀彌敦道132號美麗華大廈6樓607-608室",
+          "nameZhCN": "尖沙咀弥敦道132号美丽华大厦6楼607-608室",
+          "coordinate": "22.29881, 114.17217",
+          "enable": true,
+          "districtId": 50,
+          "tel": "2762 7692",
+          "fax": null,
+          "createDatetime": "2015-10-15 11:35:07",
+          "updateDatetime": "2015-10-15 11:35:07"
+        }
+      },
+      {
+        "id": 217,
+        "couponId": 45,
+        "primaryLoc": false,
+        "merchantLocation": {
+          "id": 2976,
+          "merchantId": 7,
+          "nameEN": "Room 202, Kam Ming House, 51 Queens Road Central, Hong Kong",
+          "nameZhHK": "環皇后大道中51號金銘樓202室",
+          "nameZhCN": "中环皇后大道中51号金铭楼202室",
+          "coordinate": "22.28275, 114.15593",
+          "enable": true,
+          "districtId": 5,
+          "tel": "2523 3711",
+          "fax": null,
+          "createDatetime": "2015-10-15 11:35:07",
+          "updateDatetime": "2015-10-15 11:35:07"
+        }
+      },
+      {
+        "id": 218,
+        "couponId": 45,
+        "primaryLoc": false,
+        "merchantLocation": {
+          "id": 2977,
+          "merchantId": 7,
+          "nameEN": "Shop 1, G/F., Tai Yau Plaza, 181 Johnston Road, Wanchai, Hong Kong",
+          "nameZhHK": "灣仔莊士敦道181號大有商場地下1號舖",
+          "nameZhCN": "湾仔庄士敦道181号大有商场地下1号铺",
+          "coordinate": "22.27697, 114.17455",
+          "enable": true,
+          "districtId": 25,
+          "tel": "3102 3698",
+          "fax": null,
+          "createDatetime": "2015-10-15 11:35:07",
+          "updateDatetime": "2015-10-15 11:35:07"
+        }
+      },
+      {
+        "id": 219,
+        "couponId": 45,
+        "primaryLoc": false,
+        "merchantLocation": {
+          "id": 2978,
+          "merchantId": 7,
+          "nameEN": "Shop B, G/F., Fair View Commercial Building, 27 Sugar Street, Causeway Bay, Hong Kong",
+          "nameZhHK": "銅鑼灣糖街27號怡景商業大廈地下B舖",
+          "nameZhCN": "铜锣湾糖街27号怡景商业大厦地下B铺",
+          "coordinate": "22.2801, 114.18681",
+          "enable": true,
+          "districtId": 4,
+          "tel": "2576 2669",
+          "fax": null,
+          "createDatetime": "2015-10-15 11:35:07",
+          "updateDatetime": "2015-10-15 11:35:07"
+        }
+      },
+      {
+        "id": 220,
+        "couponId": 45,
+        "primaryLoc": false,
+        "merchantLocation": {
+          "id": 2979,
+          "merchantId": 7,
+          "nameEN": "Shop 6, G/F., 442-456 Kings Road, North Point, Hong Kong",
+          "nameZhHK": "北角英皇道442-456號美輪大廈地下6號舖",
+          "nameZhCN": "北角英皇道442-456号美轮大厦地下6号铺",
+          "coordinate": "22.29078, 114.20016",
+          "enable": true,
+          "districtId": 12,
+          "tel": "2560 6039",
+          "fax": null,
+          "createDatetime": "2015-10-15 11:35:07",
+          "updateDatetime": "2015-10-15 11:35:07"
+        }
+      },
+      {
+        "id": 221,
+        "couponId": 45,
+        "primaryLoc": false,
+        "merchantLocation": {
+          "id": 2980,
+          "merchantId": 7,
+          "nameEN": "Shop 4, 4/F., Kornhill Plaza(South), Quarry Bay, Hong Kong",
+          "nameZhHK": "鰂魚涌康怡廣場南座四樓4號舖",
+          "nameZhCN": "鲗鱼涌康怡广场南座四楼4号铺",
+          "coordinate": "22.28385, 114.21635",
+          "enable": true,
+          "districtId": 15,
+          "tel": null,
+          "fax": null,
+          "createDatetime": "2015-10-15 11:35:07",
+          "updateDatetime": "2015-10-15 11:35:07"
+        }
+      },
+      {
+        "id": 222,
+        "couponId": 45,
+        "primaryLoc": false,
+        "merchantLocation": {
+          "id": 2981,
+          "merchantId": 7,
+          "nameEN": "Shop 7, G/F., Wai Fung Plaza, 664 Nathan Road, Mongkok, Kowloon",
+          "nameZhHK": "旺角彌敦道664號惠豐中心地下7號舖",
+          "nameZhCN": "旺角弥敦道664号惠丰中心地下7号铺",
+          "coordinate": "22.31913, 114.16975",
+          "enable": true,
+          "districtId": 42,
+          "tel": "2381 3312",
+          "fax": null,
+          "createDatetime": "2015-10-15 11:35:07",
+          "updateDatetime": "2015-10-15 11:35:07"
+        }
+      },
+      {
+        "id": 223,
+        "couponId": 45,
+        "primaryLoc": false,
+        "merchantLocation": {
+          "id": 2982,
+          "merchantId": 7,
+          "nameEN": "Shop 736, Level 7, Metropolis Mall, 6 Metropolis Drive, Hung Hom, Kowloon",
+          "nameZhHK": "紅磡都會道6號都會商場7樓736號舖",
+          "nameZhCN": "红磡都会道6号都会商场7楼736号铺",
+          "coordinate": "22.30275, 114.18326",
+          "enable": true,
+          "districtId": 31,
+          "tel": "2356 0836",
+          "fax": null,
+          "createDatetime": "2015-10-15 11:35:07",
+          "updateDatetime": "2015-10-15 11:35:07"
+        }
+      },
+      {
+        "id": 224,
+        "couponId": 45,
+        "primaryLoc": false,
+        "merchantLocation": {
+          "id": 2983,
+          "merchantId": 7,
+          "nameEN": "Shop 11, 2/F., The Pacifica Mall, 9 Sham Shing Road, Lai Chi Kok, Kowloon",
+          "nameZhHK": "荔枝角深盛路9號宇晴匯2樓11號舖",
+          "nameZhCN": "荔枝角深盛路9号宇晴汇2楼11号铺",
+          "coordinate": "22.33445, 114.14987",
+          "enable": true,
+          "districtId": 37,
+          "tel": "3110 3254",
+          "fax": null,
+          "createDatetime": "2015-10-15 11:35:07",
+          "updateDatetime": "2015-10-15 11:35:07"
+        }
+      },
+      {
+        "id": 225,
+        "couponId": 45,
+        "primaryLoc": false,
+        "merchantLocation": {
+          "id": 2984,
+          "merchantId": 7,
+          "nameEN": "Shop 82, Level 2, Metro Town, Tseung Kwan O, New Territories",
+          "nameZhHK": "將軍澳調景嶺都會駅2樓82號舖",
+          "nameZhCN": "将军澳调景岭都会駅2楼82号铺",
+          "coordinate": "22.30433, 114.25218",
+          "enable": true,
+          "districtId": 72,
+          "tel": "3549 8913",
+          "fax": null,
+          "createDatetime": "2015-10-15 11:35:07",
+          "updateDatetime": "2015-10-15 11:35:07"
+        }
+      },
+      {
+        "id": 226,
+        "couponId": 45,
+        "primaryLoc": false,
+        "merchantLocation": {
+          "id": 2985,
+          "merchantId": 7,
+          "nameEN": "Shop 2036, 2/F., Discovery Park, 398 Castle Peak Road, Tsuen Wan, New Territories",
+          "nameZhHK": "荃灣愉景新城2樓2036號舖",
+          "nameZhCN": "荃湾愉景新城2楼2036号铺",
+          "coordinate": "22.37508, 114.11223",
+          "enable": true,
+          "districtId": 74,
+          "tel": "2610 1681",
+          "fax": null,
+          "createDatetime": "2015-10-15 11:35:07",
+          "updateDatetime": "2015-10-15 11:35:07"
+        }
+      }
+    ]
+  }

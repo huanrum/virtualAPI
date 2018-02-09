@@ -1,0 +1,80 @@
+<script>
+    //data:window.$data
+    //element:toolbars,
+    //methods:runBuild,showDialog
+    ['Checkout', 'Update', 'Build', 'Deploy'].forEach(function (bar, index) {
+        var texts = ['Switch branch[' + window.$data.branch + ']', 'Update Code', 'One-click package deployment (with caution)', 'Select upload deployment'];
+        var toolbar = document.createElement('div');
+        var a = document.createElement('a');
+        var message = document.createElement('ol');
+        toolbars.append(toolbar);
+        toolbar.append(a);
+        toolbar.append(message);
+        a.innerHTML = texts[index] + ' <i>' + times(Object.keys(dirs).map(i => dirs[i].mtime).filter(i => !!i).sort().pop()) + '</i>';
+        toolbar.onclick = function () {
+            var parms = 'build=';
+            var contentEl = document.createElement('div');
+            contentEl.className = 'content-self';
+
+            switch (bar) {
+                case 'Checkout':
+                    runBuild(bar, 'Get the branch list', 'branch=', toolbar, a, message, function (items) {
+                        contentEl.innerHTML = 'You can switch to the following branches.';
+                        var bEl = document.createElement('select');
+                        contentEl.appendChild(bEl);
+
+                        items.filter(i => /^!!/.test(i)).pop().replace(/remotes\/origin\//gi, '').split('\n').filter(i => !/^(!!|\*|master)/.test(i)).forEach(function (br) {
+                            var oEl = document.createElement('option');
+                            oEl.value = br.trim();
+                            oEl.innerHTML = br;
+                            bEl.appendChild(oEl);
+                        });
+
+                        showDialog('Make sure to pack all/recently modified', contentEl, ['Confirm'], function () {
+                            runBuild(bar, texts[0].replace(/\[.*\]+/, bEl.value), 'checkout=' + bEl.value, toolbar, a, message);
+                        });
+                    });
+                    break;
+                case 'Update':
+                    showDialog('Update Code', 'Make sure to update all your code, and there may be conflicts.', ['Confirm'], function () {
+                        runBuild(bar, texts[index], 'update=', toolbar, a, message);
+                    });
+                    break;
+                case 'Build':
+                    contentEl.innerHTML = '1. If the code is not submitted, then only the corresponding modules are packaged <br><br>2. Otherwise, the recent submission will be packaged, and the latest submission times <br>.';
+                    var sEl = document.createElement('select');
+                    contentEl.appendChild(sEl);
+                    for (var i = 0; i < 20; i++) {
+                        var oEl = document.createElement('option');
+                        oEl.value = i * 10;
+                        oEl.innerHTML = i ? ('Recently submitted ' + i * 10) : ('All Modules');
+                        sEl.appendChild(oEl);
+                    }
+                    showDialog('Make sure to update all your code, and there may be conflicts', contentEl, ['Confirm'], function () {
+                        runBuild(bar, texts[index], 'build=' + sEl.value, toolbar, a, message);
+                    });
+                    break;
+                case 'Deploy':
+                    var selectList = [];
+                    Object.keys(dirs).filter(i => !!dirs[i]).forEach(function (d) {
+                        var dEl = document.createElement('div');
+                        contentEl.appendChild(dEl);
+                        dEl.innerHTML = d;
+                        dEl.onclick = function () {
+                            if (selectList.indexOf(d) !== -1) {
+                                dEl.className = '';
+                                selectList = selectList.filter(i => i !== d);
+                            } else {
+                                dEl.className = 'active';
+                                selectList.push(d);
+                            }
+                        };
+                    });
+                    showDialog('Publish the existing ZIP package', contentEl, ['Confirm'], function () {
+                        runBuild(bar, texts[index], 'deploy=' + selectList.join(), toolbar, a, message);
+                    });
+                    break;
+            }
+        };
+    });
+</script>

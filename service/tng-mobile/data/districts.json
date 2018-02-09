@@ -1,0 +1,591 @@
+{
+    "status": "success",
+    "errorCode": null,
+    "errorEN": null,
+    "errorZhHK": null,
+    "errorZhCN": null,
+    "action": null,
+    "areas": [
+        {
+            "areaEN": "Hong Kong",
+            "areaZhHK": "香港",
+            "areaZhCN": "香港",
+            "districts": [
+                {
+                    "id": 1,
+                    "nameEN": "Aberdeen",
+                    "nameZhHK": "香港仔",
+                    "nameZhCN": "香港仔",
+                    "code": "ABN"
+                },
+                {
+                    "id": 2,
+                    "nameEN": "Admiralty",
+                    "nameZhHK": "金鐘",
+                    "nameZhCN": "金钟",
+                    "code": "ADY"
+                },
+                {
+                    "id": 3,
+                    "nameEN": "Ap Lei Chau",
+                    "nameZhHK": "鴨脷洲",
+                    "nameZhCN": "鸭脷洲",
+                    "code": "ALC"
+                },
+                {
+                    "id": 4,
+                    "nameEN": "Causeway Bay",
+                    "nameZhHK": "銅鑼灣",
+                    "nameZhCN": "铜锣湾",
+                    "code": "CWAY"
+                },
+                {
+                    "id": 5,
+                    "nameEN": "Central",
+                    "nameZhHK": "中環",
+                    "nameZhCN": "中环",
+                    "code": "CL"
+                },
+                {
+                    "id": 6,
+                    "nameEN": "Chai Wan",
+                    "nameZhHK": "柴灣",
+                    "nameZhCN": "柴湾",
+                    "code": "CW"
+                },
+                {
+                    "id": 7,
+                    "nameEN": "Cyberport",
+                    "nameZhHK": "數碼港",
+                    "nameZhCN": "数码港",
+                    "code": "CPORT"
+                },
+                {
+                    "id": 8,
+                    "nameEN": "Deep Water Bay",
+                    "nameZhHK": "深水灣",
+                    "nameZhCN": "深水湾",
+                    "code": "DWB"
+                },
+                {
+                    "id": 9,
+                    "nameEN": "Happy Valley",
+                    "nameZhHK": "跑馬地",
+                    "nameZhCN": "跑马地",
+                    "code": "HV"
+                },
+                {
+                    "id": 10,
+                    "nameEN": "Heng Fa Chuen",
+                    "nameZhHK": "杏花村",
+                    "nameZhCN": "杏花村",
+                    "code": "HFC"
+                },
+                {
+                    "id": 11,
+                    "nameEN": "Mid Levels",
+                    "nameZhHK": "半山",
+                    "nameZhCN": "半山",
+                    "code": "ML"
+                },
+                {
+                    "id": 12,
+                    "nameEN": "North Point",
+                    "nameZhHK": "北角",
+                    "nameZhCN": "北角",
+                    "code": "MP"
+                },
+                {
+                    "id": 13,
+                    "nameEN": "Peak",
+                    "nameZhHK": "山頂",
+                    "nameZhCN": "山顶",
+                    "code": "PEAK"
+                },
+                {
+                    "id": 14,
+                    "nameEN": "Pok Fu Lam",
+                    "nameZhHK": "薄扶林",
+                    "nameZhCN": "薄扶林",
+                    "code": "PFL"
+                },
+                {
+                    "id": 15,
+                    "nameEN": "Quarry Bay",
+                    "nameZhHK": "鰂魚涌",
+                    "nameZhCN": "鲗鱼涌",
+                    "code": "QB"
+                },
+                {
+                    "id": 16,
+                    "nameEN": "Repulse Bay",
+                    "nameZhHK": "淺水灣",
+                    "nameZhCN": "浅水湾",
+                    "code": "RB"
+                },
+                {
+                    "id": 17,
+                    "nameEN": "Sai Wan Ho",
+                    "nameZhHK": "西灣河",
+                    "nameZhCN": "西湾河",
+                    "code": "SWH"
+                },
+                {
+                    "id": 18,
+                    "nameEN": "Shau Kei Wan",
+                    "nameZhHK": "筲箕灣",
+                    "nameZhCN": "筲箕湾",
+                    "code": "SKW"
+                },
+                {
+                    "id": 19,
+                    "nameEN": "Shek O",
+                    "nameZhHK": "石澳",
+                    "nameZhCN": "石澳",
+                    "code": "SO"
+                },
+                {
+                    "id": 20,
+                    "nameEN": "Sheung Wan",
+                    "nameZhHK": "上環",
+                    "nameZhCN": "上环",
+                    "code": "SW"
+                },
+                {
+                    "id": 21,
+                    "nameEN": "Stanley",
+                    "nameZhHK": "赤柱",
+                    "nameZhCN": "赤柱",
+                    "code": "STAN"
+                },
+                {
+                    "id": 22,
+                    "nameEN": "Tai Hang",
+                    "nameZhHK": "大坑",
+                    "nameZhCN": "大坑",
+                    "code": "TH"
+                },
+                {
+                    "id": 23,
+                    "nameEN": "Tai Koo",
+                    "nameZhHK": "太古",
+                    "nameZhCN": "太古",
+                    "code": "TK"
+                },
+                {
+                    "id": 24,
+                    "nameEN": "Tin Hau",
+                    "nameZhHK": "天后",
+                    "nameZhCN": "天后",
+                    "code": "THAU"
+                },
+                {
+                    "id": 25,
+                    "nameEN": "Wan Chai",
+                    "nameZhHK": "灣仔",
+                    "nameZhCN": "湾仔",
+                    "code": "WC"
+                },
+                {
+                    "id": 26,
+                    "nameEN": "West Point",
+                    "nameZhHK": "西環",
+                    "nameZhCN": "西环",
+                    "code": "WP"
+                }
+            ]
+        },
+        {
+            "areaEN": "Kowloon",
+            "areaZhHK": "九龍",
+            "areaZhCN": "九龙",
+            "districts": [
+                {
+                    "id": 27,
+                    "nameEN": "Cheung Sha Wan",
+                    "nameZhHK": "長沙灣",
+                    "nameZhCN": "长沙湾",
+                    "code": "CSW"
+                },
+                {
+                    "id": 28,
+                    "nameEN": "Choi Hung",
+                    "nameZhHK": "彩虹",
+                    "nameZhCN": "彩虹",
+                    "code": "CH"
+                },
+                {
+                    "id": 29,
+                    "nameEN": "Diamond Hill",
+                    "nameZhHK": "鑽石山",
+                    "nameZhCN": "钻石山",
+                    "code": "DH"
+                },
+                {
+                    "id": 30,
+                    "nameEN": "Ho Man Tin",
+                    "nameZhHK": "何文田",
+                    "nameZhCN": "何文田",
+                    "code": "HMT"
+                },
+                {
+                    "id": 31,
+                    "nameEN": "Hung Hom",
+                    "nameZhHK": "紅磡",
+                    "nameZhCN": "红磡",
+                    "code": "HH"
+                },
+                {
+                    "id": 32,
+                    "nameEN": "Jordan",
+                    "nameZhHK": "佐敦",
+                    "nameZhCN": "佐敦",
+                    "code": "JN"
+                },
+                {
+                    "id": 33,
+                    "nameEN": "Knutsford Terrace",
+                    "nameZhHK": "諾士佛臺",
+                    "nameZhCN": "诺士佛台",
+                    "code": "KT"
+                },
+                {
+                    "id": 34,
+                    "nameEN": "Kowloon Bay",
+                    "nameZhHK": "九龍灣",
+                    "nameZhCN": "九龙湾",
+                    "code": "KB"
+                },
+                {
+                    "id": 35,
+                    "nameEN": "Kowloon City",
+                    "nameZhHK": "九龍城",
+                    "nameZhCN": "九龙城",
+                    "code": "KCITY"
+                },
+                {
+                    "id": 36,
+                    "nameEN": "Kwun Tong",
+                    "nameZhHK": "觀塘",
+                    "nameZhCN": "观塘",
+                    "code": "KTONG"
+                },
+                {
+                    "id": 37,
+                    "nameEN": "Lai Chi Kok",
+                    "nameZhHK": "荔枝角",
+                    "nameZhCN": "荔枝角",
+                    "code": "LCK"
+                },
+                {
+                    "id": 38,
+                    "nameEN": "Lam Tin",
+                    "nameZhHK": "藍田",
+                    "nameZhCN": "蓝田",
+                    "code": "LT"
+                },
+                {
+                    "id": 39,
+                    "nameEN": "Lei Yue Mun",
+                    "nameZhHK": "鯉魚門",
+                    "nameZhCN": "鲤鱼门",
+                    "code": "LYM"
+                },
+                {
+                    "id": 40,
+                    "nameEN": "Lok Fu",
+                    "nameZhHK": "樂富",
+                    "nameZhCN": "乐富",
+                    "code": "LF"
+                },
+                {
+                    "id": 41,
+                    "nameEN": "Mei Foo",
+                    "nameZhHK": "美孚",
+                    "nameZhCN": "美孚",
+                    "code": "MF"
+                },
+                {
+                    "id": 42,
+                    "nameEN": "Mong Kok",
+                    "nameZhHK": "旺角",
+                    "nameZhCN": "旺角",
+                    "code": "MK"
+                },
+                {
+                    "id": 43,
+                    "nameEN": "Ngau Tau Kok",
+                    "nameZhHK": "牛頭角",
+                    "nameZhCN": "牛头角",
+                    "code": "NTK"
+                },
+                {
+                    "id": 44,
+                    "nameEN": "Prince Edward",
+                    "nameZhHK": "太子",
+                    "nameZhCN": "太子",
+                    "code": "PE"
+                },
+                {
+                    "id": 45,
+                    "nameEN": "San Po Kong",
+                    "nameZhHK": "新蒲崗",
+                    "nameZhCN": "新蒲岗",
+                    "code": "SPK"
+                },
+                {
+                    "id": 46,
+                    "nameEN": "Sham Shui Po",
+                    "nameZhHK": "深水埗",
+                    "nameZhCN": "深水埗",
+                    "code": "SSP"
+                },
+                {
+                    "id": 47,
+                    "nameEN": "Shek Kip Mei",
+                    "nameZhHK": "石硤尾",
+                    "nameZhCN": "石硖尾",
+                    "code": "SKM"
+                },
+                {
+                    "id": 48,
+                    "nameEN": "Tai Kok Tsui",
+                    "nameZhHK": "大角咀",
+                    "nameZhCN": "大角咀",
+                    "code": "TKT"
+                },
+                {
+                    "id": 49,
+                    "nameEN": "To Kwa Wan",
+                    "nameZhHK": "土瓜灣",
+                    "nameZhCN": "土瓜湾",
+                    "code": "TKW"
+                },
+                {
+                    "id": 50,
+                    "nameEN": "Tsim Sha Tsui",
+                    "nameZhHK": "尖沙咀",
+                    "nameZhCN": "尖沙咀",
+                    "code": "TST"
+                },
+                {
+                    "id": 51,
+                    "nameEN": "Tsz Wan Shan",
+                    "nameZhHK": "慈雲山",
+                    "nameZhCN": "慈云山",
+                    "code": "TWS"
+                },
+                {
+                    "id": 52,
+                    "nameEN": "Wong Tai Sin",
+                    "nameZhHK": "黃大仙",
+                    "nameZhCN": "黄大仙",
+                    "code": "WTS"
+                },
+                {
+                    "id": 53,
+                    "nameEN": "Yau Ma Tei",
+                    "nameZhHK": "油麻地",
+                    "nameZhCN": "油麻地",
+                    "code": "YMT"
+                },
+                {
+                    "id": 54,
+                    "nameEN": "Yau Tong",
+                    "nameZhHK": "油塘",
+                    "nameZhCN": "油塘",
+                    "code": "YT"
+                },
+                {
+                    "id": 77,
+                    "nameEN": "Kowloon Tong",
+                    "nameZhHK": "九龍塘",
+                    "nameZhCN": "九龙塘",
+                    "code": "KLT"
+                }
+            ]
+        },
+        {
+            "areaEN": "New Territories",
+            "areaZhHK": "新界",
+            "areaZhCN": "新界",
+            "districts": [
+                {
+                    "id": 55,
+                    "nameEN": "Fanling",
+                    "nameZhHK": "粉嶺",
+                    "nameZhCN": "粉岭",
+                    "code": "FG"
+                },
+                {
+                    "id": 56,
+                    "nameEN": "Fo Tan",
+                    "nameZhHK": "火炭",
+                    "nameZhCN": "火炭",
+                    "code": "FT"
+                },
+                {
+                    "id": 57,
+                    "nameEN": "Kwai Chung",
+                    "nameZhHK": "葵涌",
+                    "nameZhCN": "葵涌",
+                    "code": "KC"
+                },
+                {
+                    "id": 58,
+                    "nameEN": "Kwai Fong",
+                    "nameZhHK": "葵芳",
+                    "nameZhCN": "葵芳",
+                    "code": "KF"
+                },
+                {
+                    "id": 59,
+                    "nameEN": "Lau Fau Shan",
+                    "nameZhHK": "流浮山",
+                    "nameZhCN": "流浮山",
+                    "code": "LFS"
+                },
+                {
+                    "id": 60,
+                    "nameEN": "Lo Wu",
+                    "nameZhHK": "羅湖",
+                    "nameZhCN": "罗湖",
+                    "code": "LW"
+                },
+                {
+                    "id": 61,
+                    "nameEN": "Lok Ma Chau",
+                    "nameZhHK": "落馬洲",
+                    "nameZhCN": "落马洲",
+                    "code": "LMC"
+                },
+                {
+                    "id": 62,
+                    "nameEN": "Ma On Shan",
+                    "nameZhHK": "馬鞍山",
+                    "nameZhCN": "马鞍山",
+                    "code": "MOS"
+                },
+                {
+                    "id": 63,
+                    "nameEN": "Ma Wan",
+                    "nameZhHK": "馬灣",
+                    "nameZhCN": "马湾",
+                    "code": "MW"
+                },
+                {
+                    "id": 64,
+                    "nameEN": "Sai Kung",
+                    "nameZhHK": "西貢",
+                    "nameZhCN": "西贡",
+                    "code": "SK"
+                },
+                {
+                    "id": 65,
+                    "nameEN": "Sha Tin",
+                    "nameZhHK": "沙田",
+                    "nameZhCN": "沙田",
+                    "code": "STIN"
+                },
+                {
+                    "id": 66,
+                    "nameEN": "Sham Tseng",
+                    "nameZhHK": "深井",
+                    "nameZhCN": "深井",
+                    "code": "ST"
+                },
+                {
+                    "id": 67,
+                    "nameEN": "Sheung Shui",
+                    "nameZhHK": "上水",
+                    "nameZhCN": "上水",
+                    "code": "SS"
+                },
+                {
+                    "id": 68,
+                    "nameEN": "Tai Po",
+                    "nameZhHK": "大埔",
+                    "nameZhCN": "大埔",
+                    "code": "TP"
+                },
+                {
+                    "id": 69,
+                    "nameEN": "Tai Wai",
+                    "nameZhHK": "大圍",
+                    "nameZhCN": "大围",
+                    "code": "TWAI"
+                },
+                {
+                    "id": 70,
+                    "nameEN": "Tai Wo",
+                    "nameZhHK": "太和",
+                    "nameZhCN": "太和",
+                    "code": "TWO"
+                },
+                {
+                    "id": 71,
+                    "nameEN": "Tin Shui Wai",
+                    "nameZhHK": "天水圍",
+                    "nameZhCN": "天水围",
+                    "code": "TSW"
+                },
+                {
+                    "id": 72,
+                    "nameEN": "Tseung Kwan O",
+                    "nameZhHK": "將軍澳",
+                    "nameZhCN": "将军澳",
+                    "code": "TKO"
+                },
+                {
+                    "id": 73,
+                    "nameEN": "Tsing Yi",
+                    "nameZhHK": "青衣",
+                    "nameZhCN": "青衣",
+                    "code": "TY"
+                },
+                {
+                    "id": 74,
+                    "nameEN": "Tsuen Wan",
+                    "nameZhHK": "荃灣",
+                    "nameZhCN": "荃湾",
+                    "code": "TW"
+                },
+                {
+                    "id": 75,
+                    "nameEN": "Tuen Mun",
+                    "nameZhHK": "屯門",
+                    "nameZhCN": "屯门",
+                    "code": "TM"
+                },
+                {
+                    "id": 76,
+                    "nameEN": "Yuen Long",
+                    "nameZhHK": "元朗",
+                    "nameZhCN": "元朗",
+                    "code": "YL"
+                },
+                {
+                    "id": 78,
+                    "nameEN": "Western",
+                    "nameZhHK": "西區",
+                    "nameZhCN": "西区",
+                    "code": "WN"
+                },
+                {
+                    "id": 79,
+                    "nameEN": "Lantau Island",
+                    "nameZhHK": "大嶼山",
+                    "nameZhCN": "大屿山",
+                    "code": "LI"
+                },
+                {
+                    "id": 80,
+                    "nameEN": "Cheung Chau",
+                    "nameZhHK": "長洲",
+                    "nameZhCN": "长洲",
+                    "code": "CC"
+                }
+            ]
+        }
+    ]
+}
