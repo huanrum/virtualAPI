@@ -8,6 +8,7 @@ build
 .idea/
 .vscode/
 
+start.sh
 node_modules/
 build/
 backup/

@@ -66,7 +66,7 @@ module.exports = (function () {
                 dirs[i] = '';
             });
 
-            if(_path === '/views'){
+            if(/\/views\/*$/.test(_path)){
                 Object.keys(helper.config()).forEach(function (i) {
                     dirs[i] = '';
                 });
