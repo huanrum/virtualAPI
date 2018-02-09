@@ -10,6 +10,5 @@ build
 
 node_modules/
 build/
-*/index.html
-*/dev-server.js
-*/webpack.config.js
+backup/
+cache/
