@@ -90,7 +90,7 @@ module.exports = (function () {
                 var clientIp = helper.getClientIp(request).replace(/::(ffff:)?/, '');
                 var weinre = options.ip + ':' + options.weinre;
                 var content = data.toString().replace(/\?\d+/g, '').replace(/<head>/, function (str) {
-                    return str + '<title>' + path.basename(file) + '</title>';
+                    return str + '<title>' + path.basename(file.replace('index.html','')) + '</title>';
                 }).replace(/<body((?!>).)*>/, function (str) {
                     return str + '\n\t' + (options.ip !== '127.0.0.1' && options.weinre && [options.ip, '127.0.0.1', '1'].indexOf(clientIp) === -1 ? ('<script src="http://' + weinre + '/target/target-script-min.js#anonymous"></script>') : '');
                 });

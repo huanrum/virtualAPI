@@ -226,7 +226,7 @@
 
             a.onclick = function () {
                 window.open('http://' + window.$data.replace.replace(/\/\//g,'/') + '/' + dir);
-                fetch(location.origin + '/action/?scss=' + window.$data._path + '/' + dir, { method: 'GET' })
+                fetch(location.origin + '/action/?scss=' + dir, { method: 'GET' })
             };
             action.onclick = function () {
                 var count = 0, interval = setInterval(function () {
@@ -234,7 +234,7 @@
                     action.style.background = '#99ff99';
                 }, 500);
 
-                fetch(location.origin + '/action/?gulp=' + window.$data._path + '/' + dir, { method: 'GET' }).then(function (r) { return r.text() }).then(function (id) {
+                fetch(location.origin + '/action/?gulp=' + dir, { method: 'GET' }).then(function (r) { return r.text() }).then(function (id) {
                     runMessage(id, null, function () {
                         clearInterval(interval);
                         dirs[dir] = new Date();

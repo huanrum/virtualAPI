@@ -1,12 +1,13 @@
 var fs = require("fs");
 var child_process = require('child_process');
 
+var helper = require('./../../../bin/helper');
 
 module.exports = (function () {
-    var sourceDiv = __dirname + '/../../../';
+    var sourceDiv = helper.config(__dirname + '/../../../views/tng-mobile');
 
-    return function (cmd, messageFn, _actions) {
-        if (/^\/?views\/tng-mobile/.test(_actions[1])) {
+    return function (cmd, messageFn, _actions, referer) {
+        if (/\/?views\/tng-mobile/.test(referer)) {
             switch (_actions[0].toLocaleLowerCase()) {
                 case 'branch':
                     cmd(sourceDiv,messageFn, '', 'git pull && git branch -a');

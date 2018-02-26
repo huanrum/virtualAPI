@@ -24,7 +24,7 @@ module.exports = (function () {
             response.setHeader("Content-Type", 'text/plain;charset=utf-8');
             response.end(message(_actions));
         } else {
-            actions(_actions.split('=')).then(id => response.end(id));
+            actions(_actions.split('='),request.headers.referer).then(id => response.end(id));
         }
     }
 
@@ -40,9 +40,9 @@ module.exports = (function () {
     }
 
 
-    function actions(_actions) {
+    function actions(_actions,referer) {
         var id = Date.now() + '';
-        var promisses = configs.map(cfn => cfn(cmd, messageFn, _actions)).filter(i => !!i);
+        var promisses = configs.map(cfn => cfn(cmd, messageFn, _actions, referer)).filter(i => !!i);
 
         if (!promisses.length) {
             switch (_actions[0].toLocaleLowerCase()) {
