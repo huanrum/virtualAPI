@@ -6,6 +6,7 @@ var child_process = require('child_process');
 var helper = require('./helper');
 var websocket = require('./websocket');
 var resource = require('./resource');
+var config = require('./config');
 var action = require('./action');
 var views = require('./views');
 var cache = require('./cache');
@@ -38,6 +39,10 @@ var createServer = function (options, exits) {
                     //测试API
                     else if (/^\/*test\/+/.test(request.url)) {
                         response.end(JSON.stringify(true));
+                    }
+                     //配置Web
+                    else if (/^\/*config\/+/.test(request.url)) {
+                        config(helper,request, response);
                     }
                     //WEB操作控制服务端
                     else if (/^\/*action\/+/i.test(request.url)) {
@@ -125,9 +130,6 @@ module.exports = function(options){
     function configFn(type){
         var args = Array.prototype.slice.call(arguments,1);
         switch(type){
-            case 'helper':
-                helper.config(...args);
-                break;
             case 'views':
                 views.config(...args);
                 break;

@@ -7,6 +7,39 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>View List</title>
     <style>
+        @keyframes rotate_a{
+            0%{
+                transform:rotate(0deg);
+            }
+            100%{
+                transform:rotate(360deg);
+            }
+        }
+
+
+        #setting{
+            position: relative;
+            transform-origin:10px 10px;
+            animation:rotate_a 10s linear infinite;
+        }
+
+        #setting a,#setting:before,#setting:after{
+            position: absolute;
+            top:0;
+            left:0;
+            width: 0;
+            height: 0;
+            border: 10px solid #999999;
+        }
+        #setting:before{
+            content: "";
+            transform: rotate(30deg);
+        }
+        #setting:after{
+            content: "";
+            transform: rotate(60deg);
+        }
+
         #toolbar {
             padding: 1rem;
         }
@@ -142,10 +175,18 @@
 </head>
 
 <body>
+    <div id="setting"><a></a></div>
     <div id="toolbar"></div>
     <ul id="list"></ul>
     <script>
         window.$data = {};
+    </script>
+    <script>
+        var setting = document.getElementById('setting');
+        setting.onclick = function(){
+            window.open('http://' + window.$data.options.ip + ':' + window.$data.options.port +'/bin/config/index.html');
+        };
+
     </script>
     <script>
         var selectList = [];
