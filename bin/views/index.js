@@ -6,21 +6,21 @@ var helper = require('./../helper');
 
 
 module.exports = (function () {
-    var configs = [],mergeList = [];
+    var configs = [], mergeList = [];
     var basePath = __dirname.replace('\\bin\\views', '\/').replace('/bin/views', '\/');
     var webmap = i => i;
 
     view.config = function (fn) {
-        if(fn instanceof Array){
-           fn.forEach(i => view.config(i)); 
-        } if(typeof fn === 'string'){
-            mergeList.push(path.join(fn)); 
-        }else if(fn && typeof fn === 'object'){
+        if (fn instanceof Array) {
+            fn.forEach(i => view.config(i));
+        } if (typeof fn === 'string') {
+            mergeList.push(path.join(fn));
+        } else if (fn && typeof fn === 'object') {
             configs.push(fn);
         }
     };
 
-    if(fs.existsSync(__dirname + '/../../views/__config.js')){
+    if (fs.existsSync(__dirname + '/../../views/__config.js')) {
         webmap = require(__dirname + '/../../views/__config.js');
     }
 
@@ -32,17 +32,16 @@ module.exports = (function () {
         var type = onlyUrl.split('.').slice(1).pop() || 'html';
         var file = helper.config(basePath + onlyUrl);
 
-        if (helper.type(type)) {
-            response.setHeader("Content-Type", helper.type(type));
-        } else {
-            response.setHeader("Content-Type", 'text/plain;charset=utf-8');
-        }
-
         if (fs.existsSync(file)) {
+            if (helper.type(type)) {
+                response.setHeader("Content-Type", helper.type(type));
+            } else {
+                response.setHeader("Content-Type", 'text/plain;charset=utf-8');
+            }
             if (fs.statSync(file).isDirectory()) {
                 if (fs.existsSync(file + '/index.html')) {
                     var params = request.url.split('?')[1] || '';
-                    response.writeHead(302, { 'Location': onlyUrl + '/index.html' + (params?'?':'') + params });
+                    response.writeHead(302, { 'Location': onlyUrl + '/index.html' + (params ? '?' : '') + params });
                     response.end();
                 } else {
                     views(options, onlyUrl).then(content => response.end(content));
@@ -51,28 +50,29 @@ module.exports = (function () {
                 transverter(options, request, response, file).then(content => response.end(content));
             }
         } else {
-            response.end();
+            response.writeHead(404, { 'Content-Type': 'text/html;charset=utf-8' });
+            response.end(helper[404](options,'地址不存在'));
         }
     }
 
     function views(options, _path) {
         return new Promise(succ => {
-            var htmlPath = helper.config(__dirname +'/../../service/' + _path.replace('/views','') + '/views/index.html');
+            var htmlPath = helper.config(__dirname + '/../../service/' + _path.replace('/views', '') + '/views/index.html');
             var replace = `${options.ip}:${options.port}/${_path}`;
-            var addToolbar = fs.existsSync(htmlPath)?fs.readFileSync(htmlPath).toString():'';
+            var addToolbar = fs.existsSync(htmlPath) ? fs.readFileSync(htmlPath).toString() : '';
             var divPath = helper.config(basePath + _path || basePath);
             var dirs = {}, branch = helper.branch(divPath);
 
             fs.readdirSync(divPath).forEach(function (i) {
-                var config = configs.filter(cfn => cfn.path && cfn.version && path.join(divPath +'/'+ i).indexOf(path.join(cfn.path)) !== -1).pop();
-                if(config){
+                var config = configs.filter(cfn => cfn.path && cfn.version && path.join(divPath + '/' + i).indexOf(path.join(cfn.path)) !== -1).pop();
+                if (config) {
                     dirs[i] = config.version(i);
-                }else{
+                } else {
                     dirs[i] = '';
                 }
             });
 
-            if(/\/views\/*$/.test(_path)){
+            if (/\/views\/*$/.test(_path)) {
                 Object.keys(helper.config()).forEach(function (i) {
                     dirs[i] = '';
                 });
@@ -80,7 +80,7 @@ module.exports = (function () {
 
             succ(fs.readFileSync(__dirname + '/index.html', 'utf-8').toString().replace('window.$data = {};', 'window.$data = ' + decodeURIComponent(JSON.stringify({
                 _path: _path, dirs: dirs, replace: replace, options: options, branch: branch
-            }, null, 4))).replace('/*addToolbar:(function(){})();*/',addToolbar.replace(/<\/?script>/gi,'')));
+            }, null, 4))).replace('/*addToolbar:(function(){})();*/', addToolbar.replace(/<\/?script>/gi, '')));
         });
     }
 
@@ -96,7 +96,7 @@ module.exports = (function () {
                 var clientIp = helper.getClientIp(request).replace(/::(ffff:)?/, '');
                 var weinre = options.ip + ':' + options.weinre;
                 var content = data.toString().replace(/\?\d+/g, '').replace(/<head>/, function (str) {
-                    return str + '<title>' + path.basename(file.replace('index.html','')) + '</title>';
+                    return str + '<title>' + path.basename(file.replace('index.html', '')) + '</title>';
                 }).replace(/<body((?!>).)*>/, function (str) {
                     return str + '\n\t' + (options.ip !== '127.0.0.1' && options.weinre && [options.ip, '127.0.0.1', '1'].indexOf(clientIp) === -1 ? ('<script src="http://' + weinre + '/target/target-script-min.js#anonymous"></script>') : '');
                 });
@@ -106,14 +106,14 @@ module.exports = (function () {
                 });
 
                 data = new Buffer(content.toString());
-            } else if (merge && fs.existsSync(file.replace(/\.js.*/, '')) || filterConfigs.some(cfn => cfn.files.some(i=>path.join(cfn.path+'/'+i)===path.join(file)))) {
+            } else if (merge && fs.existsSync(file.replace(/\.js.*/, '')) || filterConfigs.some(cfn => cfn.files.some(i => path.join(cfn.path + '/' + i) === path.join(file)))) {
                 data = new Buffer(helper.readAllJSContent(data.toString(), file.replace(/\.js.*/, '')));
             }
 
             succ(data);
         });
 
-        
+
     }
 
 })();
