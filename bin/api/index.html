@@ -239,6 +239,11 @@
                 legend.innerHTML = item;
                 legend.style.fontSize = '26px';
                 content.appendChild(contentEl);
+                if (item !== 'api') {
+                    content.style.display = 'none';
+                }else{
+                    legend.innerHTML = item + ' <i>[Test]</i>';
+                }
             }
 
 
@@ -247,10 +252,7 @@
             legend.onclick = function () {
                 content.style.display = content.style.display === 'none' ? 'block' : 'none';
             };
-            if (item.file === 'config/base.json') {
-                content.style.display = 'none';
-                legend.innerHTML = item.file + ' <i>[Test]</i>';
-            }
+
             return fieldset;
         }
 
