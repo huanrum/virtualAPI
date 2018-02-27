@@ -1,8 +1,0 @@
-{
-    "_tngMobile/ticket/tickets":"[../data/tickets.json]",
-    "_tngMobile/coupon/coupons":"[../data/coupons.json]",
-    "_tngMobile/ticket/collected-ticket":"[../data/collectedTicket.json]",
-    "_tngMobile/coupon/collected-coupon":"[../data/collectedCoupon.json]",
-    "_tngMobile/ticket/locations":"[../data/collectedCouponLocations.json]",
-    "_tngMobile/coupon/locations":"[../data/collectedCouponLocations.json]"
-}
