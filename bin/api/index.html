@@ -21,6 +21,10 @@
             font-weight: 700;
         }
 
+        .module-group {
+            margin: 1em 0.2em;
+        }
+
         .config-group {
             margin: 1em;
         }
@@ -51,6 +55,7 @@
             width: calc(100% - 8em);
             background: #d3d3d3;
         }
+
         /*dialog*/
 
         .common-dialog-back {
@@ -175,19 +180,29 @@
         var header = document.createElement('div');
         var info = document.createElement('span');
         var helper = document.createElement('span');
-        var webSocket = document.createElement('span');
         var panel = document.createElement('div');
         header.className = 'text-align-center';
         header.appendChild(info);
-        header.appendChild(webSocket);
         header.appendChild(helper);
         document.body.appendChild(header);
         document.body.appendChild(panel);
         helper.innerHTML = ' - <a class="helper">帮助</a>';
-        webSocket.innerHTML = ' - <a class="helper">WebSocket</a>';
         info.innerHTML = ' URL里面参数越靠后优先级越高,点击API的<strong>Method</strong>可以进行测试,点击<strong>URL</strong>可以打开和关闭返回数据结构。';
+
+        var groups = {};
         window.configData.forEach(function (item) {
-            panel.appendChild(createGroup(item));
+            var groupKey = item.file.split(/[\/\\]/).filter(i => !!i)[1];
+            groups[groupKey] = (groups[groupKey] || []).concat([item]);
+        });
+
+
+        Object.keys(groups).forEach(function (key) {
+            var groupEl = document.createElement('div');
+            groupEl.className = 'group';
+            groups[key].forEach(function (item) {
+                groupEl.appendChild(createGroup(item));
+            });
+            panel.appendChild(createGroup(key, groupEl));
         });
         info.onclick = function () {
             var close = Array.prototype.some.call(panel.children, function (fieldset) {
@@ -198,30 +213,35 @@
             })
         };
         helper.onclick = function () {
-            window.open('document/help.html');
+            window.open('bin/helper/index.html');
         };
 
-        webSocket.onclick = function () {
-            window.open('document/websocket.html');
-        };
-
-        function createGroup(item) {
+        function createGroup(item, contentEl) {
             var fieldset = document.createElement('fieldset');
             var legend = document.createElement('legend');
             var content = document.createElement('div');
-            var charCount = 0;
-            Array.prototype.forEach.call('' + item.file.split('/')[1], function (i) {
-                charCount = charCount + i.charCodeAt();
-            });
-            fieldset.className = 'config-group';
-            legend.innerHTML = item.file;
-            legend.style.color = '#' + new Date(10000).setYear(charCount).toString(16).slice(-8, -2);
-            Object.keys(item.config).forEach(function (key) {
-                content.appendChild(createItem(key.match(/^\[(.*)\]/), key, item.config[key], item.file === 'config/base.json'));
-            });
-            if (!Object.keys(item.config).length) {
-                legend.style.textDecoration = 'line-through';
+            if (item.config) {
+                var charCount = 0;
+                Array.prototype.forEach.call('' + item.file.split('/')[1], function (i) {
+                    charCount = charCount + i.charCodeAt();
+                });
+                fieldset.className = 'config-group';
+                legend.innerHTML = item.file.split(/[\/\\]/).filter(i => !!i).pop();
+                legend.style.color = '#' + new Date(10000).setYear(charCount).toString(16).slice(-8, -2);
+                Object.keys(item.config).forEach(function (key) {
+                    content.appendChild(createItem(key.match(/^\[(.*)\]/), key, item.config[key], item.file === 'config/base.json'));
+                });
+                if (!Object.keys(item.config).length) {
+                    legend.style.textDecoration = 'line-through';
+                }
+            } else {
+                fieldset.className = 'module-group';
+                legend.innerHTML = item;
+                legend.style.fontSize = '26px';
+                content.appendChild(contentEl);
             }
+
+
             fieldset.appendChild(legend);
             fieldset.appendChild(content);
             legend.onclick = function () {
@@ -253,7 +273,7 @@
             url.innerHTML = urlData.split('?')[0].replace(/^\[.*\]/, '');
             returnElement.style.display = 'none';
             returnElement.readOnly = true;
-            returnElement.value = linefeed(JSON.stringify(returnData,null,4));
+            returnElement.value = linefeed(JSON.stringify(returnData, null, 4));
 
             urlElement.appendChild(method);
             urlElement.appendChild(url);
@@ -493,7 +513,7 @@
                         }
                         return req.text();
                     }).then(function (req) {
-                        message.value = linefeed(JSON.stringify(req,null,4));
+                        message.value = linefeed(JSON.stringify(req, null, 4));
                     });
                 };
 

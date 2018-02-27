@@ -58,12 +58,12 @@ module.exports = (function () {
             var key = filterUrlKV[Math.max.apply(Math, Object.keys(filterUrlKV))];
             return new Promise(succ => {
                 helper.getBodyData(request).then(bodyData => {
-                    var randomFn = random({path:returnData[key].path, IP: options.ip, PORT: options.port, WEBSOCKET: options.websocket, weinre: options.weinre, device: options.mac });
+                    var randomFn = random({ path: returnData[key].path, IP: options.ip, PORT: options.port, WEBSOCKET: options.websocket, weinre: options.weinre, device: options.mac });
                     var data = returnResult(key, request, JSON.parse(bodyData || '{}'));
                     if (data) {
                         response.writeHead(200, { 'Content-Type': 'text/plain;charset=utf-8' });
                         response.end(JSON.stringify(randomFn(data)));
-                    }else{
+                    } else {
                         succ();
                     }
                 });
@@ -137,37 +137,38 @@ module.exports = (function () {
 
 
     function initConfig(dirpath, configData, returnData) {
+        if (fs.existsSync(dirpath)) {
+            fs.readdirSync(dirpath).forEach(function (item) {
+                try {
+                    var info = fs.statSync(dirpath + '/' + item);
+                    if (info.isDirectory()) {
+                        initConfig(dirpath + '/' + item, configData, returnData);
+                    } else if (/\.(js|json)$/.test(item)) {
+                        try {
+                            var fileName = path.join(dirpath + '/' + item.replace(/\.(js|json)$/, ''));
+                            var js = fs.existsSync(fileName + '.js') ? require(fileName + '.js') : {};
+                            var json = fs.existsSync(fileName + '.json') ? JSON.parse(fs.readFileSync(fileName + '.json') || '{}') : {};
 
-        fs.readdirSync(dirpath).forEach(function (item) {
-            try {
-                var info = fs.statSync(dirpath + '/' + item);
-                if (info.isDirectory()) {
-                    initConfig(dirpath + '/' + item, configData, returnData);
-                } else if (/\.(js|json)$/.test(item)) {
-                    try {
-                        var fileName = dirpath + '/' + item.replace(/\.(js|json)$/, '');
-                        var js = fs.existsSync(fileName + '.js') ? require(fileName + '.js') : {};
-                        var json = fs.existsSync(fileName + '.json') ? JSON.parse(fs.readFileSync(fileName + '.json') || '{}') : {};
+                            configData[fileName.replace(path.join(__dirname + '/../../'), '')] = Object.assign({}, js, JSON.parse(JSON.stringify(json).replace(/</g, '&lt;').replace(/>/g, '&gt;')));
 
-                        configData[fileName.replace(path.join(__dirname + '/../../'), '')] = Object.assign({}, js, JSON.parse(JSON.stringify(json).replace(/</g, '&lt;').replace(/>/g, '&gt;')));
+                            Object.keys(json).concat(Object.keys(js)).forEach(function (key) {
+                                returnData[key] = {
+                                    path: dirpath,
+                                    data: json[key],
+                                    js: js[key]
+                                };
+                            });
+                        }
+                        catch (e) {
 
-                        Object.keys(json).concat(Object.keys(js)).forEach(function (key) {
-                            returnData[key] = {
-                                path: dirpath,
-                                data: json[key],
-                                js: js[key]
-                            };
-                        });
-                    }
-                    catch (e) {
-
+                        }
                     }
                 }
-            }
-            catch (e) {
-                log(new Date(), dirpath + '/' + item, e.message);
-            }
-        });
+                catch (e) {
+                    log(new Date(), dirpath + '/' + item, e.message);
+                }
+            });
+        }
     }
 
 })();

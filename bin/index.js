@@ -121,6 +121,7 @@ module.exports = function(options){
 
     fs.readdirSync(__dirname + '/../service' ).forEach(function (item) {
         try{
+            api.config(__dirname + '/../service/' + item + '/config'); 
             require(__dirname + '/../service/' + item)(configFn, helper);
         }catch(e){
             console.warn('\x1B[31m', 'item 配置加载失败 ' + new Date() + ' ==> ', e.message);  

@@ -6,23 +6,32 @@ module.exports = (function(){
         mete : getContent(__dirname +  '/../config/mete.json')
     };
 
+    var info = {
+        web:'发布的网站配置',
+        mete:'文件类型'
+    };
+
     return function (helper,request,response){
         if(!request){
             return data;
         }else{
             var mod = request.url.replace(/\/?((?!\/).)*\/*/,'');
-            var file = __dirname +  `/${mod}.json`;
-            helper.getBodyData(request).then(bodyData => {
-                if(bodyData){
-                    fs.writeFileSync(file, JSON.stringify(JSON.parse(bodyData), null, 4));
-                    data[mod] = JSON.parse(bodyData);
-                    response.end(null);
-                }else if(fs.existsSync(file)){
-                    response.end(fs.readFileSync(file).toString());
-                }else{
-                    response.end('{}');
-                }
-            });
+            if(!mod){
+                response.end(JSON.stringify(info)); 
+            }else{
+                var file = __dirname +  `/${mod}.json`;
+                helper.getBodyData(request).then(bodyData => {
+                    if(bodyData){
+                        fs.writeFileSync(file, JSON.stringify(JSON.parse(bodyData), null, 4));
+                        data[mod] = JSON.parse(bodyData);
+                        response.end(null);
+                    }else if(fs.existsSync(file)){
+                        response.end(fs.readFileSync(file).toString());
+                    }else{
+                        response.end('{}');
+                    }
+                });
+            }
         }
     };
 
