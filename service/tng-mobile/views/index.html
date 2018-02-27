@@ -3,7 +3,7 @@
     //element:toolbars,
     //methods:runBuild,showDialog
     ['Checkout', 'Update', 'Build', 'Deploy'].forEach(function (bar, index) {
-        var texts = ['Switch branch[' + window.$data.branch + ']', 'Update Code', 'One-click package deployment (with caution)', 'Select upload deployment'];
+        var texts = ['切换分支[' + window.$data.branch + ']', '更新代码', '一键部署', '选择上传部署'];
         var toolbar = document.createElement('div');
         var a = document.createElement('a');
         var message = document.createElement('ol');
@@ -18,8 +18,8 @@
 
             switch (bar) {
                 case 'Checkout':
-                    runBuild(bar, 'Get the branch list', 'branch=', toolbar, a, message, function (items) {
-                        contentEl.innerHTML = 'You can switch to the following branches.';
+                    runBuild(bar, '获取分支列表', 'branch=', toolbar, a, message, function (items) {
+                        contentEl.innerHTML = '你可以切换到下列分支.';
                         var bEl = document.createElement('select');
                         contentEl.appendChild(bEl);
 
@@ -30,27 +30,27 @@
                             bEl.appendChild(oEl);
                         });
 
-                        showDialog('Make sure to pack all/recently modified', contentEl, ['Confirm'], function () {
+                        showDialog('确保保存所有/最近修改。', contentEl, ['确定'], function () {
                             runBuild(bar, texts[0].replace(/\[.*\]+/, bEl.value), 'checkout=' + bEl.value, toolbar, a, message);
                         });
                     });
                     break;
                 case 'Update':
-                    showDialog('Update Code', 'Make sure to update all your code, and there may be conflicts.', ['Confirm'], function () {
+                    showDialog('更新代码', '确保更新所有代码，可能会出现冲突', ['确定'], function () {
                         runBuild(bar, texts[index], 'update=', toolbar, a, message);
                     });
                     break;
                 case 'Build':
-                    contentEl.innerHTML = '1. If the code is not submitted, then only the corresponding modules are packaged <br><br>2. Otherwise, the recent submission will be packaged, and the latest submission times <br>.';
+                    contentEl.innerHTML = '1。如果代码没有提交，那么只有相应的模块被打包<br><br>2。否则，最近的提交将被打包，并且最新的提交时间<br>。';
                     var sEl = document.createElement('select');
                     contentEl.appendChild(sEl);
                     for (var i = 0; i < 20; i++) {
                         var oEl = document.createElement('option');
                         oEl.value = i * 10;
-                        oEl.innerHTML = i ? ('Recently submitted ' + i * 10) : ('All Modules');
+                        oEl.innerHTML = i ? ('最近提交的' + i * 10 + '次') : ('所有模块');
                         sEl.appendChild(oEl);
                     }
-                    showDialog('Make sure to update all your code, and there may be conflicts', contentEl, ['Confirm'], function () {
+                    showDialog('确保更新所有代码，可能会出现冲突', contentEl, ['确定'], function () {
                         runBuild(bar, texts[index], 'build=' + sEl.value, toolbar, a, message);
                     });
                     break;
@@ -70,7 +70,7 @@
                             }
                         };
                     });
-                    showDialog('Publish the existing ZIP package', contentEl, ['Confirm'], function () {
+                    showDialog('发布现有的ZIP包', contentEl, ['确定'], function () {
                         runBuild(bar, texts[index], 'deploy=' + selectList.join(), toolbar, a, message);
                     });
                     break;

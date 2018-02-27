@@ -195,9 +195,9 @@
         var toolbars = document.getElementById('toolbar');
 
 
-        ['Remote','Push'].forEach(function(val,index){
+        ['远程','推送'].forEach(function(val,index){
             var toolbar = document.createElement('div');
-            toolbar.innerHTML = 'Open '+ val +' Debug';
+            toolbar.innerHTML = '打开'+ val +'调试';
             toolbars.append(toolbar);
             toolbar.onclick = function () {
                 var url = 'http://' + window.$data.options.ip + ':' + window.$data.options.weinre + '/client/#anonymous';
@@ -220,7 +220,7 @@
             item.append(a);
             list.append(item);
             action.title = JSON.stringify(version, null, 4);
-            action.innerHTML = 'Gulp Build <i>' + times(version.mtime) + '</i>';
+            action.innerHTML = '打包 <i>' + times(version.mtime) + '</i>';
             action.style.background = Object.keys(version).length ? '#9f9f9f' : '';
             a.innerHTML = dir;
 
@@ -230,7 +230,7 @@
             };
             action.onclick = function () {
                 var count = 0, interval = setInterval(function () {
-                    action.innerHTML = 'Build ' + (Array(count++ % 4 + 1).join('.'));
+                    action.innerHTML = '打包 ' + (Array(count++ % 4 + 1).join('.'));
                     action.style.background = '#99ff99';
                 }, 500);
 
@@ -238,7 +238,7 @@
                     runMessage(id, null, function () {
                         clearInterval(interval);
                         dirs[dir] = new Date();
-                        action.innerHTML = 'Gulp Build <i>' + times(new Date()) + '</i>';
+                        action.innerHTML = '打包 <i>' + times(new Date()) + '</i>';
                         action.style.background = '#9f9f9f';
                     });
                 });
@@ -325,7 +325,7 @@
                 document.body.removeChild(dialogBack);
             };
 
-            ['Cancel', ...btns].forEach(function (btn, index) {
+            ['取消', ...btns].forEach(function (btn, index) {
                 var button = document.createElement('a');
                 button.innerHTML = btn;
                 footer.appendChild(button);

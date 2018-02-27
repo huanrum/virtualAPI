@@ -34,9 +34,11 @@ module.exports = Object.assign({},file,net,resource,config,{
     /**
      * 获取当前git分支
      */
-    branch :function(){
+    branch :function(sourceDiv){
         try{
-            return child_process.execSync('git symbolic-ref --short -q HEAD').toString().split('\n').shift();
+            return child_process.execSync([
+                sourceDiv.split(':')[0] + ':', 'cd ' + sourceDiv.replace(/\\/g,'/'), 'git symbolic-ref --short -q HEAD'
+            ].join(' && ')).toString().split('\n').shift();
         }catch(e){
             return '';
         }

@@ -9,9 +9,7 @@ var backup = require('./../../../bin/backup');
 module.exports = (function () {
     var randomFn = random({});
 
-    return request;
-
-    function request(request, response, bodyData) {
+    return function (request, response, bodyData) {
         if(/^\/@?tngMobile/i.test(request.url)){
             try {
                 if (request.headers['mockapi']) {
@@ -52,7 +50,7 @@ module.exports = (function () {
             return Promise.resolve();
         }
         
-    }
+    };
 
     function _request(request, response, bodyData) {
         var urls = [

@@ -59,11 +59,17 @@ module.exports = (function () {
         return new Promise(succ => {
             var htmlPath = helper.config(__dirname +'/../../service/' + _path.replace('/views','') + '/views/index.html');
             var replace = `${options.ip}:${options.port}/${_path}`;
-            var dirs = {}, branch = helper.branch();
             var addToolbar = fs.existsSync(htmlPath)?fs.readFileSync(htmlPath).toString():'';
+            var divPath = helper.config(basePath + _path || basePath);
+            var dirs = {}, branch = helper.branch(divPath);
 
-            fs.readdirSync(helper.config(basePath + _path || basePath)).forEach(function (i) {
-                dirs[i] = '';
+            fs.readdirSync(divPath).forEach(function (i) {
+                var config = configs.filter(cfn => cfn.path && cfn.version && path.join(divPath +'/'+ i).indexOf(path.join(cfn.path)) !== -1).pop();
+                if(config){
+                    dirs[i] = config.version(i);
+                }else{
+                    dirs[i] = '';
+                }
             });
 
             if(/\/views\/*$/.test(_path)){

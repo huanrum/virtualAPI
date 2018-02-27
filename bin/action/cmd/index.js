@@ -8,7 +8,7 @@ module.exports = (function () {
         setTimeout(function () {
             messageFn('切换位置');
             runCmd(isChild, [
-                [sourceDiv.split(':')[0] + ':', 'cd ' + sourceDiv + '/' + dir, cmd].join(' && ')
+                [sourceDiv.split(':')[0] + ':', 'cd ' + sourceDiv.replace(/\\/g,'/') + '/' + dir, cmd].join(' && ')
             ], function (data) {
                 if (!data) {
                     messageFn('....');

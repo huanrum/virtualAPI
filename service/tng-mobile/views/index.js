@@ -3,7 +3,29 @@ var path = require('path');
 
 var helper = require('./../../../bin/helper');
 
-module.exports = function(file,content,merge){
+module.exports = {
+    path: helper.config(__dirname + '/../../../views/tng-mobile/'),
+    fn:views,
+    version:version,
+    files:[
+        '/commonGZ/js/language.js',
+        '/commonGZ/js/components.js',
+        '/commonGZ/js/wal_ca.js'
+    ]
+};
+
+
+function version(url) {
+        var _path = helper.config(__dirname + '/../../../views/tng-mobile/') + '/../builds/' + url + '.zip';
+        if (fs.existsSync(_path)) {
+            return fs.statSync(_path);
+        } else {
+            return '';
+        }
+    }
+
+
+function views(file,content,merge){
 
     var basePath = path.join(__dirname + '/../../../');
 
@@ -45,4 +67,4 @@ module.exports = function(file,content,merge){
             return macth;
         }
     });
-};
+}

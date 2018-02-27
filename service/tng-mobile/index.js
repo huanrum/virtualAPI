@@ -12,17 +12,6 @@ module.exports =  function (configFn, helper){
 
     configFn('action',action);
 
-    
-    configFn('views',{
-        path: helper.config(__dirname + '/../../views/tng-mobile/'),
-        fn:views,
-        files:[
-            '/commonGZ/js/language.js',
-            '/commonGZ/js/components.js',
-            '/commonGZ/js/wal_ca.js'
-        ]
-    });
-
-
+    configFn('views',views);
 };
 
