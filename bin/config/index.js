@@ -2,8 +2,8 @@ var fs = require("fs");
 
 module.exports = (function(){
     var data = {
-        web : JSON.parse(fs.readFileSync(__dirname +  '/../config/web.json').toString()),
-        mete : JSON.parse(fs.readFileSync(__dirname +  '/../config/mete.json').toString())
+        web : getContent(__dirname +  '/../config/web.json'),
+        mete : getContent(__dirname +  '/../config/mete.json')
     };
 
     return function (helper,request,response){
@@ -25,5 +25,13 @@ module.exports = (function(){
             });
         }
     };
+
+    function getContent(file){
+        if(fs.existsSync(file)){
+            return JSON.parse(fs.readFileSync(file).toString());
+        }else{
+            return {};
+        }
+    }
 
 })();
