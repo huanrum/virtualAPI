@@ -1,5 +1,6 @@
 var fs = require("fs");
 var http = require('http');
+var path = require('path');
 
 var  helper = require('./../helper');
 var  backup = require('./../backup');
@@ -17,20 +18,21 @@ module.exports = (function () {
         helper.getBodyData(request).then(bodyData => {
             var promises = configs.map(f => f(request, response, bodyData)).filter(i => !!i);
             if(!promises.length){
+                var api = path.join(request.headers.api).replace(':\\','://').replace(/\\/g,'/');
                 var options = {
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                         "Content-Length": bodyData.length
                     },
                     method: request.method,
-                    host: request.headers.api.split('//')[1].split(/(:|\/)/).shift(),
-                    port: parseInt(request.headers.api.split(':')[2] || 80),
-                    path: request.headers.api + (/\?/.test(request.headers.api)?'&':'?') + request.url.split('?').pop()
+                    host: api.split('//')[1].split(/(:|\/)/).shift(),
+                    port: parseInt(api.split(':')[2] || 80),
+                    path: api + (/\?/.test(api)?'&':'?') + (request.url.split('?')[1]||'')
                 };
                 
                 backup.ping(options.path).then(function(ping){
                     if(ping){
-                        console.log('\x1B[37m','use proxy : ' + request.headers.api);
+                        console.log('\x1B[37m','use proxy : ' + api);
                         var post_req = http.request(options, function (rsp) {
                             if (!/^4/.test(''+rsp.statusCode)) {
                                 helper.getResponse(rsp).then(responseText => {

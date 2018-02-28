@@ -6,7 +6,7 @@ module.exports = {
      * 提取域名或者IP
      */
     getDomain: function (url){
-        return /https?:\/\/(((?!\/).)*)/.exec(url)[1].split(':').shift();
+        return /https?:\/\/(((?!\/).)*)/.exec(url)[1].split(/[:\/\\]/).shift();
     },
     /**
      * 获取当前的IP地址
