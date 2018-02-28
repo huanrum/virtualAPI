@@ -202,7 +202,7 @@
             toolbar.onclick = function () {
                 var url = 'http://' + window.$data.options.ip + ':' + window.$data.options.weinre + '/client/#anonymous';
                 if(index){
-                    url = 'http://' + window.$data.options.ip + ':' + window.$data.options.port +'/bin/websocket/index.html'
+                    url = 'http://' + window.$data.options.ip + ':' + window.$data.options.port +'/bin/websocket/index.html?'+window.$data._path;
                 }
                 window.open(url);
             };

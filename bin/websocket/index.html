@@ -5,39 +5,21 @@
     <title>WebSocket Echo Demo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
-        #sendMessage{
+        #getMessage {
             width:90%;
-            height:400px;
-        }
-        #sendUrl{
-            width:90%;
-            height:100px;
-        }
-        #sendMessageType{
-            width:45%;
-            padding:0.5rem;
-        }
-        #sendMessageBtn,#sendUrlBtn{
-            width:45%;
-            padding:0.5rem;
-        }
-        #getMessage{
-            margin: 1rem;
+            margin: 1rem 0;
+            min-height:8rem;
         }
     </style>
+</head>
+
+<body>
+    <div class="vertical-center"></div>
+    <textarea id='getMessage' readonly></textarea>
     <script>
-        fetch(location.origin + '/tngMobile/pushType').then(res => res.json()).then(data=>{
-            var sendMessageType = document.getElementById('sendMessageType');
-            data.forEach(function(item) {
-                var op = document.createElement('option');
-                op.value = item.code;
-                op.innerHTML = item.name;
-                sendMessageType.appendChild(op);
-            });
-        });
-        fetch(location.origin + '/websocket?ip='+location.hostname).then(res => res.json()).then(req => {
+        fetch(location.origin + '/websocket?ip=' + location.hostname).then(res => res.json()).then(req => {
             var handle = Date.now();
-            var ws = new WebSocket(req.message);
+            window.ws = new WebSocket(req.message);
             ws.onopen = function (e) {
                 console.log('Connection to server opened');
                 ws.send(JSON.stringify({
@@ -46,56 +28,55 @@
                 }));
             }
             ws.onmessage = function (e) {
-                document.getElementById('getMessage').innerHTML =JSON.stringify(JSON.parse(e.data).data,4);
+                document.getElementById('getMessage').innerHTML = JSON.stringify(JSON.parse(e.data),null, 4);
             };
-            
-            //object.addEventListener("beforeunload", myScript);
-            document.getElementById('sendMessageBtn').onclick = sendMessage;
-            document.getElementById('sendUrlBtn').onclick = sendUrl;
-            window.onbeforeunload = function(){
+
+            window.onbeforeunload = function () {
                 ws.send(JSON.stringify({
                     action: 'logout'
                 }));
             };
 
-            function sendMessage() {
-                ws.send(JSON.stringify({
-                    data: {
-                        code:document.getElementById('sendMessageType').value,
-                        message:document.getElementById('sendMessage').value
-                    }
-                }));
-            }
-
-            function sendUrl(){
-                ws.send(JSON.stringify({
-                    data: {
-                        url:document.getElementById('sendUrl').value
-                    }
-                }));
-            }
         });
     </script>
-</head>
-
-<body>
-    <div class="vertical-center">
-        <div class="container">
-            <p>&nbsp;</p>
-            <textarea id="sendMessage" placeholder="Type text to echo in here"></textarea>
-            <br>
-            <select id="sendMessageType"></select>
-            <button id="sendMessageBtn">Send!</button>
-            <div id='getMessage'></div>
-        </div>
-        <br><br>
-        <div class="">
-            <p>&nbsp;</p>
-            <textarea id="sendUrl" placeholder="Send Url to client"></textarea>
-            <br>
-            <button id="sendUrlBtn">Send!</button>
-        </div>
-    </div>
+    <script>
+        var form = location.search.replace(/\?\/*views\/*/, '');
+        if (form) {
+            var script = document.createElement('script');
+            script.src = '../../service/'+form + '/websocket/index.js';
+            document.body.appendChild(script);
+        } else {
+            document.body.children[0].innerHTML = `
+                    <div class="">
+                        <p>&nbsp;</p>
+                        <textarea id="sendUrl" placeholder="Send Url to client"></textarea>
+                        <br>
+                        <button id="sendUrlBtn">Send!</button>
+                    </div>
+                    <div>
+                        <style>
+                            #sendUrl {
+                                width: 90%;
+                                height: 100px;
+                                padding: 0.5rem;
+                            }
+                            #sendUrlBtn {
+                                width: 90%;
+                                padding: 0.5rem;
+                            }
+                        </style>
+                    </div>
+                `;
+            document.getElementById('sendUrlBtn').onclick = sendUrl;
+            function sendUrl() {
+                ws.send(JSON.stringify({
+                    data: {
+                        url: document.getElementById('sendUrl').value
+                    }
+                }));
+            }
+        }
+    </script>
 </body>
 
 </html>

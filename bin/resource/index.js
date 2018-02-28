@@ -6,7 +6,7 @@ module.exports = {
      * @param {*} url 
      */
     test: function (url){
-        return /^\/*(bin|debug|lib|images|document)\/*/i.test(url);
+        return /^\/*(bin|service|debug|lib|images|document)\/*/i.test(url);
     },
     /**
      * 读取资源文件
@@ -14,9 +14,9 @@ module.exports = {
      */
     read: function (url){
         return new Promise(succ => {
-            if (fs.existsSync(__dirname + '/../../' + url)) {
+            if (fs.existsSync(__dirname + '/../../' + url.split('?').shift())) {
                 try {
-                    succ(fs.readFileSync(__dirname + '/../../' +  url));
+                    succ(fs.readFileSync(__dirname + '/../../' +  url.split('?').shift()));
                 }
                 catch (e) {
                     succ('The File Not Found');
