@@ -36,14 +36,17 @@ module.exports = (function () {
                         var post_req = http.request(options, function (rsp) {
                             if (!/^4/.test(''+rsp.statusCode)) {
                                 helper.getResponse(rsp).then(responseText => {
+                                    response.writeHead(rsp.statusCode, rsp.headers);
                                     response.end(responseText);
                                     backup.base(options.path,responseText.toString());
                                 });
                             }else{
+                                response.setHeader("Content-Type", 'text/plain;charset=utf-8');
                                 response.end(JSON.stringify({errorCode:rsp.statusCode}));
                             }
                         }).on('error', function(e){
-                            var errorMessage = '服务器错误/';
+                            var errorMessage = '服务器错误';
+                            response.setHeader("Content-Type", 'text/plain;charset=utf-8');
                             response.end(JSON.stringify({
                                 errorCode:e.code,
                                 errorEn:errorMessage,
@@ -56,6 +59,7 @@ module.exports = (function () {
                         }
                         post_req.end();
                     }else{
+                        response.setHeader("Content-Type", 'text/plain;charset=utf-8');
                         response.end(backup.base(options.path)); 
                     }
                 });

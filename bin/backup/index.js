@@ -33,12 +33,13 @@ module.exports = (function () {
     
 
     function ping(urls) {
+        var netInfo = helper.netInfo();
         if (!Array.isArray(urls)) {
             urls = [urls];
         }
-        if(helper.netInfo().offline){
+        if(netInfo.offline){
             return Promise.resolve(false);
-        }else if(urls.filter(function(i){return ping[helper.getDomain(i)];}).length){
+        }else if(urls.filter(function(i){return netInfo.address ===helper.getDomain(i) || ping[helper.getDomain(i)];}).length){
             return Promise.resolve(true);
         }else{
             return new Promise(function (succ) {

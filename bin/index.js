@@ -15,6 +15,7 @@ var db = require('./db');
 var api = require('./api');
 var random = require('./random');
 var permission = require('./permission');
+var framework = require('./framework');
 
 
 var createServer = function (options, exits) {
@@ -40,9 +41,12 @@ var createServer = function (options, exits) {
                     else if (/^\/*test\/+/.test(request.url)) {
                         response.end(JSON.stringify(true));
                     }
-                     //配置Web
+                    else if (/^\/*framework\/+/.test(request.url)) {
+                        framework(helper, request, response);
+                    }
+                    //配置Web
                     else if (/^\/*config\/+/.test(request.url)) {
-                        config(helper,request, response);
+                        config(helper, request, response);
                     }
                     //WEB操作控制服务端
                     else if (/^\/*action\/+/i.test(request.url)) {
@@ -68,7 +72,7 @@ var createServer = function (options, exits) {
                     else if (/^\/*random/.test(request.url)) {
                         helper.getBodyData(request).then(bodyData => {
                             response.writeHead(200, { 'Content-Type': 'text/plain;charset=utf-8' });
-                            response.end(JSON.stringify(randomFn(JSON.parse(bodyData||'{}'))));
+                            response.end(JSON.stringify(randomFn(JSON.parse(bodyData || '{}'))));
                         });
                     }
                     else {
@@ -80,7 +84,7 @@ var createServer = function (options, exits) {
                             }
                             else {
                                 response.writeHead(404, { 'Content-Type': 'text/html;charset=utf-8' });
-                                response.end(helper[404](options,'404 地址不存在'));
+                                response.end(helper[404](options, '404 地址不存在'));
                             }
                         });
                     }
@@ -101,16 +105,20 @@ var createServer = function (options, exits) {
 };
 
 
-module.exports = function(options){
+module.exports = function (options) {
     var weinrePort = options.weinre;
     var netInfo = helper.netInfo();
 
-    options = Object.assign(options,{ ip: netInfo.address, mac: netInfo.mac});
+    options = Object.assign(options, { ip: netInfo.address, mac: netInfo.mac });
 
     console.log('\x1B[31m', '服务器启动时间 ' + new Date());
 
-    createServer(options, 0);
-
+    if(options.kill){
+        kill(options);
+    }else{
+        createServer(options, 0);
+    }
+    
     websocket(options, 0);
 
     helper.initModule('weinre').then(function () {
@@ -119,18 +127,18 @@ module.exports = function(options){
         console.log('\x1B[32m', 'Weinre running at http://' + options.ip + ':' + weinrePort + '/');
     });
 
-    fs.readdirSync(__dirname + '/../service' ).forEach(function (item) {
-        try{
-            api.config(__dirname + '/../service/' + item + '/config'); 
+    fs.readdirSync(__dirname + '/../service').forEach(function (item) {
+        try {
+            api.config(__dirname + '/../service/' + item + '/config');
             require(__dirname + '/../service/' + item)(configFn, helper);
-        }catch(e){
-            console.warn('\x1B[31m', 'item 配置加载失败 ' + new Date() + ' ==> ', e.message);  
+        } catch (e) {
+            console.warn('\x1B[31m', 'item 配置加载失败 ' + new Date() + ' ==> ', e.message);
         }
     });
 
-    function configFn(type){
-        var args = Array.prototype.slice.call(arguments,1);
-        switch(type){
+    function configFn(type) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        switch (type) {
             case 'views':
                 views.config(...args);
                 break;
@@ -146,27 +154,29 @@ module.exports = function(options){
                 break;
         }
     }
-    
+
 };
 
 
-/*
-//会自动关闭浏览器，注释掉之后需要手动关闭所有相关进程
-child_process.exec(process.platform == 'win32' ? 'netstat -aon' : 'netstat –apn', function (err, stdout, stderr) {
-    var port = 8888, count = 0, thenList = [];
-    if (err) { return console.log(err); }
-    stdout.split('\n').filter(function (line) { return line.trim().split(/\s+/).length > 4; }).forEach(function (line) {
-        var p = line.trim().split(/\s+/);
-        if (process.platform == 'win32') {
-            p.splice(1, 0, "0");
-        }
-        if (p[2].split(':')[1] == port || p[3].split(':')[1] == port) {
-            ++count;
-            child_process.exec('taskkill /pid ' + p[5].split('/')[0] + ' -t -f ', function (err, stdout, stderr) {
-                createServer(port, --count);
-            });
-        }
+function kill(options) {
+    //会自动关闭浏览器，注释掉之后需要手动关闭所有相关进程
+    child_process.exec(process.platform == 'win32' ? 'netstat -aon' : 'netstat –apn', function (err, stdout, stderr) {
+        var count = 0;
+        if (err) { return console.log(err); }
+        stdout.split('\n').filter(function (line) { return line.trim().split(/\s+/).length > 4; }).forEach(function (line) {
+            var p = line.trim().split(/\s+/);
+            if (process.platform == 'win32') {
+                p.splice(1, 0, "0");
+            }
+            if (p[2].split(':')[1] == options.port || p[3].split(':')[1] == options.port) {
+                ++count;
+                child_process.exec('taskkill /pid ' + p[5].split('/')[0] + ' -t -f ', function (err, stdout, stderr) {
+                    createServer(options, --count);
+                });
+            }
+        });
+        createServer(options, count);
     });
-    createServer(port, count);
-});
-*/
+}
+
+
