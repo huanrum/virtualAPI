@@ -66,16 +66,13 @@ module.exports = (function () {
 
             fs.readdirSync(divPath).forEach(function (i) {
                 var config = configs.filter(cfn => cfn.path && cfn.version && path.join(divPath + '/' + i).indexOf(path.join(cfn.path)) !== -1).pop();
-                if (config) {
-                    dirs[i] = config.version(i);
-                } else {
-                    dirs[i] = '';
-                }
+                dirs['['+ helper.packTool(path.join(divPath + '/' + i)) + ']' + i] =  config?config.version(i):{};
             });
 
             if (/\/views\/*$/.test(_path)) {
-                Object.keys(helper.config()).forEach(function (i) {
-                    dirs[i] = '';
+                var allPath = helper.config();
+                Object.keys(allPath).forEach(function (i) {
+                    dirs['['+helper.packTool(allPath[i]) + ']' + i] = {};
                 });
             }
 

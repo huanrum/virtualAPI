@@ -7,35 +7,39 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>View List</title>
     <style>
-        @keyframes rotate_a{
-            0%{
-                transform:rotate(0deg);
+        @keyframes rotate_a {
+            0% {
+                transform: rotate(0deg);
             }
-            100%{
-                transform:rotate(360deg);
+            100% {
+                transform: rotate(360deg);
             }
         }
 
 
-        #setting{
+        #setting {
             position: relative;
-            transform-origin:10px 10px;
-            animation:rotate_a 10s linear infinite;
+            transform-origin: 10px 10px;
+            animation: rotate_a 10s linear infinite;
         }
 
-        #setting a,#setting:before,#setting:after{
+        #setting a,
+        #setting:before,
+        #setting:after {
             position: absolute;
-            top:0;
-            left:0;
+            top: 0;
+            left: 0;
             width: 0;
             height: 0;
             border: 10px solid #999999;
         }
-        #setting:before{
+
+        #setting:before {
             content: "";
             transform: rotate(30deg);
         }
-        #setting:after{
+
+        #setting:after {
             content: "";
             transform: rotate(60deg);
         }
@@ -175,7 +179,9 @@
 </head>
 
 <body>
-    <div id="setting"><a></a></div>
+    <div id="setting">
+        <a></a>
+    </div>
     <div id="toolbar"></div>
     <ul id="list"></ul>
     <script>
@@ -183,8 +189,8 @@
     </script>
     <script>
         var setting = document.getElementById('setting');
-        setting.onclick = function(){
-            window.open('http://' + window.$data.options.ip + ':' + window.$data.options.port +'/bin/config/index.html');
+        setting.onclick = function () {
+            window.open('http://' + window.$data.options.ip + ':' + window.$data.options.port + '/bin/config/index.html');
         };
 
     </script>
@@ -194,56 +200,67 @@
         var list = document.getElementById('list');
         var toolbars = document.getElementById('toolbar');
 
-        if(window.$data.netSegment){
-            ['远程','推送'].forEach(function(val,index){
-            var toolbar = document.createElement('div');
-            toolbar.innerHTML = '打开'+ val +'调试';
-            toolbars.append(toolbar);
-            toolbar.onclick = function () {
-                var url = 'http://' + window.$data.options.ip + ':' + window.$data.options.weinre + '/client/#anonymous';
-                if(index){
-                    url = 'http://' + window.$data.options.ip + ':' + window.$data.options.port +'/bin/websocket/index.html?'+window.$data._path;
-                }
-                window.open(url);
-            };
-        });
+        if (window.$data.netSegment) {
+            ['远程', '推送'].forEach(function (val, index) {
+                var toolbar = document.createElement('div');
+                toolbar.innerHTML = '打开' + val + '调试';
+                toolbars.append(toolbar);
+                toolbar.onclick = function () {
+                    var url = 'http://' + window.$data.options.ip + ':' + window.$data.options.weinre + '/client/#anonymous';
+                    if (index) {
+                        url = 'http://' + window.$data.options.ip + ':' + window.$data.options.port + '/bin/websocket/index.html?' + window.$data._path;
+                    }
+                    window.open(url);
+                };
+            });
         }
-    
+
         /*addToolbar:(function(){})();*/
 
-        Object.keys(dirs).sort(function (a, b) { return a.toLocaleLowerCase() > b.toLocaleLowerCase() ? 1 : -1 }).forEach(function (dir) {
-            var version = dirs[dir];
-
+        Object.keys(dirs).sort(function (a, b) { return a.toLocaleLowerCase() > b.toLocaleLowerCase() ? 1 : -1 }).forEach(function (_dir) {
+            var version = dirs[_dir];
+            var pack = /\[(.*)\]/.exec(_dir)[1];
+            var dir = _dir.replace(/\[(.*)\]/g, '');
             var item = document.createElement('li');
             var action = document.createElement('div');
             var a = document.createElement('a');
             item.append(action);
             item.append(a);
             list.append(item);
-            action.title = JSON.stringify(version, null, 4);
-            action.innerHTML = '打包 <i>' + times(version.mtime) + '</i>';
-            action.style.background = Object.keys(version).length ? '#9f9f9f' : '';
-            a.innerHTML = dir;
 
+            a.innerHTML = dir;
             a.onclick = function () {
-                window.open('http://' + window.$data.replace.replace(/\/\//g,'/') + '/' + dir);
+                window.open('http://' + window.$data.replace.replace(/\/\//g, '/') + '/' + dir);
                 fetch(location.origin + '/action/?scss=' + dir, { method: 'GET' })
             };
-            action.onclick = function () {
-                var count = 0, interval = setInterval(function () {
-                    action.innerHTML = '打包 ' + (Array(count++ % 4 + 1).join('.'));
-                    action.style.background = '#99ff99';
-                }, 500);
 
-                fetch(location.origin + '/action/?gulp=' + dir, { method: 'GET' }).then(function (r) { return r.text() }).then(function (id) {
-                    runMessage(id, null, function () {
-                        clearInterval(interval);
-                        dirs[dir] = new Date();
-                        action.innerHTML = '打包 <i>' + times(new Date()) + '</i>';
-                        action.style.background = '#9f9f9f';
+            if (pack) {
+                action.title = JSON.stringify(version, null, 4);
+                action.innerHTML = '<strong>'+ pack + '</strong>打包 <i>' + times(version.mtime) + '</i>';
+                action.style.background = Object.keys(version).length > 1 ? '#9f9f9f' : '';
+                action.style.color = '#' + (new Date(10000).setDate(Array.prototype.reduce.call(pack,(acc, val) => acc + val.charCodeAt(), 999999))).toString(16).slice(-8, -2);
+
+                action.onclick = function () {
+                    var count = 0, interval = setInterval(function () {
+                        action.innerHTML = '<strong>'+ pack + '</strong>打包 ' + (Array(count++ % 4 + 1).join('.'));
+                        action.style.background = '#99ff99';
+                    }, 500);
+
+                    fetch(location.origin + '/action/?' + pack.toLocaleLowerCase() + '=' + dir, { method: 'GET' }).then(function (r) { return r.text() }).then(function (id) {
+                        runMessage(id, null, function () {
+                            clearInterval(interval);
+                            dirs[dir] = new Date();
+                            action.innerHTML = '<strong>'+ pack + '</strong>打包 <i>' + times(new Date()) + '</i>';
+                            action.style.background = '#9f9f9f';
+                        });
                     });
-                });
-            };
+                };
+            }else{
+                action.innerHTML = '不需要打包';
+                action.style.background = '#f3f3f3';
+                action.style.color = '#d3d3d3';
+            }
+
         });
 
         function times(dt) {
@@ -265,7 +282,7 @@
                 if (msEl) {
                     data.forEach(i => {
                         var li = document.createElement('li');
-                        li.innerHTML = /^!!/.test(i)?'':i;
+                        li.innerHTML = /^!!/.test(i) ? '' : i;
                         msEl.appendChild(li);
                     });
                 }
@@ -290,7 +307,7 @@
                     clearInterval(interval);
                     a.innerHTML = text + ' <i>' + times(new Date()) + '</i>';
                     toolbar.style.background = '#9f9f9f';
-                    if(callback){
+                    if (callback) {
                         callback(data);
                     }
                 });
