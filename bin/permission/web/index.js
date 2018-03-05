@@ -36,11 +36,11 @@ module.exports = (function(){
         }
         //配置Web
         else if (/^\/*config\/+/.test(request.url)) {
-            return helper.getClientIp(request).indexOf(helper.netInfo().address) !== -1;
+            return helper.localhost(request);
         }
         //WEB操作控制服务端
         else if (/^\/*action\/+/i.test(request.url)) {
-            return helper.getClientIp(request).indexOf(helper.netInfo().address) !== -1;
+            return helper.localhost(request);
         }
         //资源文件
         else if (resource.test(request.url)) {

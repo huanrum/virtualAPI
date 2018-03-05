@@ -15,6 +15,20 @@ module.exports = {
             req.connection.socket.remoteAddress;
     },
     /**
+     * 客户端是否跟服务端在同一个网段
+     */
+    net: function(request){
+        var netSegment = this.netInfo().address.split('.').slice(0,-1).join('.');
+        return this.getClientIp(request).indexOf(netSegment) !== -1;
+    },
+    /**
+     * 是否是本机访问
+     */
+    localhost: function(request){
+        var clientIp = this.getClientIp(request).replace(/::(ffff:)?/, '');
+        return [this.netInfo().address, '127.0.0.1', '1'].indexOf(clientIp) !== -1;
+    },
+    /**
      * 
      * @param {*} request 
      */

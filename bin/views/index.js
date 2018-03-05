@@ -44,7 +44,7 @@ module.exports = (function () {
                     response.writeHead(302, { 'Location': onlyUrl + '/index.html' + (params ? '?' : '') + params });
                     response.end();
                 } else {
-                    views(options, onlyUrl).then(content => response.end(content));
+                    views(options, request, response, onlyUrl).then(content => response.end(content));
                 }
             } else {
                 transverter(options, request, response, file).then(content => response.end(content));
@@ -55,13 +55,14 @@ module.exports = (function () {
         }
     }
 
-    function views(options, _path) {
+    function views(options,request, response, _path) {
         return new Promise(succ => {
             var htmlPath = helper.config(__dirname + '/../../service/' + _path.replace('/views', '') + '/views/index.html');
             var replace = `${options.ip}:${options.port}/${_path}`;
             var addToolbar = fs.existsSync(htmlPath) ? fs.readFileSync(htmlPath).toString() : '';
             var divPath = helper.config(basePath + _path || basePath);
             var dirs = {}, branch = helper.branch(divPath);
+            var netSegment = helper.net(request) || helper.localhost(request);
 
             fs.readdirSync(divPath).forEach(function (i) {
                 var config = configs.filter(cfn => cfn.path && cfn.version && path.join(divPath + '/' + i).indexOf(path.join(cfn.path)) !== -1).pop();
@@ -79,7 +80,7 @@ module.exports = (function () {
             }
 
             succ(fs.readFileSync(__dirname + '/index.html', 'utf-8').toString().replace('window.$data = {};', 'window.$data = ' + decodeURIComponent(JSON.stringify({
-                _path: _path, dirs: dirs, replace: replace, options: options, branch: branch
+                _path: _path, dirs: dirs, replace: replace, options: options, branch: branch, netSegment:netSegment
             }, null, 4))).replace('/*addToolbar:(function(){})();*/', addToolbar.replace(/<\/?script>/gi, '')));
         });
     }
@@ -93,12 +94,11 @@ module.exports = (function () {
             var merge = request.url.split('?').pop().split('&').filter(i => /merge=/.test(i)).pop();
             var data = fs.readFileSync(file.replace(/\/\//g, '/'));
             if (/(\/|\\)index\.html/.test(file)) {
-                var clientIp = helper.getClientIp(request).replace(/::(ffff:)?/, '');
                 var weinre = options.ip + ':' + options.weinre;
                 var content = data.toString().replace(/\?\d+/g, '').replace(/<head>/, function (str) {
                     return str + '<title>' + path.basename(file.replace('index.html', '')) + '</title>';
                 }).replace(/<body((?!>).)*>/, function (str) {
-                    return str + '\n\t' + (options.ip !== '127.0.0.1' && options.weinre && [options.ip, '127.0.0.1', '1'].indexOf(clientIp) === -1 ? ('<script src="http://' + weinre + '/target/target-script-min.js#anonymous"></script>') : '');
+                    return str + '\n\t' + (options.ip !== '127.0.0.1' && options.weinre && !helper.localhost(request)? ('<script src="http://' + weinre + '/target/target-script-min.js#anonymous"></script>') : '');
                 });
 
                 filterConfigs.forEach(cfn => {

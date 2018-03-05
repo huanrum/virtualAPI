@@ -194,8 +194,8 @@
         var list = document.getElementById('list');
         var toolbars = document.getElementById('toolbar');
 
-
-        ['远程','推送'].forEach(function(val,index){
+        if(window.$data.netSegment){
+            ['远程','推送'].forEach(function(val,index){
             var toolbar = document.createElement('div');
             toolbar.innerHTML = '打开'+ val +'调试';
             toolbars.append(toolbar);
@@ -207,6 +207,7 @@
                 window.open(url);
             };
         });
+        }
     
         /*addToolbar:(function(){})();*/
 
