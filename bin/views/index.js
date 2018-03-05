@@ -33,26 +33,33 @@ module.exports = (function () {
         var file = helper.config(basePath + onlyUrl);
 
         if (fs.existsSync(file)) {
-            if (helper.type(type)) {
-                response.setHeader("Content-Type", helper.type(type));
-            } else {
-                response.setHeader("Content-Type", 'text/plain;charset=utf-8');
-            }
             if (fs.statSync(file).isDirectory()) {
-                if (fs.existsSync(file + '/index.html')) {
+                if(redirect(file)){
                     var params = request.url.split('?')[1] || '';
-                    response.writeHead(302, { 'Location': onlyUrl + '/index.html' + (params ? '?' : '') + params });
+                    response.writeHead(302, { 'Location': onlyUrl + '/' + redirect(file) + (params ? '?' : '') + params });
                     response.end();
                 } else {
+                    response.setHeader('Content-Type', 'text/html;charset=utf-8');
                     views(options, request, response, onlyUrl).then(content => response.end(content));
                 }
             } else {
+                response.setHeader("Content-Type", helper.type(type) || 'text/plain;charset=utf-8');
                 transverter(options, request, response, file).then(content => response.end(content));
             }
         } else {
             response.writeHead(404, { 'Content-Type': 'text/html;charset=utf-8' });
             response.end(helper[404](options,'地址不存在'));
         }
+    }
+
+    function redirect(file){
+        var defaultPages = ['index.html','default.html'];
+        for(var i=0;i<defaultPages.length;i++){
+            if (fs.existsSync(file + '/' + defaultPages[i])) {
+                return  defaultPages[i];
+            } 
+        }
+        return '';
     }
 
     function views(options,request, response, _path) {

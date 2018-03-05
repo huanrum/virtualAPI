@@ -15,9 +15,10 @@
                 transform: rotate(360deg);
             }
         }
-
+        
 
         #setting {
+            cursor: pointer;
             position: relative;
             transform-origin: 10px 10px;
             animation: rotate_a 10s linear infinite;
@@ -42,6 +43,29 @@
         #setting:after {
             content: "";
             transform: rotate(60deg);
+        }
+
+        #callback {
+            cursor: pointer;
+        }
+        #callback a {
+            position: absolute;
+            top: 40px;
+            left: 0;
+            width: 0;
+            height: 0;
+            border: 10px solid transparent;
+            border-left: 5px solid transparent; 
+            border-right-color: #00AAEF;
+        }
+
+        #callback a:after {
+            position: absolute;
+            top: -2.5px;
+            left: 10px;
+            width: 15px;
+            content: ' ';
+            border-top: 5px solid #00AAEF;
         }
 
         #toolbar {
@@ -76,7 +100,7 @@
         }
 
         #list li {
-            padding: 0.2rem 1rem;
+            padding: 0.7rem 1.0rem;
             border-bottom: 1px solid #d3d3d3;
         }
 
@@ -85,7 +109,7 @@
             width: 160px;
             text-align: center;
             cursor: pointer;
-            margin: 0.5rem;
+            margin: 0 0.5rem;
             color: green;
             border: 1px solid green;
         }
@@ -180,7 +204,10 @@
 
 <body>
     <div id="setting">
-        <a></a>
+        <a title="设置"></a>
+    </div>
+    <div id="callback">
+        <a title="关闭当前窗口"></a>
     </div>
     <div id="toolbar"></div>
     <ul id="list"></ul>
@@ -191,6 +218,10 @@
         var setting = document.getElementById('setting');
         setting.onclick = function () {
             window.open('http://' + window.$data.options.ip + ':' + window.$data.options.port + '/bin/config/index.html');
+        };
+        var callback = document.getElementById('callback');
+        callback.onclick = function () {
+            window.close();
         };
 
     </script>
@@ -236,13 +267,13 @@
 
             if (pack) {
                 action.title = JSON.stringify(version, null, 4);
-                action.innerHTML = '<strong>'+ pack + '</strong>打包 <i>' + times(version.mtime) + '</i>';
+                action.innerHTML = '<strong>' + pack + '</strong>打包 <i>' + times(version.mtime) + '</i>';
                 action.style.background = Object.keys(version).length > 1 ? '#9f9f9f' : '';
-                action.style.color = '#' + (new Date(10000).setDate(Array.prototype.reduce.call(pack,(acc, val) => acc + val.charCodeAt(), 999999))).toString(16).slice(-8, -2);
+                action.style.color = '#' + (new Date(10000).setDate(Array.prototype.reduce.call(pack, (acc, val) => acc + val.charCodeAt(), 999999))).toString(16).slice(-8, -2);
 
                 action.onclick = function () {
                     var count = 0, interval = setInterval(function () {
-                        action.innerHTML = '<strong>'+ pack + '</strong>打包 ' + (Array(count++ % 4 + 1).join('.'));
+                        action.innerHTML = '<strong>' + pack + '</strong>打包 ' + (Array(count++ % 4 + 1).join('.'));
                         action.style.background = '#99ff99';
                     }, 500);
 
@@ -250,15 +281,25 @@
                         runMessage(id, null, function () {
                             clearInterval(interval);
                             dirs[dir] = new Date();
-                            action.innerHTML = '<strong>'+ pack + '</strong>打包 <i>' + times(new Date()) + '</i>';
+                            action.innerHTML = '<strong>' + pack + '</strong>打包 <i>' + times(new Date()) + '</i>';
                             action.style.background = '#9f9f9f';
                         });
                     });
                 };
-            }else{
+            } else if (Object.keys(dirs).some(function (i) { return /\[.+\]/.test(i) })) {
                 action.innerHTML = '不需要打包';
+                action.style.borderColor = '#f3f3f3';
                 action.style.background = '#f3f3f3';
                 action.style.color = '#d3d3d3';
+            } else {
+                action.innerHTML = '&nbsp;';
+                action.style.width = '30px';
+                if (/\.(png|jpg|jpeg|svg)$/.test(dir)) {
+                    action.style.background = 'url(http://' + window.$data.replace.replace(/\/\//g, '/') + '/' + dir + ')';
+                    action.style.backgroundSize = '32px 23px';
+                } else {
+                    action.style.background = 'rgb(218, 232, 161)';
+                }
             }
 
         });
