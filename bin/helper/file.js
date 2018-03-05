@@ -85,18 +85,24 @@ module.exports = (function () {
          * 获取相应的打包工具
          */
         packTool: function (dir) {
-            var allfiles = fs.readdirSync(dir);
-            if (allfiles.some(i => i.toLocaleLowerCase() === 'gulpfile.js')) {
-                return 'Gulp';
-            } else if (allfiles.some(i => i.toLocaleLowerCase() === 'gruntfile.js')) {
-                return 'Grunt';
-            } else if (allfiles.some(i => i.toLocaleLowerCase() === 'webpack.config.js')) {
-                return 'Webpack';
-            } else if (path.dirname(dir) !== dir) {
-                return this.packTool(path.dirname(dir));
-            } else {
+            
+            if(fs.statSync(dir).isDirectory()){
+                var allfiles = fs.readdirSync(dir);
+                if (allfiles.some(i => i.toLocaleLowerCase() === 'gulpfile.js')) {
+                    return 'Gulp';
+                } else if (allfiles.some(i => i.toLocaleLowerCase() === 'gruntfile.js')) {
+                    return 'Grunt';
+                } else if (allfiles.some(i => i.toLocaleLowerCase() === 'webpack.config.js')) {
+                    return 'Webpack';
+                } else if (path.dirname(dir) !== dir) {
+                    return this.packTool(path.dirname(dir));
+                } else {
+                    return '';
+                }
+            }else{
                 return '';
             }
+            
         }
     };
 })();
