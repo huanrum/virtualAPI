@@ -90,8 +90,8 @@
         .common-dialog-back .common-dialog.max-window {
             width: 96%;
             height: 96%;
-            left: 2%!important;
-            top: 2%!important;
+            left: 2% !important;
+            top: 2% !important;
             margin-left: 0;
             transform: none;
         }
@@ -229,7 +229,8 @@
                 legend.innerHTML = item.file.split(/[\/\\]/).filter(i => !!i).pop();
                 legend.style.color = '#' + new Date(10000).setYear(charCount).toString(16).slice(-8, -2);
                 Object.keys(item.config).forEach(function (key) {
-                    content.appendChild(createItem(key.match(/^\[(.*)\]/), key, item.config[key], item.file === 'config/base.json'));
+                    content.appendChild(createItem(key.match(/^\[(.*)\]/), key, item.config[key], item.file ===
+                        'config/base.json'));
                 });
                 if (!Object.keys(item.config).length) {
                     legend.style.textDecoration = 'line-through';
@@ -241,7 +242,7 @@
                 content.appendChild(contentEl);
                 if (item !== 'api') {
                     content.style.display = 'none';
-                }else{
+                } else {
                     legend.innerHTML = item + ' <i>[Test]</i>';
                 }
             }
@@ -272,7 +273,7 @@
             method.innerHTML = (methodData && methodData[1] || 'GET').toLocaleUpperCase();
             method.style.color = methodColor[method.innerHTML];
 
-            url.innerHTML = urlData.split('?')[0].replace(/^\[.*\]/, '');
+            url.innerHTML = urlData.split('?')[0].replace(/^\[.*\]/, '').replace(/\(.*\)/g, '');
             returnElement.style.display = 'none';
             returnElement.readOnly = true;
             returnElement.value = linefeed(JSON.stringify(returnData, null, 4));
@@ -294,7 +295,8 @@
                     });
                 }
                 urlElement.style.color = '#6666ff';
-                showDialog(isDisable, method.innerHTML, url.innerHTML, JSON.stringify(returnData), default_data, function (disable) {
+                showDialog(isDisable, method.innerHTML, urlData, JSON.stringify(returnData), default_data, function (
+                    disable) {
                     if (disable === undefined) {
                         urlElement.style.color = null;
                     } else {
@@ -309,8 +311,11 @@
 
         function linefeed(str) {
             return str;
-            var live = 0, line = false;
-            var br = function () { return line ? '' : '<br>'; }
+            var live = 0,
+                line = false;
+            var br = function () {
+                return line ? '' : '<br>';
+            }
             for (var i = 0; i < str.length; i++) {
                 if (str[i] === '"' && str[i - 1] !== '\\') {
                     line = !line;
@@ -328,18 +333,21 @@
                             str = str.slice(0, i + 1) + br() + Array(live + 1).join('    ') + str.slice(i + 1);
                             i = i + live * 4 + 4;
                         } else {
-                            str = str.slice(0, i) + br() + Array(live).join('    ') + str[i] + br() + Array(live + 1).join('    ') + str.slice(i + 1);
+                            str = str.slice(0, i) + br() + Array(live).join('    ') + str[i] + br() + Array(live + 1).join(
+                                '    ') + str.slice(i + 1);
                             i = i + live * 4 + live * 4 + 4;
                         }
                         break;
                     case '}':
                         live = live - 1;
-                        if (',;[]'.indexOf(str[i + 1]) === -1) {//下一个不是这些符号
-                            str = str.slice(0, i) + br() + Array(live + 1).join('    ') + '}' + Array(live + 1).join('    ') + str.slice(i + 1);
+                        if (',;[]'.indexOf(str[i + 1]) === -1) { //下一个不是这些符号
+                            str = str.slice(0, i) + br() + Array(live + 1).join('    ') + '}' + Array(live + 1).join(
+                                '    ') + str.slice(i + 1);
                             i = i + live * 4 + live * 4 + 4;
                         } else {
-                            if (',;'.indexOf(str[i + 1]) === -1) {//下一个不是这些符号
-                                str = str.slice(0, i) + br() + Array(live + 1).join('    ') + '}' + br() + Array(live).join('    ') + str.slice(i + 1);
+                            if (',;'.indexOf(str[i + 1]) === -1) { //下一个不是这些符号
+                                str = str.slice(0, i) + br() + Array(live + 1).join('    ') + '}' + br() + Array(live).join(
+                                    '    ') + str.slice(i + 1);
                                 i = i + live * 4 + live * 4;
                             } else {
                                 str = str.slice(0, i) + br() + Array(live + 1).join('    ') + '}' + str.slice(i + 1);
@@ -401,7 +409,7 @@
             function initHeader() {
                 var title = document.createElement('label');
                 var close = document.createElement('a');
-                title.innerHTML = urlData;
+                title.innerHTML = urlData.split('?')[0].replace(/^\[.*\]/, '').replace(/\(.*\)/g, '');
                 close.innerHTML = '&times;';
                 header.appendChild(title);
                 header.appendChild(close);
@@ -413,7 +421,8 @@
                     } else {
                         dialog.className = dialog.className + ' max-window';
                         message.style.maxWidth = 'none';
-                        message.style.maxHeight = dialog.offsetHeight - header.offsetHeight - content.offsetHeight - footer.offsetHeight - 45 + 'px';
+                        message.style.maxHeight = dialog.offsetHeight - header.offsetHeight - content.offsetHeight -
+                            footer.offsetHeight - 45 + 'px';
                     }
                 };
                 close.onclick = function () {
@@ -421,30 +430,33 @@
                     callback();
                 };
             }
+
             function initContent() {
                 var el_data = {};
-                match(urlData, false);
-                match(returnData, true);
+                match(urlData.split('?')[0].replace(/^\[.*\]/, '').replace(/\(.*\)/g, '').match(/:[0-9a-zA-Z_]+/g),
+                    false);
+                match(returnData.match(/:[0-9a-zA-Z_]+/g), true);
+                match(urlData.match(/\(.*\)/g) && urlData.match(/\(.*\)/g)[0].replace(/[\(\)]/g, '').split(','), true);
                 return el_data;
 
-                function match(str, enumerable) {
-                    var parms = str.match(/:[0-9a-zA-Z_]+/g);
+                function match(parms, enumerable) {
                     if (parms) {
-                        parms.forEach(function (key) {
-                            if (/:(null|false|true|undefined|\d+)/.test(key)) {
+                        parms.forEach(function (key_type) {
+                            var kts = key_type.split(':').filter(i => !!i);
+                            if (/:(null|false|true|undefined|\d+)/.test(kts[0])) {
                                 return;
                             }
-                            if (typeof el_data[key.replace(':', '')] === 'undefined' && !/:\d+/.test(key)) {
-                                Object.defineProperty(el_data, key.replace(':', ''), {
+                            if (typeof el_data[kts[0]] === 'undefined' && !/:\d+/.test(kts[0])) {
+                                Object.defineProperty(el_data, kts[0], {
                                     enumerable: enumerable,
-                                    get: initRow(key, default_data[key.replace(':', '')], enumerable)
+                                    get: initRow(kts[0], kts[1], default_data[kts[0]], enumerable)
                                 });
                             }
                         });
                     }
                 }
 
-                function initRow(key, dafaultValue, nullable) {
+                function initRow(key, type, dafaultValue, nullable) {
                     var row = document.createElement('div');
                     var label = document.createElement('div');
                     var value = document.createElement('input');
@@ -456,9 +468,22 @@
                     setTimeout(function () {
                         value.focus();
                     }, 200);
-                    return function () {
-                        return value.value;
-                    };
+
+                    switch (type) {
+                        case 'file':
+                            var file = null;
+                            value.type = 'file';
+                            value.onchange = function (evt) {
+                                file = (evt.__files_ || (evt.target && evt.target.files))[0];
+                            };
+                            return function () {
+                                return file;
+                            };
+                        default:
+                            return function () {
+                                return value.value;
+                            };
+                    }
                 }
             }
 
@@ -483,7 +508,11 @@
                 confrom.style.opacity = isDisable ? 0.2 : 1.0;
 
                 disable.onclick = function () {
-                    http(urlData.split('/').map(function (i) { return /:/.test(i) && el_data[i.replace(':', '')] || i; }).join('/'), { disable: !isDisable }).then(function (req) {
+                    http(urlData.split('/').map(function (i) {
+                        return /:/.test(i) && el_data[i.replace(':', '')] || i;
+                    }).join('/'), {
+                        disable: !isDisable
+                    }).then(function (req) {
                         if (req.status === 200) {
                             return req.json();
                         }
@@ -509,7 +538,9 @@
                         message.innerHTML = '此API不可用！';
                         return;
                     }
-                    http(urlData.split('/').map(function (i) { return /:/.test(i) && el_data[i.replace(':', '')] || i; }).join('/')).then(function (req) {
+                    http(urlData.split('/').map(function (i) {
+                        return /:/.test(i) && el_data[i.replace(':', '')] || i;
+                    }).join('/'), {}).then(function (req) {
                         if (req.status === 200) {
                             return req.json();
                         }
@@ -520,7 +551,9 @@
                 };
 
                 copy.onclick = function (item) {
-                    if (isDisable) { return; }
+                    if (isDisable) {
+                        return;
+                    }
                     var textarea = document.createElement("textarea");
                     textarea.style.position = 'fixed';
                     textarea.style.opacity = 0.01;
@@ -546,6 +579,7 @@
                 }, 100);
 
                 function http(urlFull, headers) {
+                    urlFull = urlFull.replace(/^\[.*\]/, '').replace(/\(.*\)/g, '');
                     if (/:/.test(urlFull)) {
                         message.innerHTML = "必填参数没有填写";
                     } else {
@@ -558,10 +592,20 @@
                                 headers: headers
                             });
                         } else {
+                            var formData = el_data;
+                            if(Object.keys(el_data).filter(i => el_data[i] instanceof  Blob).length){
+                                var formData = new FormData();
+                                Object.keys(el_data).forEach(function (k) {
+                                    if (el_data[k]) {
+                                        formData.append(k, el_data[k]);
+                                    }
+                                });
+                                //headers['Content-Type'] = 'multipart/form-data;boundary=AaB03x;';
+                            }
                             return fetch(urlFull, {
                                 method: methodData,
                                 headers: headers,
-                                body: JSON.stringify(el_data)
+                                body: formData
                             });
                         }
                     }
@@ -602,6 +646,7 @@
                     element.style.cursor = 'default';
                     window.removeEventListener('mousemove', mousemove);
                 });
+
                 function mousedown(e) {
                     var style = window.getComputedStyle(element);
                     temp.e = e;
@@ -610,6 +655,7 @@
                     element.style.cursor = 'move';
                     window.addEventListener('mousemove', mousemove);
                 }
+
                 function mousemove(e) {
                     element.style.left = e.clientX - temp.x + 'px';
                     element.style.top = e.clientY - temp.y + 'px';

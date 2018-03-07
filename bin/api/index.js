@@ -10,6 +10,7 @@ var log = require("./../log");
 
 module.exports = (function () {
 
+    var defaultReturn = {message:'根据具体逻辑处理返回'};
     var returnData = {}, configData = {}, disableList = [];
     var configs = [];
 
@@ -46,7 +47,7 @@ module.exports = (function () {
         } else {
             return new Promise(succ => {
                 helper.getBodyData(request).then(bodyData => {
-                    var promises = configs.map(f => f(request, response, bodyData)).filter(i => !!i);
+                    var promises = configs.map(f => f(request, response, bodyData.toString())).filter(i => !!i);
                     if (!promises.length) {
                         succ();
                     }
@@ -59,7 +60,7 @@ module.exports = (function () {
             return new Promise(succ => {
                 helper.getBodyData(request).then(bodyData => {
                     var randomFn = random({ path: returnData[key].path, IP: options.ip, PORT: options.port, WEBSOCKET: options.websocket, weinre: options.weinre, device: options.mac });
-                    var data = returnResult(key, request, JSON.parse(bodyData || '{}'));
+                    var data = returnResult(key, request, toObject(bodyData.toString() || '{}'));
                     if (data) {
                         response.writeHead(200, { 'Content-Type': 'text/plain;charset=utf-8' });
                         response.end(JSON.stringify(randomFn(data)));
@@ -68,6 +69,14 @@ module.exports = (function () {
                     }
                 });
             });
+
+            function toObject(data){
+                try{
+                    return JSON.parse(data);
+                }catch(e){
+                    return {};
+                }
+            }
         }
 
         function countValue(filterUrls) {
@@ -86,7 +95,7 @@ module.exports = (function () {
 
     function returnResult(key, request, bodyData) {
         var parameters = getParameters(key, request.url.split('?'), request.headers);
-        var configStr = JSON.stringify(typeof returnData[key].js === 'function' ? returnData[key].js(JSON.parse(JSON.stringify(returnData[key].data)), parameters, bodyData) : returnData[key].data);
+        var configStr = JSON.stringify(typeof returnData[key].js === 'function' ? returnData[key].js(JSON.parse(JSON.stringify(returnData[key].data || defaultReturn)), parameters, bodyData, request) : returnData[key].data);
         debugFn(request, parameters, bodyData, returnData[key].data, log);
         if (typeof returnData[key].js === 'function') {
             console.log('\x1B[30m', 'use api :' + key);
@@ -146,13 +155,14 @@ module.exports = (function () {
                     } else if (/\.(js|json)$/.test(item)) {
                         try {
                             var fileName = path.join(dirpath + '/' + item.replace(/\.(js|json)$/, ''));
-                            var js = fs.existsSync(fileName + '.js') ? require(fileName + '.js') : {};
+                            var js = fs.existsSync(fileName + '.js') ? require(fileName + '.js') : {}, jsNew = {};
                             var json = fs.existsSync(fileName + '.json') ? JSON.parse(fs.readFileSync(fileName + '.json') || '{}') : {};
 
-                            configData[fileName.replace(path.join(__dirname + '/../../'), '')] = Object.assign({}, js, JSON.parse(JSON.stringify(json).replace(/</g, '&lt;').replace(/>/g, '&gt;')));
+                            Object.keys(js).forEach(k => jsNew[k] = typeof js[k] === 'function'?defaultReturn:js[k]);
+                            configData[fileName.replace(path.join(__dirname + '/../../'), '')] = Object.assign({}, jsNew, JSON.parse(JSON.stringify(json).replace(/</g, '&lt;').replace(/>/g, '&gt;')));
 
                             Object.keys(json).concat(Object.keys(js)).forEach(function (key) {
-                                returnData[key] = {
+                                returnData[key.replace(/\(.*\)/g,'')] = {
                                     path: dirpath,
                                     data: json[key],
                                     js: js[key]

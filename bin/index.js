@@ -72,7 +72,7 @@ var createServer = function (options, exits) {
                     else if (/^\/*random/.test(request.url)) {
                         helper.getBodyData(request).then(bodyData => {
                             response.writeHead(200, { 'Content-Type': 'text/plain;charset=utf-8' });
-                            response.end(JSON.stringify(randomFn(JSON.parse(bodyData || '{}'))));
+                            response.end(JSON.stringify(randomFn(JSON.parse(bodyData.toString() || '{}'))));
                         });
                     }
                     else {

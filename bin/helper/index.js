@@ -1,3 +1,4 @@
+
 var child_process = require('child_process');
 
 var file = require('./file');
@@ -12,12 +13,23 @@ module.exports = Object.assign({},file,net,resource,config,error,{
      * @param {*配置} option 
      * @param {*端口} weinre 
      */
-    initModule: function (module) {
+    initModule: function (modules) {
+        if(!(modules instanceof Array)){
+            modules = [modules];
+        }
         return new Promise(succ => {
-            init(succ,4);
+            var results = [];
+            Promise.all(modules.map((module,index) => {
+                return new Promise(resolve => {
+                    init(module,res =>{
+                        results[index] = res;
+                        resolve();
+                    },4);
+                });
+            })).then(() => succ(...results));
         });
 
-        function init(succ,count){
+        function init(module,succ,count){
             if(!count){return ;}
             try {
                 succ(require(module));
@@ -26,7 +38,7 @@ module.exports = Object.assign({},file,net,resource,config,error,{
                     if(err){
                         console.log('\x1B[32m',`获取 ${module} 失败`);
                     }
-                    init(succ,--count);
+                    init(module,succ,--count);
                 });
             }
         }

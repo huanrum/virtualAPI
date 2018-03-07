@@ -7,7 +7,7 @@ module.exports = (function () {
     return function (request, response) {
 
         helper.getBodyData(request).then(bodyData => {
-            return sqlite(request, response, JSON.parse(bodyData||'{}'));
+            return sqlite(request, response, JSON.parse(bodyData.toString()||'{}'));
         });
 
     };

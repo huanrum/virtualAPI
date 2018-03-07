@@ -21,6 +21,7 @@ module.exports = (function(){
             }else{
                 var file = __dirname +  `/${mod}.json`;
                 helper.getBodyData(request).then(bodyData => {
+                    bodyData = bodyData.toString();
                     if(bodyData){
                         fs.writeFileSync(file, JSON.stringify(JSON.parse(bodyData), null, 4));
                         data[mod] = JSON.parse(bodyData);

@@ -12,6 +12,7 @@ module.exports = (function () {
             var type = url.split('?').pop();
             var file = __dirname + '/../../cache/' + key + '.json';
 
+            value = value.toString();
             helper.mkdirs(file.replace(/\/+((?!\/).)*$/, ''))
 
             if (!value) {
