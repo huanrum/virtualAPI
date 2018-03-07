@@ -103,6 +103,28 @@ module.exports = (function () {
                 return '';
             }
             
+        },
+
+        upload: function(request,dirPath){
+            this.initModule(['multiparty','express']).then(multiparty => {
+                try{
+                    var form = new multiparty.Form();
+                    form.encoding = 'utf-8';
+                    form.uploadDir = dirPath;
+                    //设置单文件大小限制
+                    form.maxFilesSize = 2 * 1024 * 1024;
+                    
+                    form.on('error',function(e){
+                        console.log(request.url,e);
+                    });
+                    
+                    form.parse(request, function (err, fields, files) {
+                        console.log(fields);
+                    });
+                }catch(e){
+                    console.log(request.url,e);
+                }
+            });
         }
     };
 })();
