@@ -105,10 +105,6 @@ var createServer = function (options, exits) {
 };
 
 
-process.on('uncaughtException', function(err) {
-    console.error('Error caught in uncaughtException event:', err);
-});
-
 module.exports = function (options) {
     var weinrePort = options.weinre;
     var netInfo = helper.netInfo();

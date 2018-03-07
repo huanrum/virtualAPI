@@ -97,10 +97,10 @@ module.exports = (function () {
         var parameters = getParameters(key, request.url.split('?'), request.headers);
         var configStr = JSON.stringify(typeof returnData[key].js === 'function' ? returnData[key].js(JSON.parse(JSON.stringify(returnData[key].data || defaultReturn)), parameters, bodyData, request) : returnData[key].data);
         debugFn(request, parameters, bodyData, returnData[key].data, log);
-        if (typeof returnData[key].js === 'function') {
-            console.log('\x1B[30m', 'use api :' + key);
+        if (typeof (returnData[key]&&returnData[key].js) === 'function') {
+            console.log('\x1B[38m', 'use localhost api :' + key);
         } else {
-            console.log('\x1B[30m', 'use random :' + key);
+            console.log('\x1B[39m', 'use random :' + key);
         }
         if (Object.keys(request.headers).indexOf('disable') !== -1) {
             if (request.headers.disable === 'true') {
