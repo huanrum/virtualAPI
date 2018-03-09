@@ -7,7 +7,9 @@ var resource = require('./resource');
 var config = require('./config');
 var error = require('./error');
 
-module.exports = Object.assign({},file,net,resource,config,error,{
+function Helper(){}
+
+module.exports = Object.assign(new Helper(),file,net,resource,config,error,{
     /**
      * 获取对应的依赖包，若没有就安装
      * @param {*配置} option 

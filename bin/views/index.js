@@ -100,7 +100,7 @@ module.exports = (function () {
             if (/(\/|\\)index\.html/.test(file)) {
                 var weinre = options.ip + ':' + options.weinre;
                 var content = data.toString().replace(/\?\d+/g, '').replace(/<head>/, function (str) {
-                    return str + '<title>' + path.basename(file.replace('index.html', '')) + '</title>';
+                    return str + /<title>.*<\/title>/.test(data.toString())?(''):('<title>' + path.basename(file.replace('index.html', '')) + '</title>');
                 }).replace(/<body((?!>).)*>/, function (str) {
                     return str + '\n\t' + (options.ip !== '127.0.0.1' && options.weinre && !helper.localhost(request)? ('<script src="http://' + weinre + '/target/target-script-min.js#anonymous"></script>') : '');
                 });

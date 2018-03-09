@@ -5,7 +5,9 @@ var path = require('path');
 module.exports = (function () {
 
     return {
-
+        webName: function(_path){
+            return _path.split('\\service\\').pop().split('\\').shift();
+        },
         /**
          * 创建路径
          */
@@ -13,6 +15,21 @@ module.exports = (function () {
             if (dirpath && !fs.existsSync(dirpath)) {
                 this.mkdirs(dirpath.replace(/\/*((?!\/).)*$/, ''));
                 fs.mkdirSync(dirpath);
+            }
+        },
+        rmdirs: function(_path) {
+            var files = [];
+            if( fs.existsSync(_path) ) {
+                files = fs.readdirSync(_path);
+                files.forEach(function(file,index){
+                    var curPath = _path + "/" + file;
+                    if(fs.statSync(curPath).isDirectory()) { // recurse
+                        this.rmdirs(curPath);
+                    } else { // delete file
+                        fs.unlinkSync(curPath);
+                    }
+                });
+                fs.rmdirSync(_path);
             }
         },
         /**
