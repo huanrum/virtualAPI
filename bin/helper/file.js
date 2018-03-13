@@ -13,7 +13,7 @@ module.exports = (function () {
          */
         mkdirs: function (dirpath) {
             if (dirpath && !fs.existsSync(dirpath)) {
-                this.mkdirs(dirpath.replace(/\/*((?!\/).)*$/, ''));
+                this.mkdirs(path.dirname(dirpath));
                 fs.mkdirSync(dirpath);
             }
         },

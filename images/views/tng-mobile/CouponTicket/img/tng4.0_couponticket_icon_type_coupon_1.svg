@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<!-- Common CSS -->
+	<link type="text/css" rel="stylesheet" href="../common/css/tng.css" />
+	<!-- CommonGZ CSS -->
+	<link type="text/css" rel="stylesheet" href="../commonGZ/css/lib.css" />
+	<link type="text/css" rel="stylesheet" href="../commonGZ/css/_touch.css" />
+	<link type="text/css" rel="stylesheet" href="../commonGZ/css/fdl.css" />
+	<link type="text/css" rel="stylesheet" href="../commonGZ/css/swiper-3.4.2.min.css">
+	<!-- Module CSS -->
+
+	<link type="text/css" rel="stylesheet" href="./css/index.css" />
+</head>
+
+<body>
+	<div id="devJS">
+	<script src="/views/tng-mobile/_dev/dev.js"></script>
+	
+<script src="/views/tng-mobile/_dev/dev/base.js"></script>
+	
+<script src="/views/tng-mobile/_dev/dev/editor.js"></script>
+	
+<script src="/views/tng-mobile/_dev/dev/extend.js"></script>
+	
+<script src="/views/tng-mobile/_dev/dev/login.js"></script>
+	
+<script src="/views/tng-mobile/_dev/dev/native.js"></script>
+	
+<script src="/views/tng-mobile/_dev/dev/others/behavior.js"></script>
+	
+<script src="/views/tng-mobile/_dev/dev/style.js"></script>
+	
+	</div>
+	
+	
+
+	<global-elements></global-elements>
+
+	<div id="app"></div>
+
+	<!-- Common JavaScript -->
+
+	<script src="http://maps.google.cn/maps/api/js?key=AIzaSyDQRe2FVROC6ZkO8eWEkSwhwT_dfrJoKlk"></script>
+
+	<!-- build:tng -->
+	<script src="../common/js/tng.js" type="text/javascript"></script>
+	<!-- endbuild -->
+	<script src="../commonGZ/loader.js"></script>
+	<script src="../commonGZ/lib/libphonenumber.js"></script>
+	<script src="../commonGZ/lib/qrcode.min.js"></script>
+	<script src="../commonGZ/lib/swiper-3.4.2.min.js"></script>
+
+
+	<script src="../common/data/tng-language.js" type="text/javascript"></script>
+	<!-- Module Language -->
+	<script src="data/language.js"></script>
+
+
+	<script>
+		lazyload([
+			["css", "../commonTemplate/css/purchaseSummaryTemplate.css"],
+			["css", "../commonTemplate/css/activityHistoryListTemplate.css"],
+			["css", "../commonTemplate/css/thankYouPageTemplate.css"],
+
+			["js", "../commonTemplate/data/purSum_lang.js"],
+			["js", "data/language.js"],
+
+			["js", "../commonGZ/js/lib.js?merge=true"],
+			["js", "../commonGZ/lib/vue-scroller.min.js"],
+			["js", "../commonGZ/js/_touch.js"],
+			["js", "../commonGZ/js/commonPage.js"],
+			["js", "../txPin/js/txPin.js"],
+
+			["module", "textBox"]
+
+		]).then(function () {
+			return lazyload([
+                ["js", "../textBox/js/textBox.js?merge=true"]
+			]);
+		}).then(function () {
+			return lazyload([
+			["js", "../commonGZ/js/models.js"],
+				["js", "../commonTemplate/js/activityHistoryTemplate.js?merge=true"],
+				["js", "../commonTemplate/js/purchaseSummaryTemplate.js?merge=true"],
+				["js", "../commonTemplate/js/thankYouPageTemplate.js?merge=true"]
+			]);
+		}).then(function(){
+			return lazyload([
+				["js", "js/common.js?merge=true"],
+				["js", "js/scripts.js?merge=true"]
+			]);
+		}).then(function(){
+			lazyload([
+				["js", "js/app.js"]
+			]);
+		})
+	</script>
+
+</body>
+
+</html>

@@ -95,7 +95,7 @@ module.exports = (function () {
 
     function returnResult(key, request, bodyData) {
         var parameters = getParameters(key, request.url.split('?'), request.headers);
-        var configStr = JSON.stringify(typeof returnData[key].js === 'function' ? returnData[key].js(JSON.parse(JSON.stringify(returnData[key].data || defaultReturn)), parameters, bodyData, request) : returnData[key].data);
+        var configStr = JSON.stringify(typeof returnData[key].js === 'function' ? returnData[key].js(JSON.parse(JSON.stringify(returnData[key].data || defaultReturn)), parameters, bodyData, request) : returnData[key].data)||'';
         debugFn(request, parameters, bodyData, returnData[key].data, log);
         if (typeof (returnData[key]&&returnData[key].js) === 'function') {
             console.log('\x1B[38m', 'use localhost api :' + key);

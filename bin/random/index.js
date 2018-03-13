@@ -174,7 +174,7 @@ module.exports = (function (emnuData, getValue) {
 
 }, function getValue(someValue) {
     var data = {
-        date: Date.now,
+        date: new Date().toLocaleString(),
         dir: __dirname
     };
     Object.keys(someValue || {}).forEach(function (key) {

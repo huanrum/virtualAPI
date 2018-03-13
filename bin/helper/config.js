@@ -23,7 +23,7 @@ module.exports = (function () {
         var paths = config().web;
         if(webModule){
             var basePath = __dirname + '/../../views/';
-            var filterPath = Object.keys(paths).sort((a,b)=> a.length-b.length?1:-1).filter(i=>path.join(webModule).indexOf(path.join(basePath,i))!==-1).pop();
+            var filterPath = Object.keys(paths).sort((a,b)=> a.length-b.length?1:-1).filter(i=>path.join(webModule).indexOf(path.join(basePath,i))!==-1).shift();
             if(filterPath){
                 return path.join(webModule).replace(path.join(basePath,filterPath),paths[filterPath]);
             }else{

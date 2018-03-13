@@ -31,6 +31,7 @@ module.exports = (function () {
         var onlyUrl = request.url.split('?').shift();
         var type = onlyUrl.split('.').slice(1).pop() || 'html';
         var file = helper.config(basePath + onlyUrl);
+        
 
         if (fs.existsSync(file)) {
             if (fs.statSync(file).isDirectory()) {
@@ -47,8 +48,18 @@ module.exports = (function () {
                 transverter(options, request, response, file).then(content => response.end(content));
             }
         } else {
-            response.writeHead(404, { 'Content-Type': 'text/html;charset=utf-8' });
-            response.end(helper[404](options,'地址不存在'));
+            file = request.headers.referer?helper.config(basePath + request.headers.referer) : file;
+            var filterConfigs = configs.filter(cfn => cfn.path && cfn.fn && path.join(file).indexOf(path.join(cfn.path)) !== -1);
+            if(filterConfigs.length){
+                filterConfigs.forEach(config => {
+                    if(config.api){
+                        config.api(options, request, response);
+                    }
+                });
+            }else{
+                response.writeHead(404, { 'Content-Type': 'text/html;charset=utf-8' });
+                response.end(helper[404](options,'地址不存在'));
+            }
         }
     }
 
