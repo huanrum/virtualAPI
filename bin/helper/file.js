@@ -103,7 +103,7 @@ module.exports = (function () {
          */
         packTool: function (dir) {
             
-            if(fs.statSync(dir).isDirectory()){
+            if(fs.existsSync(dir) && fs.statSync(dir).isDirectory()){
                 var allfiles = fs.readdirSync(dir);
                 if (allfiles.some(i => i.toLocaleLowerCase() === 'gulpfile.js')) {
                     return 'Gulp';
