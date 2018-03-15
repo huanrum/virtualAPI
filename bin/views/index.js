@@ -49,7 +49,7 @@ module.exports = (function () {
             }
         } else {
             file = request.headers.referer?helper.config(basePath + request.headers.referer) : file;
-            var filterConfigs = configs.filter(cfn => cfn.path && cfn.fn && path.join(file).indexOf(path.join(cfn.path)) !== -1);
+            var filterConfigs = configs.filter(cfn => cfn.path && cfn.fn && path.join(file).toLocaleLowerCase().indexOf(path.join(cfn.path).toLocaleLowerCase()) !== -1);
             if(filterConfigs.length){
                 filterConfigs.forEach(config => {
                     if(config.api){
@@ -83,7 +83,7 @@ module.exports = (function () {
             var netSegment = helper.net(request) || helper.localhost(request);
 
             fs.readdirSync(divPath).forEach(function (i) {
-                var config = configs.filter(cfn => cfn.path && cfn.version && path.join(divPath + '/' + i).indexOf(path.join(cfn.path)) !== -1).pop();
+                var config = configs.filter(cfn => cfn.path && cfn.version && path.join(divPath + '/' + i).toLocaleLowerCase().indexOf(path.join(cfn.path).toLocaleLowerCase()) !== -1).pop();
                 dirs['['+ helper.packTool(path.join(divPath + '/' + i)) + ']' + i] =  config?config.version(i):{};
             });
 
@@ -103,12 +103,12 @@ module.exports = (function () {
 
     function transverter(options, request, response, file) {
 
-        var filterConfigs = configs.filter(cfn => cfn.path && cfn.fn && path.join(file).indexOf(path.join(cfn.path)) !== -1);
-
+        var filterConfigs = configs.filter(cfn => cfn.path && cfn.fn && path.join(file).toLocaleLowerCase().indexOf(path.join(cfn.path).toLocaleLowerCase()) !== -1);
+        var getParm = name => request.url.split('?').pop().split('&').filter(i=>i.split('=')[0].toLocaleLowerCase()===name.toLocaleLowerCase()).pop();
         return new Promise(succ => {
-            var merge = request.url.split('?').pop().split('&').filter(i => /merge=/.test(i)).pop();
+            var merge = getParm('merge'),debug = getParm('debug') || options.debug;
             var data = fs.readFileSync(file.replace(/\/\//g, '/'));
-            if (/(\/|\\)index\.html/.test(file)) {
+            if (/(\/|\\)(index|default)\.html/.test(file)) {
                 var weinre = options.ip + ':' + options.weinre;
                 var content = data.toString().replace(/\?\d+/g, '').replace(/<head>/, function (str) {
                     return str + /<title>.*<\/title>/.test(data.toString())?(''):('<title>' + path.basename(file.replace('index.html', '')) + '</title>');
@@ -117,11 +117,11 @@ module.exports = (function () {
                 });
 
                 filterConfigs.forEach(cfn => {
-                    content = cfn.fn(file, content, merge);
+                    content = cfn.fn(file, content, merge, debug);
                 });
 
                 data = new Buffer(content.toString());
-            } else if (merge && fs.existsSync(file.replace(/\.js.*/, '')) || filterConfigs.some(cfn => cfn.files.some(i => path.join(cfn.path + '/' + i) === path.join(file)))) {
+            } else if (merge && fs.existsSync(file.replace(/\.js.*/, '')) || filterConfigs.some(cfn => cfn.files.some(i => path.join(cfn.path + '/' + i).toLocaleLowerCase() === path.join(file).toLocaleLowerCase()))) {
                 data = new Buffer(helper.readAllJSContent(data.toString(), file.replace(/\.js.*/, '')));
             }
 
