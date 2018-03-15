@@ -120,10 +120,20 @@ module.exports = (function () {
                     content = cfn.fn(file, content, merge, debug);
                 });
 
+                if(debug){
+                    content = content.replace(/<\/body>/,function(src){
+                        return fs.readFileSync(__dirname + '/../debug/index.html').toString().replace(/<script>/,function(script){
+                            return script + '\r\nvar pack = "' + helper.packTool(path.dirname(file)) + '"';
+                        }) + '\r\n' + src;
+                    });
+                }
+
                 data = new Buffer(content.toString());
             } else if (merge && fs.existsSync(file.replace(/\.js.*/, '')) || filterConfigs.some(cfn => cfn.files.some(i => path.join(cfn.path + '/' + i).toLocaleLowerCase() === path.join(file).toLocaleLowerCase()))) {
                 data = new Buffer(helper.readAllJSContent(data.toString(), file.replace(/\.js.*/, '')));
             }
+
+            
 
             succ(data);
         });
