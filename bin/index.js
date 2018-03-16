@@ -132,7 +132,7 @@ module.exports = function (options) {
             api.config(__dirname + '/../service/' + item + '/config');
             require(__dirname + '/../service/' + item)(configFn, helper);
         } catch (e) {
-            console.warn('\x1B[31m', 'item 配置加载失败 ' + new Date() + ' ==> ', e.message);
+            console.warn('\x1B[31m', item + ' 配置加载失败 ' + new Date() + ' ==> ', e.message);
         }
     });
 

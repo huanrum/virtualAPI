@@ -11,6 +11,7 @@
         "returnCode": "0",
         "message": ":user,login succeed!!!"
     },
+    "favicon.ico":"[../../favicon.ico]",
     "[GET]login/user/location": {
         "returnCode": "0",
         "message": "GET login/user/location!"

@@ -62,8 +62,14 @@ module.exports = (function () {
                     var randomFn = random({ path: returnData[key].path, IP: options.ip, PORT: options.port, WEBSOCKET: options.websocket, weinre: options.weinre, device: options.mac });
                     var data = returnResult(key, request, toObject(bodyData.toString() || '{}'));
                     if (data) {
-                        response.writeHead(200, { 'Content-Type': 'text/plain;charset=utf-8' });
-                        response.end(JSON.stringify(randomFn(data)));
+                        var datas = randomFn(data);
+                        if(typeof datas === 'string' && fs.existsSync(returnData[key].path + '/' + datas)){
+                            response.writeHead(200, { 'Content-Type': helper.type(datas.split('.').pop())});
+                            response.end(fs.readFileSync(returnData[key].path + '/' + datas));
+                        }else{
+                            response.writeHead(200, { 'Content-Type': 'text/plain;charset=utf-8' });
+                            response.end(JSON.stringify(datas));
+                        }
                     } else {
                         succ();
                     }

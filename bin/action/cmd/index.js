@@ -3,13 +3,14 @@ var child_process = require('child_process');
 
 module.exports = (function () {
 
-    return function useCMD(sourceDiv,messageFn, dir, cmd, isChild) {
+    return function useCMD(sourceDiv,messageFn, dirs, cmd, isChild) {
+        if(!Array.isArray(dirs)){
+            dirs = [dirs];
+        }
         messageFn('命令 开始');
         setTimeout(function () {
             messageFn('切换位置');
-            runCmd(isChild, [
-                [sourceDiv.split(':')[0] + ':', 'cd ' + sourceDiv.replace(/\\/g,'/') + '/' + dir, cmd].join(' && ')
-            ], function (data) {
+            runCmd(isChild, dirs.map(dir=>[sourceDiv.split(':')[0] + ':', 'cd ' + sourceDiv.replace(/\\/g,'/') + '/' + dir, cmd].join(' && ')), function (data) {
                 if (!data) {
                     messageFn('....');
                 } else {
@@ -43,9 +44,9 @@ module.exports = (function () {
         function then(lts, data) {
             console.log(`end: ${data}`);
             runFn(data);
-            if (list.length) {
+            if (lts.length) {
                 setTimeout(function () {
-                    runCmd(lts);
+                    cmd(lts);
                 }, 1000);
             } else {
                 callback(data);
