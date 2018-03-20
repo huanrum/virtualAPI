@@ -26,6 +26,10 @@ module.exports = (function () {
 
     return view;
 
+    function findConfig(file,filetr){
+        return configs.filter(cfn => cfn.path && filetr(cfn) && path.join(file).toLocaleLowerCase().indexOf(path.join(cfn.path).toLocaleLowerCase()) !== -1);
+        
+    }
 
     function view(options, request, response) {
         var onlyUrl = request.url.split('?').shift();
@@ -48,12 +52,13 @@ module.exports = (function () {
                 transverter(options, request, response, file).then(content => response.end(content));
             }
         } else {
-            file = request.headers.referer?helper.config(basePath + request.headers.referer) : file;
-            var filterConfigs = configs.filter(cfn => cfn.path && cfn.fn && path.join(file).toLocaleLowerCase().indexOf(path.join(cfn.path).toLocaleLowerCase()) !== -1);
+            var webBaseUrl = new RegExp('https?:\/\/'+request.headers.host.replace(/\./g,'\\.'));
+            var filterConfigs = findConfig(request.headers.referer?helper.config(basePath + request.headers.referer.replace(webBaseUrl,'')) : file, cfn=>cfn.api);
             if(filterConfigs.length){
+                response.setHeader("Content-Type", helper.type(type) || 'text/plain;charset=utf-8');
                 filterConfigs.forEach(config => {
                     if(config.api){
-                        config.api(options, request, response);
+                        config.api(options, request, response, file);
                     }
                 });
             }else{
@@ -103,7 +108,7 @@ module.exports = (function () {
 
     function transverter(options, request, response, file) {
 
-        var filterConfigs = configs.filter(cfn => cfn.path && cfn.fn && path.join(file).toLocaleLowerCase().indexOf(path.join(cfn.path).toLocaleLowerCase()) !== -1);
+        var filterConfigs = findConfig(file,cfn=>cfn.fn);
         var getParm = name => request.url.split('?').pop().split('&').filter(i=>i.split('=')[0].toLocaleLowerCase()===name.toLocaleLowerCase()).pop();
         return new Promise(succ => {
             var merge = getParm('merge'),debug = getParm('debug') || options.debug;
