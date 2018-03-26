@@ -3,13 +3,14 @@ var child_process = require('child_process');
 
 var file = require('./file');
 var net = require('./net');
+var ftp = require('./ftp');
 var resource = require('./resource');
 var config = require('./config');
 var error = require('./error');
 
 function Helper(){}
 
-module.exports = Object.assign(new Helper(),file,net,resource,config,error,{
+module.exports = Object.assign(new Helper(),file,net,ftp,resource,config,error,{
     /**
      * 获取对应的依赖包，若没有就安装
      * @param {*配置} option 
