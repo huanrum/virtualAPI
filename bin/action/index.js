@@ -24,7 +24,7 @@ module.exports = (function () {
             response.setHeader("Content-Type", 'text/plain;charset=utf-8');
             response.end(message(_actions));
         } else {
-            actions(_actions.split('='),request.headers.referer).then(id => response.end(id));
+            actions(_actions.split('=').map(i=>decodeURIComponent(i)),request.headers.referer).then(id => response.end(id));
         }
     }
 

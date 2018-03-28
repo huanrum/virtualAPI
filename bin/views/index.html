@@ -173,7 +173,7 @@
         .dialog .footer {
             border-top: 1px solid #d3d3d3;
             text-align: center;
-            padding: 2px;
+            padding: 8px;
         }
 
         .dialog .footer a {
@@ -181,6 +181,7 @@
             margin: 2px 1rem;
             padding: 1px;
             cursor: pointer;
+            white-space: nowrap;
         }
 
         .content-self div {
@@ -390,10 +391,9 @@
                 button.innerHTML = btn;
                 footer.appendChild(button);
                 button.onclick = function () {
-                    if (index) {
-                        callback(index);
+                    if(!index || (index && callback(index,btn) !== false)){
+                        document.body.removeChild(dialogBack);
                     }
-                    document.body.removeChild(dialogBack);
                 };
             });
 
