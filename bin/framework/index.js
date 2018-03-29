@@ -8,13 +8,11 @@ module.exports = (function () {
         var type = request.url.split('.').pop();
 
         response.setHeader("Content-Type", helper.type(type) || '');
-        switch(framework){
-            case 'ehuanrum':
-                response.end(fs.readFileSync(helper.config(__dirname + '/../../views/framework/demo/framework.' + type)));
-            break;
-            default :
-                response.end('//no file');
-            break;
+
+        if(fs.existsSync(__dirname +'/'+framework + '.' + type)){
+            response.end(fs.readFileSync(__dirname +'/'+framework + '.' + type));
+        }else{
+            response.end('//no file');
         }
 
     };

@@ -1,30 +1,25 @@
 var child_process = require('child_process');
 
-var  helper = require('./../../helper');
+var helper = require('./../../helper');
 
 
-function replaceToSQL(request) {
-    var [table, condition = ''] = request.url.replace(/.*\/db\//, '').split('?');
-    return [table, condition.replace('&', ' and ') || '1=1'];
+function extendObject(bodyData, extend) {
+    return Object.assign(bodyData, {
+        islive: 1,
+        version: 1,
+        insertby: 1,
+        insertdate: new Date().toLocaleString().replace(/\d+/g, i => (i.length < 2 ? '0' : '') + i)
+    }, extend);
 }
 
-function extendObject(bodyData,extend){
-    return Object.assign(bodyData,{ 
-        islive:1,
-        version:1,
-        insertby:1,
-        insertdate:new Date().toLocaleString().replace(/\d+/g,i=>(i.length<2?'0':'') + i)
-    },extend);
-}
-
-function transverterValue(value){
-    switch(Object.prototype.toString.call(value)){
+function transverterValue(value) {
+    switch (Object.prototype.toString.call(value)) {
         case '[object String]':
             return '\'' + value + '\'';
         case '[object Object]':
             return '\'' + JSON.stringify(value) + '\'';
-            default:
-        return value;
+        default:
+            return value;
     }
 }
 
@@ -36,41 +31,53 @@ module.exports = (function () {
             databaseFile: './bin/db/sqlite/services.db3'
         });
         db.connectDataBase(sqlite3);
-        //console.log('\x1B[32m', 'sqlite3 running');
     });
 
-    return function (request, response, bodyData) {
-        // used:
+    return function run(getArguments, request, response, bodyData, count = 3) {
         if (!db) {
-            response.end('Wait a moment, Sqlite loading ...');
+            if (count) {
+                setTimeout(() => {
+                    run(getArguments, request, response, bodyData, count - 1);
+                }, 1000);
+            } else {
+                response.end('Wait a moment, Sqlite loading ...');
+            }
         } else {
-            var [table, condition] = replaceToSQL(request);
-            bodyData = JSON.parse(JSON.stringify(bodyData).replace(/\[IP\]/gi,helper.getClientIp(request)) || '{}') || {};;
-            switch (request.method) {
-                case 'GET':
-                    db.sql(`select * from ${table} where ${condition}`, {}, 'all').then((res) => {
-                        response.end(JSON.stringify(res));
-                    });
-                    break;
-                case 'POST':
-                    var update = Object.keys(bodyData).map(i => i + '=\'' + bodyData[i]+'\'').join(' and ');
-                    db.sql(`update ${table} set ${update} where ${condition}`, {}, 'all').then((res) => {
-                        response.end(JSON.stringify(res));
-                    });
-                    break;
-                case 'PUT':
-                    db.sql(`select max(id) from ${table}`, {}, 'all').then((res) => {
-                        var insert = extendObject(bodyData,{id:res.data[0]['max(id)']+1});
-                        db.sql(`insert into ${table} (${Object.keys(insert).join()}) values (${Object.values(insert).map(transverterValue).join()})`, {}, 'all').then((res) => {
+            var [table, condition] = getArguments(request);
+            if (!table) {
+                db.sql(`select * from sqlite_master where ${condition}`, {}, 'all').then((res) => {
+                    response.end(JSON.stringify(res));
+                });
+            } else {
+                bodyData = JSON.parse(JSON.stringify(bodyData).replace(/\[IP\]/gi, helper.getClientIp(request)) || '{}') || {};;
+                switch (request.method) {
+                    case 'GET':
+                        db.sql(`select * from ${table} where ${condition}`, {}, 'all').then((res) => {
                             response.end(JSON.stringify(res));
                         });
-                    });
-                    break;
-                case 'DELETE':
-                    db.sql(`delete * from ${table} where ${condition}`, {}, 'all').then((res) => {
-                        response.end(JSON.stringify(res));
-                    });
-                    break;
+                        break;
+                    case 'POST':
+                        var update = Object.keys(bodyData).map(i => i + '=\'' + bodyData[i] + '\'').join(' and ');
+                        db.sql(`update ${table} set ${update} where ${condition}`, {}, 'all').then((res) => {
+                            response.end(JSON.stringify(res));
+                        });
+                        break;
+                    case 'PUT':
+                        db.sql(`select max(id) from ${table}`, {}, 'all').then((res) => {
+                            var insert = extendObject(bodyData, {
+                                id: res.data[0]['max(id)'] + 1
+                            });
+                            db.sql(`insert into ${table} (${Object.keys(insert).join()}) values (${Object.values(insert).map(transverterValue).join()})`, {}, 'all').then((res) => {
+                                response.end(JSON.stringify(res));
+                            });
+                        });
+                        break;
+                    case 'DELETE':
+                        db.sql(`delete * from ${table} where ${condition}`, {}, 'all').then((res) => {
+                            response.end(JSON.stringify(res));
+                        });
+                        break;
+                }
             }
 
         }
@@ -94,10 +101,10 @@ module.exports = (function () {
 class HandleDB {
 
     constructor(options) {
-        this.databaseFile = options && options.databaseFile || `.service/data/test.db`;    // 数据库文件(文件路径+文件名)
-        this.tableName = options && options.tableName || `adsTable`;   // 表名
+        this.databaseFile = options && options.databaseFile || `.service/data/test.db`; // 数据库文件(文件路径+文件名)
+        this.tableName = options && options.tableName || `adsTable`; // 表名
 
-        this.db = null;    // 打开的数据库对象
+        this.db = null; // 打开的数据库对象
     }
 
     // 连接数据库(不存在就创建,存在则打开)
@@ -157,18 +164,25 @@ class HandleDB {
         let _self = this;
         mode = mode == 'all' ? 'all' : mode == 'get' ? 'get' : 'run';
         return new Promise((resolve, reject) => {
-            _self.db[mode](sql, param, function (err, data) {    // data: Array, Object
+            _self.db[mode](sql, param, function (err, data) { // data: Array, Object
                 if (err) {
-                    resolve({ status: 'false', error: err.message });
+                    resolve({
+                        status: 'false',
+                        error: err.message
+                    });
                 } else {
                     if (data) {
-                        resolve({ status: 'success', data });    // 返回数据查询成功的结果
+                        resolve({
+                            status: 'success',
+                            data
+                        }); // 返回数据查询成功的结果
                     } else {
-                        resolve({ status: 'success' });    // 提示 增 删 改 操作成功
+                        resolve({
+                            status: 'success'
+                        }); // 提示 增 删 改 操作成功
                     }
                 }
-            }
-            );
+            });
         });
     }
 }

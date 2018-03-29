@@ -11,10 +11,10 @@ module.exports = {
      * 获取请求者的ip
      */
     getClientIp: function (req) {
-        return req.headers['x-forwarded-for'] ||
-            req.connection.remoteAddress ||
-            req.socket.remoteAddress ||
-            req.connection.socket.remoteAddress;
+        return (req.headers && req.headers['x-forwarded-for']) ||
+            (req.connection && req.connection.remoteAddress) ||
+            (req.socket && req.socket.remoteAddress) ||
+            (req.connection && req.connection.socket && req.connection.socket.remoteAddress);
     },
     /**
      * 客户端是否跟服务端在同一个网段
@@ -37,12 +37,16 @@ module.exports = {
     getBodyData: function (request) {
         return new Promise(succ => {
             var bufferHelper = new BufferHelper();
-            request.on("data", function (chunk) {
-                bufferHelper.concat(chunk);
-            });
-            request.on('end', function () {
-                succ(bufferHelper.toBuffer());
-            });
+            if (!request.on) {
+                succ(JSON.stringify(request.body||{}));
+            } else {
+                request.on("data", function (chunk) {
+                    bufferHelper.concat(chunk);
+                });
+                request.on('end', function () {
+                    succ(bufferHelper.toBuffer());
+                });
+            }
         });
     },
     /**

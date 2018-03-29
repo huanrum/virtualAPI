@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>DB Helper</title>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        .tabs>* {
+            padding: 4.5px;
+            display: inline-block;
+            text-align: center;
+            width: calc(33.3% - 2px);
+            border: 1px solid #f3f3f3;
+        }
+
+        .tabs .active,.menu-control .active {
+            background: #00aeef;
+        }
+
+        .menu-control{
+            height: 100%;
+            float: left;
+            background: #333333;
+        }
+        .menu-control>div{
+            margin: 10px 15px;
+            cursor: pointer;
+        }
+        .menu-control>div>a {
+            color:#f3f3f3;
+            border-bottom: 1px solid;
+        }
+        .menu-control>div:hover{
+            color:#00aeef;
+        }
+
+        .content-control{
+            height: 100%;
+            overflow: auto;
+        }
+
+        /*my-grid*/
+
+        .table-header .table-row>*,
+        .table-body .table-row>* {
+            display: inline-block;
+            width: 10rem;
+            padding: 0.5rem;
+            border-right: 1px solid #e3e3e3;
+            
+        }
+
+        .table-header {
+            font-size: 1.2rem;
+            color: #ffffff;
+            background: #666699;
+            white-space: nowrap;
+        }
+        .table-header .table-row>*{
+            background: #666699;
+        }
+
+        .table-body .table-row {
+            border: 1px solid #d3d3d3;
+            white-space: nowrap;
+        }
+
+        .table-body .table-row>* {
+            height:25px;
+            background: #f3f3f3;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        
+
+        .table-body .table-row:nth-child(2n)>* {
+            background: #d3d3d3;
+        }
+
+        .table-body .table-row:hover {
+            opacity: 0.8;
+        }
+
+        .table-body .table-row>*:hover {
+            background: #99f399;
+        }
+
+        /*my-grid-menu*/
+
+        .my-grid-menu {
+            margin: 0.5em 0;
+            text-align: center;
+            list-style: none;
+        }
+
+        .my-grid-menu>li {
+            display: inline-block;
+            line-height: 1.2em;
+            margin: 0;
+            padding: 0.2em 0.4em;
+            border: 1px solid #666699;
+        }
+
+        .my-grid-menu>li.active {
+            background: #666699;
+        }
+
+        .my-grid-menu>li>* {
+            border: none;
+            max-width: 2em;
+        }
+
+        .my-grid-menu>li>*.disable {
+            color: #d3d3d3;
+            cursor: not-allowed;
+        }
+    </style>
+    <script src="../framework/ehuanrum/framework.js"></script>
+</head>
+
+<body>
+    <script>
+        window.$data = {};
+        window.localValue = function (name, value) {
+            if (value) {
+                localStorage['[component]/' + name] = value;
+            } else {
+                return localStorage['[component]/' + name];
+            }
+        };
+    </script>
+    <script>
+        $ehr('main', ['binding', 'service', function (binding, service) {
+            var myApp = binding([
+                '<div class="tabs">',
+                '  <div [item:items] (click)="dbName(item)" [class]="item==db?\'active\':\'\'" [style.fontSize]="fontSize" [style.width]="width">{{item}}</div>',
+                '</div>',
+                '<div>',
+                '   <div class="menu-control">',
+                '       <div [menu:menus] (click)="tableName(menu.name)"><a [class]="menu.name==table?\'active\':\'\'">{{menu.name}}</a></div>',
+                '   </div>',
+                '   <div class="content-control">',
+                '       <div [my.grid]="data"></div>',
+                '   </div>',
+                '</div>'
+            ].join(''), {
+                db: '',
+                table:'',
+                fontSize: '16px',
+                width: 'calc(' + (Math.floor(1000/window.$data.length)/10) + '% - 11px)',
+                items: window.$data,
+                menus:[],
+                data: []
+            }, function (scope) {
+
+                scope.dbName = function (db) {
+                    if(scope.db === db){return;}
+                    scope.db = db;
+                    localValue('tab', db);
+                    service(scope.db + '?type=table').then(req => {
+                        scope.menus.replace(req.data);
+                        scope.data.replace([]);
+                    });
+                }
+
+                scope.tableName = function (table) {
+                    if(scope.table === table){return;}
+                    scope.table = table;
+                    service(scope.db + '/' + table + '?ISLIVE=1').then(req => {
+                        scope.data.replace(req.data);
+                    });
+                }
+
+            });
+            myApp.scope().dbName(localValue('tab') || myApp.scope().items[0]);
+            myApp[1].style.height = window.innerHeight - 32 + 'px';
+        }]);
+    </script>
+
+    <script>
+        $ehr('filter.capitalize', function () {
+            return function (value, index) {
+                index = index % value.length || 0;
+                return value.slice(0, index) + value[index].toLocaleUpperCase() + value.slice(index + 1);
+            };
+        });
+
+        $ehr('control.my.grid', ['binding', 'value', function (binding, value) {
+            return function (element, data, field) {
+                var excludeColumns = ['ISLIVE','VERSION','INSERTBY',/*'INSERTDATE',*/'UPDATEBY','UPDATEDATE'];
+                var oldColumns = [],
+                    newData = data.$extend({
+                        select: data.select,
+                        show: function (item) {
+                            console.log(item);
+                        }
+                    }, [field]);
+                Object.defineProperty(newData, 'columns', {
+                    configurable: true,
+                    enumerable: false,
+                    set: function (v) {
+                        oldColumns = v;
+                    },
+                    get: function () {
+                        var columns = [];
+                        (value(data, field) || []).forEach(function (it) {
+                            Object.keys(it).forEach(function (k) {
+                                if (columns.indexOf(k) === -1 && excludeColumns.indexOf(k.toLocaleUpperCase()) === -1) {
+                                    columns.push(k);
+                                }
+                            });
+                        });
+                        if (Object.keys(oldColumns).join() !== Object.keys(columns).join()) {
+                            newData.columns = columns;
+                        }
+                        return columns;
+                    }
+                });
+
+                binding([
+                    '<div >',
+                    '   <div class="table-header">',
+                    '       <div class="table-row">',
+                    '           <div [column:columns] [innerHTML]="column|capitalize" [class]="\'cell-\' + $index" (click)="sort(column)"></div>',
+                    '       </div>',
+                    '   </div>',
+                    '   <div class="table-body">',
+                    '       <div [item:' + field + '] class="table-row" [ondblclick]="show(item)" [onclick]="select" [title]="getTitle(item)">',
+                    '           <div [column:columns] [class]="\'cell-\' + $index" [innerHTML]="item[column]" [title]="item[column]"></div>',
+                    '       </div>',
+                    '   </div>',
+                    '</div>'
+                ].join(''), newData, element,function(scope){
+                    scope.getTitle = function(item){
+                        return JSON.stringify(item);
+                    };
+                    scope.sort = function(column){
+                        scope[field].sort(function(a,b){
+                            return (a[column]>b[column]?1:-1) * (scope.column === column?1:-1);
+                        });
+                        if(scope.column === column){
+                            scope.column = '';
+                        }else{
+                            scope.column = column;
+                        }
+                    };
+                });
+            }
+        }]);
+
+        $ehr('service', ['global', 'binding', function (global, binding) {
+            return function (url, parms) {
+                var fullUrl = initParms(url, parms || {});
+
+                var loading = binding([
+                    '<div class="common-dialog-back">',
+                    '   <div class="common-dialog">',
+                    '      <strong [innerHTML]="loadMessage + \'(\' +floor(remaining/2)+ \'s)\' + index" [hidden]="!remaining"></strong>',
+                    '      <span [hidden]="!!remaining">加载已经超时</span>',
+                    '  </div>',
+                    '</div>',
+                ].join(''), {
+                    loadMessage: '加载中',
+                    index: '...',
+                    remaining: 2 * 30,
+                    floor: function (i) {
+                        return Math.floor(i);
+                    }
+                }, document.body, function (scope) {
+                    var index = 0;
+                    var hald = setInterval(function () {
+                        index = (index + 1) % 16;
+                        scope.index = Array(index + 4).join('.');
+                        scope.remaining = scope.remaining - 1;
+                        if (!Math.floor(scope.remaining)) {
+                            setTimeout(function () {
+                                loading.update();
+                            }, 3 * 1000);
+                        }
+                    }, 500);
+                    scope.$destroy(function () {
+                        clearInterval(hald);
+                    });
+                });
+
+
+
+                return new Promise(function (resolve, reject) {
+                    if (!fullUrl) {
+                        reject({
+                            message: '参数不完整'
+                        });
+                    }
+                    fetch(fullUrl).then(function (response) {
+                        loading.update();
+                        return response.json();
+                    }, function (err) {
+                        loading.update();
+                        reject(err);
+                    }).then(function (json) {
+                        resolve(json);
+                    });
+                });
+            };
+
+
+            function initParms(url, parms) {
+                var parmsStr = Object.keys(parms).sort(function (a, b) {
+                    return /:/.test(b.name) - /:/.test(a.name);
+                }).map(function (key) {
+                    if (url.indexOf(':' + key) !== -1) {
+                        url = url.replace(':' + key, parms[key]);
+                    } else {
+                        return key + '=' + parms[key];
+                    }
+                }).filter(function (i) {
+                    return !!i;
+                }).join('&');
+
+                if (url.indexOf(':') === -1) {
+                    return url + (parmsStr ? ('?' + parmsStr) : '')
+                }
+            }
+
+        }]);
+    </script>
+</body>
+
+</html>
