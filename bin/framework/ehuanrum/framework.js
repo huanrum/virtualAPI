@@ -261,7 +261,7 @@
             if (ehuanrum('menuAction')) {
                 return function () {
                     ehuanrum('menuAction')(m, menuSpan, childMenu);
-                }
+                };
             } else {
                 childMenu.style.display = new RegExp('#' + (hash || '') + '/' + m).test(location.hash) ? 'block' : 'none';
                 return function () {
@@ -316,7 +316,7 @@
 
             var td = data;
             fi.split('.').forEach(function (f) {
-                de(td, f);
+                de(td, f.trim());
                 td = td[f] || {};
             });
         });
@@ -338,7 +338,9 @@
                     fn();
                 },
                 get: function () {
-                    return descriptor.get && descriptor.get() || descriptor.value;
+                    return [descriptor.get && descriptor.get() , descriptor.value , $value(td.__proto__, tf)].sort(function(a,b){
+                        return [false,0,'',null,undefined].indexOf(a) - [false,0,'',null,undefined].indexOf(b);
+                    }).shift();
                 }
             });
         }
@@ -888,7 +890,6 @@
                         bindElement.e.update(parentNode);
                         bindElement.e.scope().$eval();
                     }
-                    
 
                     return bindElement;
                 });

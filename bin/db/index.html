@@ -65,6 +65,11 @@
         .table-header .table-row>*{
             background: #666699;
         }
+        .table-header .table-row .active:after{
+            content:'!!';
+            font-weight: bold;
+            color:#00aeef;
+        }
 
         .table-body .table-row {
             border: 1px solid #d3d3d3;
@@ -77,7 +82,7 @@
             overflow: hidden;
             white-space: nowrap;
         }
-
+        
         
 
         .table-body .table-row:nth-child(2n)>* {
@@ -140,11 +145,15 @@
         $ehr('main', ['binding', 'service', function (binding, service) {
             var myApp = binding([
                 '<div class="tabs">',
-                '  <div [item:items] (click)="dbName(item)" [class]="item==db?\'active\':\'\'" [style.fontSize]="fontSize" [style.width]="width">{{item}}</div>',
+                '  <div [item:items] (click)="dbName(item)" [class]="item==db?\'active\':\'\'" [style.fontSize]="fontSize" [style.width]="width">',
+                '       <a>{{item}}</a>',
+                '   </div>',
                 '</div>',
                 '<div>',
                 '   <div class="menu-control">',
-                '       <div [menu:menus] (click)="tableName(menu.name)"><a [class]="menu.name==table?\'active\':\'\'">{{menu.name}}</a></div>',
+                '       <div [menu:menus] (click)="tableName(menu.name)">',
+                '           <a [class]="menu.name==table?\'active\':\'\'">{{menu.name}}</a>',
+                '       </div>',
                 '   </div>',
                 '   <div class="content-control">',
                 '       <div [my.grid]="data"></div>',
@@ -197,6 +206,7 @@
                 var excludeColumns = ['ISLIVE','VERSION','INSERTBY',/*'INSERTDATE',*/'UPDATEBY','UPDATEDATE'];
                 var oldColumns = [],
                     newData = data.$extend({
+                        sortColumn:'',
                         select: data.select,
                         show: function (item) {
                             console.log(item);
@@ -228,12 +238,16 @@
                     '<div >',
                     '   <div class="table-header">',
                     '       <div class="table-row">',
-                    '           <div [column:columns] [innerHTML]="column|capitalize" [class]="\'cell-\' + $index" (click)="sort(column)"></div>',
+                    '           <div [column:columns] [class]="\'cell-\' + $index" (click)="sort(column)">',
+                    '               <a [class]="column===sortColumn?\' active\':\'\'">{{column|capitalize}}</a>',
+                    '           </div>',
                     '       </div>',
                     '   </div>',
                     '   <div class="table-body">',
-                    '       <div [item:' + field + '] class="table-row" [ondblclick]="show(item)" [onclick]="select" [title]="getTitle(item)">',
-                    '           <div [column:columns] [class]="\'cell-\' + $index" [innerHTML]="item[column]" [title]="item[column]"></div>',
+                    '       <div [item:' + field + '] class="table-row" [ondblclick]="show(item)" [onclick]="select" [title]="getTitle(item)" [style.display]="">',
+                    '           <div [column:columns] [class]="\'cell-\' + $index" [title]="item[column]">',
+                    '               {{item[column]}}',
+                    '           </div>',
                     '       </div>',
                     '   </div>',
                     '</div>'
@@ -241,14 +255,17 @@
                     scope.getTitle = function(item){
                         return JSON.stringify(item);
                     };
+                    scope.show = function(){
+
+                    };
                     scope.sort = function(column){
                         scope[field].sort(function(a,b){
                             return (a[column]>b[column]?1:-1) * (scope.column === column?1:-1);
                         });
-                        if(scope.column === column){
-                            scope.column = '';
+                        if(scope.sortColumn === column){
+                            scope.sortColumn = '';
                         }else{
-                            scope.column = column;
+                            scope.sortColumn = column;
                         }
                     };
                 });
