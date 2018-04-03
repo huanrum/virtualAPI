@@ -122,7 +122,7 @@ module.exports = (function () {
                 });
 
                 filterConfigs.forEach(cfn => {
-                    content = cfn.fn(file, content, merge, debug);
+                    content = cfn.fn(file, content, merge, debug, request.url.split('?')[1]||'');
                 });
 
                 if(debug){
