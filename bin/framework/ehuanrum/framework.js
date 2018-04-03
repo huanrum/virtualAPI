@@ -237,7 +237,7 @@
                 var args = arguments;
                 templist.forEach(function (i) { i.apply(scope, args) });
             }
-        }
+        };
     }
 
     //完成菜单和路由的构建，它是不对外公开的,若外部定义了相关的menuAction操作就用外部的，否则就用默认的
@@ -271,7 +271,7 @@
                         });
                     });
                     childMenu.style.display = childMenu.style.display === 'none' ? 'block' : 'none';
-                }
+                };
             }
         }
 
@@ -338,12 +338,34 @@
                     fn();
                 },
                 get: function () {
-                    return [descriptor.get && descriptor.get() , descriptor.value , $value(td.__proto__, tf)].sort(function(a,b){
-                        return [false,0,'',null,undefined].indexOf(a) - [false,0,'',null,undefined].indexOf(b);
-                    }).shift();
+                    return _realValue(descriptor.get && descriptor.get() , descriptor.value , $value(td.__proto__, tf));
                 }
             });
         }
+    }
+
+    function _$extendArray(list,render) {
+        ['push', 'pop', 'shift', 'unshift','sort'].forEach(function (funName) {
+            Object.defineProperty(list, funName, {
+                configurable: true,
+                value: function () {
+                    var result = Array.prototype[funName].apply(list, arguments);
+                    render(list);
+                    return result;
+                }
+            });
+        });
+        Object.defineProperty(list, 'replace', {
+            configurable: true,
+            value: function () {
+                list.length = 0;
+                Array.prototype.forEach.call(arguments,function(arg){
+                    Array.prototype.push.apply(list, arg||[]);
+                });
+                render(list);
+                return list;
+            }
+        });
     }
 
     //给对象设值或取值，field可以是复杂的路径:a.b.0.a
@@ -373,7 +395,7 @@
                         return obj[field[i]];
                     }
                 }
-                if (!(typeof obj === 'object')) {
+                if (typeof obj !== 'object') {
                     return obj;
                 } else {
                     return null;
@@ -387,7 +409,7 @@
                     obj = fill(obj, fields.shift(), true);
                 }
             }
-            if (!(typeof value === 'undefined')) {
+            if (typeof value !== 'undefined') {
                 fill(obj, fields.shift(), true, value);
             } else {
                 return fill(obj, fields.shift(), false);
@@ -419,7 +441,7 @@
                         ent = ent[v] = ent[v] || [];
                     } else {
                         if (run) {
-                            ent = ent[v] = (!(typeof val === 'undefined') ? val : ent[v] || {});
+                            ent = ent[v] = (typeof val !== 'undefined' ? val : ent[v] || {});
                         } else {
                             return ent[v];
                         }
@@ -505,6 +527,13 @@
                         return tempData;
                     }
                 });
+                if(tempData instanceof Array){
+                    _$extendArray(tempData,function(list){
+                        oldObject[from] = list;
+                        oldObject.$eval();
+                        newObject.$eval();
+                    });
+                }
             });
             return newObject;
         }
@@ -546,6 +575,10 @@
         }
 
         function initBindingElement(element) {
+            if(element.render){return;}
+            element.render = true;
+            setTimeout(function(){delete element.render;},10);
+
             //把[]关起来的属性设置双向绑定
             var controls = ehuanrum('control');
 
@@ -686,7 +719,9 @@
 
     ///defineProperty,实现双向绑定
     function defineProperty(element, data, field, value) {
+        
         if (!element.parentNode) { return; }
+
         //关联的element属性名以on开头的都是事件
         if (/^\s*on/.test(field)) {
             events();
@@ -736,13 +771,15 @@
             if (field === 'onload') {
                 var fn = getFn();
                 if (/^[0-9a-zA-Z\._$@]*$/.test(value) && fn) {
-                    fn.call(data, element)
+                    fn.call(data, element);
+                    data.$eval();
                 }
             } else {
                 element.addEventListener(field.replace('on', '').trim(), function (e) {
                     var fn = getFn(e);
                     if (/^[0-9a-zA-Z\._$@]*$/.test(value) && fn) {
-                        fn.apply(data, e.data || arguments)
+                        fn.apply(data, e.data || arguments);
+                        data.$eval();
                     }
                 });
             }
@@ -826,45 +863,28 @@
             if (chaceData.binding) {
                 binding(document.createComment(element.outerHTML)).update(parentNode, nextSibling);
             }
+            data.$eval(function(){
+                render(extendArray($value(data, value || fields[1])));
+            });
             render(extendArray($value(data, value || fields[1])));
 
             function extendArray(list) {
                 if (list instanceof Array) {
-                    ['push', 'pop', 'shift', 'unshift','sort'].forEach(function (funName) {
-                        Object.defineProperty(list, funName, {
-                            configurable: true,
-                            value: function () {
-                                var result = Array.prototype[funName].apply(list, arguments);
-                                render(list);
-                                return result;
-                            }
-                        });
-                    });
-                    Object.defineProperty(list, 'replace', {
-                        configurable: true,
-                        value: function () {
-                            list.length = 0;
-                            Array.prototype.forEach.call(arguments,function(arg){
-                                Array.prototype.push.apply(list, arg||[]);
-                            });
-                            render(list);
-                            return list;
-                        }
-                    });
+                    _$extendArray(list,render);
                 }
                 return list;
             }
 
             function render(vals) {
                 elements.forEach(function (it,index) {
-                    if(vals[index] !== it.t){
+                    //if(vals[index] !== it.t){
                         it.e.update();
-                    }
+                    //}
                 });
                 elements = map(vals || [], function (item, i, obj, da) {
-                    var bindElement = (elements.filter(function (it) { return it.t === item; })[0] || { t: item, e: bindElement });
+                    var bindElement = {};//(elements.filter(function (it) { return it.t === item; })[0] || { t: item, e: bindElement });
                     if (!bindElement.e || bindElement.e.scope().item !== bindElement.t) {
-                        if (typeof i === 'number') {
+                        if (/^\d+$/.test(i)) {
                             Object.defineProperty(da, '$index', {
                                 enumerable: false,
                                 get: function () {
@@ -876,7 +896,7 @@
                             configurable: true,
                             enumerable: true,
                             get: function () {
-                                return vals[i];
+                                return _realValue(vals[i],item);
                             },
                             set: function (val) {
                                 vals[i] = val;
@@ -895,7 +915,11 @@
                 });
 
                 function map(obj, fn) {
-                    if (obj.length) {
+                    if(/^\d+$/.test(obj)){
+                        return Array(+obj).fill(1).map(function(v, i, list){
+                            return mapEach(i, i, i, list.length);
+                        });
+                    }else if (obj.length) {
                         return Array.prototype.map.call(obj, function (v, i, list) {
                             return mapEach(v, i, i, list.length);
                         });

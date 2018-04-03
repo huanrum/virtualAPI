@@ -6,7 +6,7 @@ var helper = require('./../helper');
 module.exports = (function () {
     
     var getArguments = function (request) {
-        var [table, condition = ''] = request.url.replace(/.*\/db\/((?![\/\?]).)+\/*/, '').split('?').map(i=>decodeURIComponent(i));
+        var [table, condition = ''] = request.url.replace(/.*\/db\/+((?![\/\?]).)+\/*/, '').split('?').map(i=>decodeURIComponent(i));
         return [table, condition?condition.split('&').map(i=>i.split('=')[0] + '=\''+i.split('=')[1]+'\'').join(' and ') : '1=1'];
     };
 
@@ -18,7 +18,7 @@ module.exports = (function () {
         }
 
         helper.getBodyData(request).then(bodyData => {
-            var sqlType = /.*\/db\/(((?![\/\?]).)+)/.exec(request.url);
+            var sqlType = /.*\/db\/+(((?![\/\?]).)+)/.exec(request.url);
             switch(sqlType && sqlType[1].toLocaleLowerCase()){
                 case null:
                     var sqlTypes = JSON.stringify(fs.readdirSync(__dirname).filter(i=>fs.statSync(__dirname+'/'+i).isDirectory()));

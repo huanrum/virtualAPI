@@ -10,6 +10,16 @@
         body {
             margin: 0;
         }
+        .fixed-middle-center,.common-dialog{
+            position: fixed;
+            top:50%;
+            margin-left: 50%;
+            transform: translate(-50%,-50%);
+            background:#00AEEF;
+            padding: 10px;
+            border-radius: 8px;
+            color:#ffffff;
+        }
 
         .tabs>* {
             padding: 4.5px;
@@ -97,6 +107,21 @@
             background: #99f399;
         }
 
+        .table-footer{
+            text-align: center;
+            margin: 1em;
+        }
+        .table-footer a{
+            cursor: pointer;
+            margin: 0 1em;
+            padding: 8px;
+            border: 1px solid #d3d3d3;
+            border-radius: 50%;
+        }
+        .table-footer a.active{
+            background: #00AEEF;
+        }
+
         /*my-grid-menu*/
 
         .my-grid-menu {
@@ -135,9 +160,9 @@
         window.$data = {};
         window.localValue = function (name, value) {
             if (value) {
-                localStorage['[component]/' + name] = value;
+                localStorage['[db]/' + name] = value;
             } else {
-                return localStorage['[component]/' + name];
+                return localStorage['[db]/' + name];
             }
         };
     </script>
@@ -182,6 +207,7 @@
                 scope.tableName = function (table) {
                     if(scope.table === table){return;}
                     scope.table = table;
+                    localValue('table', table);
                     service(scope.db + '/' + table + '?ISLIVE=1').then(req => {
                         scope.data.replace(req.data);
                     });
@@ -189,6 +215,7 @@
 
             });
             myApp.scope().dbName(localValue('tab') || myApp.scope().items[0]);
+            myApp.scope().tableName(localValue('table'));
             myApp[1].style.height = window.innerHeight - 32 + 'px';
         }]);
     </script>
@@ -203,15 +230,30 @@
 
         $ehr('control.my.grid', ['binding', 'value', function (binding, value) {
             return function (element, data, field) {
+                var size = 15;
                 var excludeColumns = ['ISLIVE','VERSION','INSERTBY',/*'INSERTDATE',*/'UPDATEBY','UPDATEDATE'];
-                var oldColumns = [],
-                    newData = data.$extend({
+                var oldColumns = [],newData = data.$extend({
                         sortColumn:'',
+                        page:0,
                         select: data.select,
                         show: function (item) {
                             console.log(item);
                         }
                     }, [field]);
+                Object.defineProperty(newData, '$pages', {
+                    configurable: true,
+                    enumerable: false,
+                    get:function(){
+                        return Math.ceil((value(data, field) || []).length / size);
+                    }
+                });
+                Object.defineProperty(newData, '$items', {
+                    configurable: true,
+                    enumerable: false,
+                    get:function(){
+                        return (value(data, field) || []).slice(newData.page*size,newData.page*size+size);
+                    }
+                });
                 Object.defineProperty(newData, 'columns', {
                     configurable: true,
                     enumerable: false,
@@ -244,14 +286,20 @@
                     '       </div>',
                     '   </div>',
                     '   <div class="table-body">',
-                    '       <div [item:' + field + '] class="table-row" [ondblclick]="show(item)" [onclick]="select" [title]="getTitle(item)" [style.display]="">',
-                    '           <div [column:columns] [class]="\'cell-\' + $index" [title]="item[column]">',
+                    '       <div [item:$items] class="table-row" [ondblclick]="show(item)" [onclick]="select" [my.tooltip]="getTitle(item)" [style.display]="">',
+                    '           <div [column:columns] [class]="\'cell-\' + $index" [my.tooltip]="item[column]">',
                     '               {{item[column]}}',
                     '           </div>',
                     '       </div>',
                     '   </div>',
+                    '   <div class="table-footer">',
+                    '       <a [pg:$pages] [class]="pg===page?\' active\':\'\'" [onclick]="paging(pg)">{{\' \' + pg + \' \'}}</a>',    
+                    '   </div>',
                     '</div>'
                 ].join(''), newData, element,function(scope){
+                    scope.paging = function(page){
+                        scope.page = page;
+                    };
                     scope.getTitle = function(item){
                         return JSON.stringify(item);
                     };
@@ -272,14 +320,42 @@
             }
         }]);
 
-        $ehr('service', ['global', 'binding', function (global, binding) {
-            return function (url, parms) {
-                var fullUrl = initParms(url, parms || {});
+        $ehr('control.my.tooltip', ['binding', 'value', function (binding, value) {
+            var remain = false,leave = false, tooltip = document.createElement('div');
+            tooltip.className = 'fixed-middle-center';
+                tooltip.addEventListener('mouseenter',function(e){
+                    clearTimeout(leave);
+                });
+                tooltip.addEventListener('mouseleave',function(){
+                    tooltip.parentNode.removeChild(tooltip);
+                });
 
-                var loading = binding([
+            return function (element, data, field) {
+                element.addEventListener('mouseenter',function(e){
+                    clearTimeout(remain);
+                    remain = setTimeout(function(){
+                        tooltip.innerHTML = value(data, field);
+                        document.body.appendChild(tooltip);
+                    },2000);
+                });
+                element.addEventListener('mouseleave',function(){
+                    clearTimeout(remain);
+                    clearTimeout(leave);
+                    if(tooltip.parentNode){
+                        leave = setTimeout(function(){
+                            tooltip.parentNode.removeChild(tooltip);
+                        },1000);
+                    }
+                });
+            };
+        }]);
+
+        $ehr('service', ['global', 'binding', function (global, binding) {
+
+            var loading = binding([
                     '<div class="common-dialog-back">',
                     '   <div class="common-dialog">',
-                    '      <strong [innerHTML]="loadMessage + \'(\' +floor(remaining/2)+ \'s)\' + index" [hidden]="!remaining"></strong>',
+                    '      <strong [innerHTML]="loadMessage + \'(\' +floor(remaining*10)/10+ \'s)\' + index" [hidden]="!remaining"></strong>',
                     '      <span [hidden]="!!remaining">加载已经超时</span>',
                     '  </div>',
                     '</div>',
@@ -291,35 +367,48 @@
                         return Math.floor(i);
                     }
                 }, document.body, function (scope) {
-                    var index = 0;
-                    var hald = setInterval(function () {
-                        index = (index + 1) % 16;
-                        scope.index = Array(index + 4).join('.');
-                        scope.remaining = scope.remaining - 1;
-                        if (!Math.floor(scope.remaining)) {
-                            setTimeout(function () {
-                                loading.update();
-                            }, 3 * 1000);
-                        }
-                    }, 500);
+                    var index = 0,hald ;
+                    scope.update = function(){
+                        index = 0;
+                        clearInterval(hald);
+                        hald = setInterval(function () {
+                            index = (index + 1) % 16;
+                            scope.index = Array(index + 4).join('.');
+                            scope.remaining = scope.remaining - 1;
+                            
+                            scope.$eval();
+                        }, 100);
+                    }
+                   
                     scope.$destroy(function () {
                         clearInterval(hald);
                     });
                 });
 
+                var showHide = function(parent){
+                    if(parent){
+                        loading.loading = (loading.loading || 0) + 1;
+                        loading.scope().update();
+                    }else{
+                        loading.loading = (loading.loading || 1) - 1;
+                    }
+                    loading.update(loading.loading?document.body:null);
+                };
 
-
+            return function (url, parms) {
+                var fullUrl = initParms(url, parms || {});
+                showHide(document.body);
                 return new Promise(function (resolve, reject) {
                     if (!fullUrl) {
                         reject({
                             message: '参数不完整'
                         });
                     }
-                    fetch(fullUrl).then(function (response) {
-                        loading.update();
+                    fetch(location.href +'/'+ fullUrl).then(function (response) {
+                        showHide();
                         return response.json();
                     }, function (err) {
-                        loading.update();
+                        showHide();
                         reject(err);
                     }).then(function (json) {
                         resolve(json);
