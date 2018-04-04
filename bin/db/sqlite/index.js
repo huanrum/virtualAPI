@@ -1,5 +1,3 @@
-var child_process = require('child_process');
-
 var helper = require('./../../helper');
 
 

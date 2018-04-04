@@ -1,13 +1,15 @@
 var fs = require('fs');
 
 var sqlite = require('./sqlite');
+var mongodb = require('./mongodb');
+var mysql = require('./mysql');
 var helper = require('./../helper');
 
 module.exports = (function () {
     
     var getArguments = function (request) {
         var [table, condition = ''] = request.url.replace(/.*\/db\/+((?![\/\?]).)+\/*/, '').split('?').map(i=>decodeURIComponent(i));
-        return [table, condition?condition.split('&').map(i=>i.split('=')[0] + '=\''+i.split('=')[1]+'\'').join(' and ') : '1=1'];
+        return [table, condition?condition.split('&').map(i=>i.split('=')[0] + '=\''+i.split('=')[1]+'\'').join(' and ') : '1=1',condition.split('&').map(i=>i.split('='))];
     };
 
     return function (request, response = {}) {
@@ -26,6 +28,10 @@ module.exports = (function () {
                     return response.end(fs.readFileSync(__dirname + '/index.html').toString().replace(/window.\$data = \{\}/,'window.$data = ' + sqlTypes));
                 case 'sqlite':
                     return sqlite(getArguments, request, response, JSON.parse(bodyData.toString()||'{}'));
+                case 'mongodb':
+                    return mongodb(getArguments, request, response, JSON.parse(bodyData.toString()||'{}'));
+                case 'mysql':
+                    return mysql(getArguments, request, response, JSON.parse(bodyData.toString()||'{}'));
                 default:
                     return response.end(JSON.stringify({message:'没有对应的数据库'}));
             }

@@ -231,7 +231,9 @@
         $ehr('control.my.grid', ['binding', 'value', function (binding, value) {
             return function (element, data, field) {
                 var size = 15;
-                var excludeColumns = ['ISLIVE','VERSION','INSERTBY',/*'INSERTDATE',*/'UPDATEBY','UPDATEDATE'];
+                var excludeColumns = col=>{
+                    return ['ISLIVE','VERSION','INSERTBY',/*'INSERTDATE',*/'UPDATEBY','UPDATEDATE'].indexOf(col) === -1 && !/^(_|\$)/.test(col);
+                };
                 var oldColumns = [],newData = data.$extend({
                         sortColumn:'',
                         page:0,
@@ -264,11 +266,20 @@
                         var columns = [];
                         (value(data, field) || []).forEach(function (it) {
                             Object.keys(it).forEach(function (k) {
-                                if (columns.indexOf(k) === -1 && excludeColumns.indexOf(k.toLocaleUpperCase()) === -1) {
+                                if (columns.indexOf(k) === -1 && excludeColumns(k.toLocaleUpperCase())) {
                                     columns.push(k);
                                 }
                             });
                         });
+                        if(!columns.length){
+                            (value(data, field) || []).forEach(function (it) {
+                                Object.keys(it).forEach(function (k) {
+                                    if (columns.indexOf(k) === -1) {
+                                        columns.push(k);
+                                    }
+                                });
+                            });
+                        }
                         if (Object.keys(oldColumns).join() !== Object.keys(columns).join()) {
                             newData.columns = columns;
                         }
