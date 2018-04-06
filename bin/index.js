@@ -5,6 +5,7 @@ var child_process = require('child_process');
 
 var helper = require('./helper');
 var websocket = require('./websocket');
+var weinre = require('./weinre');
 var resource = require('./resource');
 var config = require('./config');
 var action = require('./action');
@@ -18,12 +19,9 @@ var permission = require('./permission');
 var framework = require('./framework');
 
 
-var createServer = function (options, exits) {
-    if (exits) { return; }
+var createServer = function (options) {
 
     var randomFn = random({ IP: options.ip, PORT: options.port, WEBSOCKET: options.websocket, weinre: options.weinre, device: options.mac });
-    //等待相关服务启动后再重新赋值
-    options.weinre = '';
 
     http.createServer(function (request, response) {
         response.setHeader('Access-Control-Allow-Origin', '*');
@@ -106,7 +104,7 @@ var createServer = function (options, exits) {
 
 
 module.exports = function (options) {
-    var weinrePort = options.weinre;
+    
     var netInfo = helper.netInfo();
 
     options = Object.assign(options, { ip: netInfo.address, mac: netInfo.mac });
@@ -114,17 +112,19 @@ module.exports = function (options) {
     console.log('\x1B[31m', '服务器启动时间 ' + new Date());
 
     if(options.kill){
-        kill(options);
+        helper.killPort(options.websocket).then(function(){
+            createServer(options);
+        });
     }else{
-        createServer(options, 0);
+        createServer(options);
     }
     
-    websocket(options, 0);
+    helper.killPort(options.websocket).then(function(){
+        websocket(options);
+    });
 
-    helper.initModule('weinre').then(function () {
-        child_process.exec('weinre --httpPort ' + weinrePort + ' --boundHost ' + options.ip);
-        options.weinre = weinrePort;
-        console.log('\x1B[32m', 'Weinre running at http://' + options.ip + ':' + weinrePort + '/');
+    helper.killPort(options.weinre).then(function(){
+        weinre(options);
     });
 
     fs.readdirSync(__dirname + '/../service').forEach(function (item) {
@@ -156,27 +156,5 @@ module.exports = function (options) {
     }
 
 };
-
-
-function kill(options) {
-    //会自动关闭浏览器，注释掉之后需要手动关闭所有相关进程
-    child_process.exec(process.platform == 'win32' ? 'netstat -aon' : 'netstat –apn', function (err, stdout, stderr) {
-        var count = 0;
-        if (err) { return console.log(err); }
-        stdout.split('\n').filter(function (line) { return line.trim().split(/\s+/).length > 4; }).forEach(function (line) {
-            var p = line.trim().split(/\s+/);
-            if (process.platform == 'win32') {
-                p.splice(1, 0, "0");
-            }
-            if (p[2].split(':')[1] == options.port || p[3].split(':')[1] == options.port) {
-                ++count;
-                child_process.exec('taskkill /pid ' + p[5].split('/')[0] + ' -t -f ', function (err, stdout, stderr) {
-                    createServer(options, --count);
-                });
-            }
-        });
-        createServer(options, count);
-    });
-}
 
 

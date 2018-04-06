@@ -22,15 +22,15 @@ function transverterValue(value) {
 }
 
 module.exports = (function(){
-    var db = null;
+    var dbName = 'test' ,db = null;
     helper.initModule('mysql').then(mysql => {
-        // db = mysql.createConnection({
-        //     host     : 'localhost',
-        //     user     : 'root',
-        //     password : '123456',
-        //     database : 'test'
-        // });
-        // db.on('error',e=>{}).connect();
+        var _db = mysql.createConnection({
+            host     : 'localhost',
+            user     : 'root',
+            password : '123456',
+            database : dbName
+        });
+        _db.on('error',e=>{}).connect({},()=>{ db = _db;});
     });
 
     return function run(getArguments, request, response, bodyData, count = 3) {
@@ -45,36 +45,36 @@ module.exports = (function(){
         } else {
             var [table, condition] = getArguments(request);
             if (!table) {
-                db.query(`select * from sqlite_master where ${condition}`, {}, 'all').then((res) => {
-                    response.end(JSON.stringify(res));
+                db.query(`select * from information_schema.tables where table_schema='${dbName}' and table_type='base table'`, {}, (err, rows) => {
+                    response.end(JSON.stringify({data:rows}));
                 });
             } else {
                 bodyData = JSON.parse(JSON.stringify(bodyData).replace(/\[IP\]/gi, helper.getClientIp(request)) || '{}') || {};;
                 switch (request.method) {
                     case 'GET':
-                        db.query(`select * from ${table} where ${condition}`, {}, 'all').then((res) => {
-                            response.end(JSON.stringify(res));
+                        db.query(`select * from ${table} where ${condition}`, {}, (err, rows) => {
+                            response.end(JSON.stringify({data:rows}));
                         });
                         break;
                     case 'POST':
                         var update = Object.keys(bodyData).map(i => i + '=\'' + bodyData[i] + '\'').join(' and ');
-                        db.query(`update ${table} set ${update} where ${condition}`, {}, 'all').then((res) => {
-                            response.end(JSON.stringify(res));
+                        db.query(`update ${table} set ${update} where ${condition}`, {}, (err, rows) => {
+                            response.end(JSON.stringify({data:rows}));
                         });
                         break;
                     case 'PUT':
-                        db.query(`select max(id) from ${table}`, {}, 'all').then((res) => {
+                        db.query(`select max(id) from ${table}`, {}, (err, res) => {
                             var insert = extendObject(bodyData, {
-                                id: res.data[0]['max(id)'] + 1
+                                id: res[0]['max(id)'] + 1
                             });
-                            db.query(`insert into ${table} (${Object.keys(insert).join()}) values (${Object.values(insert).map(transverterValue).join()})`, {}, 'all').then((res) => {
-                                response.end(JSON.stringify(res));
+                            db.query(`insert into ${table} (${Object.keys(insert).join()}) values (${Object.values(insert).map(transverterValue).join()})`, {}, (err, rows, fields) => {
+                                response.end(JSON.stringify({data:rows}));
                             });
                         });
                         break;
                     case 'DELETE':
-                        db.query(`delete * from ${table} where ${condition}`, {}, 'all').then((res) => {
-                            response.end(JSON.stringify(res));
+                        db.query(`delete * from ${table} where ${condition}`, {},(err, rows, fields) => {
+                            response.end(JSON.stringify(rows));
                         });
                         break;
                 }

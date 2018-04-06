@@ -1,4 +1,5 @@
 var os = require('os');
+var child_process = require('child_process');
 
 
 module.exports = {
@@ -23,5 +24,31 @@ module.exports = {
               }  
         }
         return {offline:true,address:'127.0.0.1'}; 
+    },
+    /**
+     * 关闭对应端口下的进程
+     */
+    killPort: function (port) {
+        return new Promise(succ =>{
+            child_process.exec(process.platform == 'win32' ? 'netstat -aon' : 'netstat –apn', function (err, stdout, stderr) {
+                var count = 0, thenList = [];
+                if (err) { return console.log(err); }
+                stdout.split('\n').filter(function (line) { return line.trim().split(/\s+/).length > 4; }).forEach(function (line) {
+                    var p = line.trim().split(/\s+/);
+                    if (process.platform == 'win32') {
+                        p.splice(1, 0, "0");
+                    }
+                    if (p[2].split(':')[1] == port || p[3].split(':')[1] == port) {
+                        ++count;
+                        child_process.exec('taskkill /pid ' + p[5].split('/')[0] + ' -t -f ', function (err, stdout, stderr) {
+                            if(!--count){
+                                succ(); 
+                            }
+                        });
+                    }
+                });
+                succ();
+            });
+        });
     }
 };

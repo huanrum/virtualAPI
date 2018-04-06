@@ -22,12 +22,12 @@ function transverterValue(value) {
 }
 
 module.exports = (function(){
-    var db = null;
-    var url = "mongodb://" + helper.netInfo().address + ":27017/";
+    var dbName = 'runoob' ,db = null;
+    
     helper.initModule('mongodb').then(mongodb => {
-        mongodb.MongoClient(url).on('error',e=>{}).connect(function(error,client){
+        new mongodb.MongoClient("mongodb://" + helper.netInfo().address + ":27017/").on('error',e=>{}).connect(function(error,client){
             if(error){return;}
-            db = client.db("runoob");
+            db = client.db(dbName);
         });
     });
 

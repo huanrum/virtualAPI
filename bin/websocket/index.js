@@ -2,8 +2,7 @@ var child_process = require('child_process');
 
 var helper = require('./../helper');
 
-var createServer = function (options, exits) {
-    if (exits) { return; }
+module.exports = function (options) {
 
     helper.initModule('ws').then(ws => {
         var wss = new ws.Server({ port: options.websocket }), wList = {};
@@ -73,25 +72,4 @@ var createServer = function (options, exits) {
         console.log('\x1B[32m', 'websocket running at http://' + options.ip + ':' + options.websocket + '/');
     });
 
-};
-
-
-module.exports = function (options) {
-    child_process.exec(process.platform == 'win32' ? 'netstat -aon' : 'netstat –apn', function (err, stdout, stderr) {
-        var count = 0, thenList = [];
-        if (err) { return console.log(err); }
-        stdout.split('\n').filter(function (line) { return line.trim().split(/\s+/).length > 4; }).forEach(function (line) {
-            var p = line.trim().split(/\s+/);
-            if (process.platform == 'win32') {
-                p.splice(1, 0, "0");
-            }
-            if (p[2].split(':')[1] == options.websocket || p[3].split(':')[1] == options.websocket) {
-                ++count;
-                child_process.exec('taskkill /pid ' + p[5].split('/')[0] + ' -t -f ', function (err, stdout, stderr) {
-                    createServer(options, --count);
-                });
-            }
-        });
-        createServer(options, count);
-    });
 };

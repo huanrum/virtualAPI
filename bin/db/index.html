@@ -159,7 +159,7 @@
     <script>
         window.$data = {};
         window.localValue = function (name, value) {
-            if (value) {
+            if (value !== undefined) {
                 localStorage['[db]/' + name] = value;
             } else {
                 return localStorage['[db]/' + name];
@@ -168,6 +168,7 @@
     </script>
     <script>
         $ehr('main', ['binding', 'service', function (binding, service) {
+            var getValue = $ehr('filter.getValue');
             var myApp = binding([
                 '<div class="tabs">',
                 '  <div [item:items] (click)="dbName(item)" [class]="item==db?\'active\':\'\'" [style.fontSize]="fontSize" [style.width]="width">',
@@ -176,8 +177,8 @@
                 '</div>',
                 '<div>',
                 '   <div class="menu-control">',
-                '       <div [menu:menus] (click)="tableName(menu.name)">',
-                '           <a [class]="menu.name==table?\'active\':\'\'">{{menu.name}}</a>',
+                '       <div [menu:menus] (click)="tableName(menu.table)">',
+                '           <a [class]="menu.table==table?\'active\':\'\'">{{menu.name}}</a>',
                 '       </div>',
                 '   </div>',
                 '   <div class="content-control">',
@@ -196,26 +197,36 @@
 
                 scope.dbName = function (db) {
                     if(scope.db === db){return;}
-                    scope.db = db;
                     localValue('tab', db);
-                    service(scope.db + '?type=table').then(req => {
-                        scope.menus.replace(req.data);
-                        scope.data.replace([]);
-                    });
+                    localValue('table', '');
+                    scope.update(db);
                 }
 
                 scope.tableName = function (table) {
-                    if(scope.table === table){return;}
-                    scope.table = table;
+                    if(!table || scope.table === table){return;}
                     localValue('table', table);
-                    service(scope.db + '/' + table + '?ISLIVE=1').then(req => {
-                        scope.data.replace(req.data);
-                    });
+                    scope.update(null,table);
                 }
 
+                scope.update = function(db,table){
+                    if(db){
+                        scope.db = db;
+                        service(db).then(req => {
+                            scope.menus.replace(req.data.map(i=>({name:getValue(i,['name','tableName']),table:getValue(i,['tableName','talName','name'])})));
+                            scope.data.replace([]);
+                        });
+                    }
+                    if(table){
+                        scope.table = table;
+                        service(scope.db + '/' + table + '?ISLIVE=1').then(req => {
+                            scope.data.replace(req.data);
+                        });
+                    }
+                };
+
             });
-            myApp.scope().dbName(localValue('tab') || myApp.scope().items[0]);
-            myApp.scope().tableName(localValue('table'));
+            myApp.scope().update(localValue('tab') || myApp.scope().items[0],localValue('table'));
+            
             myApp[1].style.height = window.innerHeight - 32 + 'px';
         }]);
     </script>
@@ -226,6 +237,16 @@
                 index = index % value.length || 0;
                 return value.slice(0, index) + value[index].toLocaleUpperCase() + value.slice(index + 1);
             };
+        });
+
+        $ehr('filter.getValue', function () {
+            return function getFiled(item,fields){
+                return item[fields.map(function(field){
+                    return Object.keys(item).filter(function(key){
+                        return field.toLocaleUpperCase() === key.replace(/(\$|\_|\-|\@)/g,'').toLocaleUpperCase();
+                    }).pop();
+                }).filter(i=>!!i).shift()] || '';
+            }
         });
 
         $ehr('control.my.grid', ['binding', 'value', function (binding, value) {

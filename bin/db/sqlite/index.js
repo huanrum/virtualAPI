@@ -43,7 +43,7 @@ module.exports = (function () {
         } else {
             var [table, condition] = getArguments(request);
             if (!table) {
-                db.sql(`select * from sqlite_master where ${condition}`, {}, 'all').then((res) => {
+                db.sql(`select * from sqlite_master where type='table'`, {}, 'all').then((res) => {
                     response.end(JSON.stringify(res));
                 });
             } else {
