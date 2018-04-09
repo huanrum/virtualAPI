@@ -2,6 +2,7 @@ var fs = require("fs");
 var child_process = require('child_process');
 
 var cmd = require('./cmd');
+var helper = require('./../helper');
 
 module.exports = (function () {
     var configs = [];
@@ -9,8 +10,12 @@ module.exports = (function () {
     var baseDir = __dirname.replace('\\views\\_dev\\service', '') + '/views/';
     var messageList = {};
 
-    action.config = function (fn) {
-        configs.push(fn);
+    action.config = function (web,fn) {
+        configs.push({
+            web:web,
+            path:helper.config(__dirname + '/../../views/' + web),
+            fn:fn
+        });
     };
 
     return action;
@@ -42,7 +47,7 @@ module.exports = (function () {
 
     function actions(_actions,referer) {
         var id = Date.now() + '';
-        var promisses = configs.map(cfn => cfn(cmd, messageFn, _actions, referer)).filter(i => !!i);
+        var promisses = configs.filter(cf=>new RegExp('\/?views\/+'+cf.web.replace(/\-/g,'\\-')+'\/','i').test(referer + '/' + _actions[1]+ '/')).map(cfn => cfn.fn(cmd, messageFn, _actions, referer)).filter(i => !!i);
 
         if (!promisses.length) {
             switch (_actions[0].toLocaleLowerCase()) {

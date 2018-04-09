@@ -7,8 +7,8 @@ var backup = require('./../backup');
 
 module.exports = (function () {
     var configs = [];
-    proxy.config = function (fn) {
-        configs.push(fn);
+    proxy.config = function (web,fn) {
+        configs.push({web:web,fn:fn});
     };
 
     return proxy;
@@ -16,7 +16,7 @@ module.exports = (function () {
 
     function proxy(request, response) {
         helper.getBodyData(request).then(bodyData => {
-            var promises = configs.map(f => f(request, response, bodyData.toString())).filter(i => !!i);
+            var promises = configs.filter(cf=>new RegExp('\/?views\/+'+cf.web.replace(/\-/g,'\\-')+'\/','i').test(request.headers.referer + '/')).map(f => f.fn(request, response, bodyData.toString())).filter(i => !!i);
             if (!promises.length) {
                 var api = path.join(request.headers.api).replace(':\\', '://').replace(/\\/g, '/');
                 var options = {

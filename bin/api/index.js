@@ -16,9 +16,9 @@ module.exports = (function () {
 
     initConfig(__dirname + '/config', configData, returnData);
 
-    api.config = function (__dir) {
+    api.config = function (web,__dir) {
         if (typeof __dir === 'function') {
-            configs.push(__dir);
+            configs.push({web:web,fn:__dir});
         } else {
             initConfig(__dir, configData, returnData);
         }
@@ -47,7 +47,7 @@ module.exports = (function () {
         } else {
             return new Promise(succ => {
                 helper.getBodyData(request).then(bodyData => {
-                    var promises = configs.map(f => f(request, response, bodyData.toString())).filter(i => !!i);
+                    var promises = configs.filter(cf=>new RegExp('\/?views\/+'+cf.web.replace(/\-/g,'\\-')+'\/','i').test(request.headers.referer + '/')).map(cf => cf.fn(request, response, bodyData.toString())).filter(i => !!i);
                     if (!promises.length) {
                         succ();
                     }

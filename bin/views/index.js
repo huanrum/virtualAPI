@@ -6,23 +6,27 @@ var helper = require('./../helper');
 
 
 module.exports = (function () {
-    var configs = [], mergeList = [];
+    var configs = [];
     var basePath = __dirname.replace('\\bin\\views', '\/').replace('/bin/views', '\/');
-    var webmap = i => i;
 
-    view.config = function (fn) {
+    view.config = function (web,fn) {
         if (fn instanceof Array) {
-            fn.forEach(i => view.config(i));
-        } if (typeof fn === 'string') {
-            mergeList.push(path.join(fn));
+            fn.forEach(i => view.config(web,i));
+        } if (typeof fn === 'function') {
+            configs.push(Object.assign({},getObj(),{fn:fn}));
         } else if (fn && typeof fn === 'object') {
-            configs.push(fn);
+            configs.push(Object.assign({},getObj(),fn));
+        }
+
+        function getObj(){
+            return {
+                fn:()=>'',
+                version:()=>'',
+                files:[],
+                path : helper.config(__dirname + '/../../views/'+ web +'/')
+            }
         }
     };
-
-    if (fs.existsSync(__dirname + '/../../views/__config.js')) {
-        webmap = require(__dirname + '/../../views/__config.js');
-    }
 
     return view;
 

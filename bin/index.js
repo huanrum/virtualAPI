@@ -129,30 +129,32 @@ module.exports = function (options) {
 
     fs.readdirSync(__dirname + '/../service').forEach(function (item) {
         try {
-            api.config(__dirname + '/../service/' + item + '/config');
-            require(__dirname + '/../service/' + item)(configFn, helper);
+            api.config(item,__dirname + '/../service/' + item + '/config');
+            require(__dirname + '/../service/' + item)(configFn(item), helper);
         } catch (e) {
             console.warn('\x1B[31m', item + ' 配置加载失败 ' + new Date() + ' ==> ', e.message);
         }
     });
 
-    function configFn(type) {
-        var args = Array.prototype.slice.call(arguments, 1);
-        switch (type) {
-            case 'views':
-                views.config(...args);
-                break;
-            case 'action':
-                action.config(...args);
-                break;
-            case 'api':
-                api.config(...args);
-                break;
-            case 'proxy':
-                proxy.config(...args);
-                api.config(...args);
-                break;
-        }
+    function configFn(module) {
+        return function(type){
+            var args = Array.prototype.slice.call(arguments, 1);
+            switch (type) {
+                case 'views':
+                    views.config(module,...args);
+                    break;
+                case 'action':
+                    action.config(module,...args);
+                    break;
+                case 'api':
+                    api.config(module,...args);
+                    break;
+                case 'proxy':
+                    proxy.config(module,...args);
+                    api.config(module,...args);
+                    break;
+            }
+        };
     }
 
 };
