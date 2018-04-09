@@ -30,25 +30,34 @@ module.exports = {
      */
     killPort: function (port) {
         return new Promise(succ =>{
-            child_process.exec(process.platform == 'win32' ? 'netstat -aon' : 'netstat –apn', function (err, stdout, stderr) {
-                var count = 0, thenList = [];
-                if (err) { return console.log(err); }
-                stdout.split('\n').filter(function (line) { return line.trim().split(/\s+/).length > 4; }).forEach(function (line) {
-                    var p = line.trim().split(/\s+/);
-                    if (process.platform == 'win32') {
-                        p.splice(1, 0, "0");
-                    }
-                    if (p[2].split(':')[1] == port || p[3].split(':')[1] == port) {
-                        ++count;
-                        child_process.exec('taskkill /pid ' + p[5].split('/')[0] + ' -t -f ', function (err, stdout, stderr) {
-                            if(!--count){
-                                succ(); 
-                            }
-                        });
-                    }
-                });
-                succ();
+            getTaskPort(function(list){
+                Promise.all(list.filter(i=>i.port == port).map(i=>new Promise(resolve=>{
+                    child_process.exec('taskkill /pid ' + i.pid + ' -t -f ', function (err, stdout, stderr) {
+                        resolve();
+                    });
+                }))).then(succ);
             });
         });
+
+        function getTaskPort(callback){
+            if(process.platform !== 'win32'){return;}
+            child_process.exec('tasklist', function (err1, stdout1, stderr1) {
+                if (err1) { return console.log(err1); }
+                child_process.exec('netstat -aon', function (err2, stdout2, stderr2) {
+                    if (err2) { return console.log(err2); }
+                    var result = {};
+                    var tasklist = stdout1.split('\n').map(i=>i.trim().split(/\s+/));
+                    stdout2.split('\n').map(i=>i.trim().split(/\s+/)).filter(i=>!!i[4]).forEach(i=>{
+                        result[i[1].split(':').pop()] = Object.assign(result[i[1].split(':').pop()]||{},{
+                            pid:i[4].split('/')[0],
+                            port:i[1].split(':').pop(),
+                            task:(tasklist.filter(t=>t[1]==i[4].split('/')[0]).pop()||[])[0]
+                        });
+                    });
+
+                    callback(Object.keys(result).map(i=>result[i]).filter(i=>i.pid>1500));
+                });
+            });
+        }
     }
 };

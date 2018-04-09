@@ -1,4 +1,5 @@
 var fs = require("fs");
+var path = require("path");
 var child_process = require('child_process');
 
 var cmd = require('./cmd');
@@ -44,12 +45,23 @@ module.exports = (function () {
         return JSON.stringify(messages);
     }
 
+    function contextmenu(_actions,referer,messageFn){
+        var action = /contextmenu\[(.+)\]/i.exec(_actions[0])[1].trim();
+        var dirPath = helper.config(referer+'/'+_actions[1]);
+        switch (action.toLocaleLowerCase()) {
+            case 'open':
+                cmd(path.dirname(dirPath), messageFn, '', 'start ' + dirPath);
+            break;
+        }
+    }
+
 
     function actions(_actions,referer) {
         var id = Date.now() + '';
         var promisses = configs.filter(cf=>new RegExp('\/?views\/+'+cf.web.replace(/\-/g,'\\-')+'\/','i').test(referer + '/' + _actions[1]+ '/')).map(cfn => cfn.fn(cmd, messageFn, _actions, referer)).filter(i => !!i);
-
-        if (!promisses.length) {
+        if(/contextmenu\[.+\]/.test(_actions[0])){
+            Promise.all(promisses).then(()=>contextmenu(_actions,referer,messageFn));
+        }else if (!promisses.length) {
             switch (_actions[0].toLocaleLowerCase()) {
                 case 'branch':
                     cmd(sourceDiv, messageFn, '', 'git pull && git branch -a');
@@ -61,6 +73,9 @@ module.exports = (function () {
                     cmd(sourceDiv, messageFn, '', 'git pull origin ' + child_process.execSync('git symbolic-ref --short -q HEAD').toString());
                     break;
                 case 'scss':
+                    cmd(sourceDiv, messageFn, _actions[1], 'gulp scss');
+                    break;
+                case 'open':
                     cmd(sourceDiv, messageFn, _actions[1], 'gulp scss');
                     break;
                 default:

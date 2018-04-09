@@ -22,7 +22,7 @@ module.exports = (function () {
                     messageFn('!!' + message);
                 }, 1000);
             });
-        }, 1000);
+        }, 500);
     };
 
     function runCmd(isChild, list, runFn, callback) {

@@ -66,13 +66,13 @@ module.exports = (function(){
                             });
                             break;
                         case 'POST':
-                            response.end(JSON.stringify(collection.update(conditionObj,extendObject(bodyData, {}))).pretty());
+                            collection.update(conditionObj,extendObject(bodyData, {})).then(req=>response.end(JSON.stringify(req)));
                             break;
                         case 'PUT':
-                            response.end(JSON.stringify(collection.insert(extendObject(bodyData, {}))).pretty());
+                            collection.insert(extendObject(bodyData, {})).then(req=>response.end(JSON.stringify(req)));
                             break;
                         case 'DELETE':
-                            response.end(JSON.stringify(collection.remove(conditionObj)).pretty());
+                            collection.remove(conditionObj).then(req=>response.end(JSON.stringify(req)));
                             break;
                     }
                 });

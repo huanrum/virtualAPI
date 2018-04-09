@@ -23,12 +23,16 @@ module.exports = (function () {
         var paths = config().web;
         if(webModule){
             var basePath = __dirname + '/../../views/';
+            if(/https?:\/\/.*\/views\/*/.test(webModule)){
+                webModule = webModule.replace(/https?:\/\/.*\/views\/*/i,basePath);
+            }
             var filterPath = Object.keys(paths).sort((a,b)=> a.length-b.length).filter(i=>path.join(webModule).toLocaleLowerCase().indexOf(path.join(basePath,i).toLocaleLowerCase())!==-1).pop();
             if(filterPath){
                 return path.join(webModule).toLocaleLowerCase().replace(path.join(basePath,filterPath).toLocaleLowerCase(),paths[filterPath]);
             }else{
                return webModule; 
             }
+            
         }else{
             return paths;
         }

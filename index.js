@@ -4,7 +4,7 @@ require('./bin')({
     debug:true,
     kill:false,
     port:8888,
-    websocket:8889,
-    weinre:8887
+    websocket:8844 + Math.floor(Math.random()*44),
+    weinre:8800 + Math.floor(Math.random()*44)
 });
 

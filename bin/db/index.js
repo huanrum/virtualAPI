@@ -1,8 +1,5 @@
 var fs = require('fs');
 
-var sqlite = require('./sqlite');
-var mongodb = require('./mongodb');
-var mysql = require('./mysql');
 var helper = require('./../helper');
 
 module.exports = (function () {
@@ -21,22 +18,30 @@ module.exports = (function () {
 
         helper.getBodyData(request).then(bodyData => {
             var sqlType = /.*\/db\/+(((?![\/\?]).)+)/.exec(request.url);
-            switch(sqlType && sqlType[1].toLocaleLowerCase()){
-                case null:
-                    var sqlTypes = JSON.stringify(fs.readdirSync(__dirname).filter(i=>fs.statSync(__dirname+'/'+i).isDirectory()));
-                    response.setHeader('Content-Type', 'text/html;charset=utf-8');
-                    return response.end(fs.readFileSync(__dirname + '/index.html').toString().replace(/window.\$data = \{\}/,'window.$data = ' + sqlTypes));
-                case 'sqlite':
-                    return sqlite(getArguments, request, response, JSON.parse(bodyData.toString()||'{}'));
-                case 'mongodb':
-                    return mongodb(getArguments, request, response, JSON.parse(bodyData.toString()||'{}'));
-                case 'mysql':
-                    return mysql(getArguments, request, response, JSON.parse(bodyData.toString()||'{}'));
-                default:
+           
+            if(sqlType && sqlType[1].toLocaleLowerCase()){
+                var dbFun = getDbFun(sqlType[1]);
+                if(dbFun){
+                    dbFun(getArguments, request, response, JSON.parse(bodyData.toString()||'{}'));
+                }else{
                     return response.end(JSON.stringify({message:'没有对应的数据库'}));
+                }
+            }else{
+                var sqlTypes = JSON.stringify(fs.readdirSync(__dirname).filter(i=>fs.statSync(__dirname+'/'+i).isDirectory()));
+                response.setHeader('Content-Type', 'text/html;charset=utf-8');
+                return response.end(fs.readFileSync(__dirname + '/index.html').toString().replace(/window.\$data = \{\}/,'window.$data = ' + sqlTypes));
             }
         });
 
     };
+
+    function getDbFun(type){
+        var item = fs.readdirSync(__dirname).filter(i=>i.toLocaleLowerCase()===type.toLocaleLowerCase()).pop();
+        if(item){
+            return require('./' + item);
+        }else{
+            return null;
+        }
+    }
 
 })();

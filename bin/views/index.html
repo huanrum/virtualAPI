@@ -113,6 +113,12 @@
             color: green;
             border: 1px solid green;
         }
+        #list li a {
+            cursor: pointer;
+        }
+        #list li a:hover{
+            text-decoration:underline;
+        }
 
         #list li div i {
             color: #d3d3d3;
@@ -201,6 +207,24 @@
             padding: 0.2rem;
             margin: 0.2rem;
         }
+
+        .context-menu{
+            cursor: pointer;
+            position: fixed;
+            width: 125px;
+            list-style: none;
+            padding: 8px;
+            background: #d3d3d3;
+            border-radius: 8px;
+        }
+        
+        .context-menu li+li{
+            padding-top: 8px;
+        }
+        .context-menu li:hover{
+            color: #00AAEF;
+            text-decoration:underline;
+        }
     </style>
 </head>
 
@@ -228,7 +252,7 @@
 
     </script>
     <script>
-        var selectList = [];
+        var selectList = [], contextmenu = ['open[打开文件(夹)]'];
         var dirs = window.$data.dirs;
         var list = document.getElementById('list');
         var toolbars = document.getElementById('toolbar');
@@ -265,6 +289,19 @@
             a.onclick = function () {
                 window.open('http://' + window.$data.replace.replace(/\/\//g, '/') + '/' + dir);
                 fetch(location.origin + '/action/?scss=' + dir, { method: 'GET' })
+            };
+
+            action.oncontextmenu = function(e){
+                window.createContextmenu(e,contextmenu.map(i=>({
+                    name:/\[(.*)\]/.test(i)?/\[(.*)\]/.exec(i)[1]:i,
+                    fn:()=>{
+                        fetch(location.origin + '/action/?contextmenu[' + i.replace(/\[.*\]/m,'').toLocaleLowerCase() + ']=' + dir, { method: 'GET' });
+                        if(/@/.test(i)){
+                            setTimeout(()=>window.location.reload(),1000);
+                        }
+                    }
+                })));
+                e.preventDefault();
             };
 
             if (pack) {
@@ -406,6 +443,33 @@
 
     </script>
     <script>
+        (function(){
+            var contextmenu = document.createElement('ul');
+            contextmenu.className = 'context-menu';
+            window.onclick=function(e){
+                if(contextmenu && contextmenu.parentNode){
+                    contextmenu.parentNode.removeChild(contextmenu);
+                }
+            };
+
+            window.createContextmenu = function(e,menus){
+                contextmenu.innerHTML = '';
+                document.body.appendChild(contextmenu);
+                menus.forEach(menu=>{
+                    var menuitem = document.createElement('li');
+                    menuitem.innerHTML = menu.name;
+                    menuitem.onclick = menu.fn || menu;
+                    contextmenu.appendChild(menuitem);
+                });
+
+                //根据事件对象中鼠标点击的位置，进行定位
+                contextmenu.style.left=e.clientX+'px';
+                contextmenu.style.top=e.clientY+'px';
+            };
+        })();
+    </script>
+
+    <script>
         fetch('/websocket?ip=' + location.hostname).then(function (req) { return req.json(); }).then(req => {
             var ws = new WebSocket(req.message);
             ws.onopen = function (e) {
@@ -431,18 +495,20 @@
     </script>
 
     <script>
-        var friends = document.createElement('div');
-        friends.className = 'friends';
-        document.body.appendChild(friends);
+        (function(){
+            var friends = document.createElement('div');
+            friends.className = 'friends';
+            document.body.appendChild(friends);
 
-        function updateFriends(list) {
-            friends.innerHTML = '';
-            list.forEach(function (i) {
-                var item = document.createElement('div');
-                friends.appendChild(item);
-                item.innerHTML = i;
-            })
-        }
+            function updateFriends(list) {
+                friends.innerHTML = '';
+                list.forEach(function (i) {
+                    var item = document.createElement('div');
+                    friends.appendChild(item);
+                    item.innerHTML = i;
+                })
+            }
+        })();
     </script>
 </body>
 
