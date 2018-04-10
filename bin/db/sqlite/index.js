@@ -26,7 +26,7 @@ module.exports = (function () {
 
     helper.initModule('sqlite3').then(sqlite3 => {
         db = new HandleDB({
-            databaseFile: './bin/db/sqlite/services.db3'
+            databaseFile: './data/services.db3'
         });
         db.connectDataBase(sqlite3);
     });
