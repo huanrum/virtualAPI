@@ -15,4 +15,4 @@ backup/
 cache/
 images
 bin/config/web.json
-bin/db/sqlite/*.db3
+bin/db/sqlite/services.db3
