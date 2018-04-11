@@ -75,7 +75,7 @@ module.exports = (function(){
             require("./../helper").rmdirs(dir);
         }
         fs.mkdirSync(dir);
-        fs.writeFileSync(dir + '/index.js',`module.exports =  function (configFn, helper){\n\n};`);
+        fs.writeFileSync(dir + '/index.js',`\n\nmodule.exports =  function (configFn, helper){\n\n};`);
     }
 
 })();

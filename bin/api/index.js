@@ -28,7 +28,7 @@ module.exports = (function () {
 
     function api(options, request, response) {
         if (!request) {
-            return fs.readFileSync('bin/api/index.html').toString().replace('window.configData = []', 'window.configData = ' + JSON.stringify(Object.keys(configData).map(f => { return { file: f, config: configData[f] }; })));
+            return fs.readFileSync(__dirname + '/index.html').toString().replace('window.configData = []', 'window.configData = ' + JSON.stringify(Object.keys(configData).map(f => { return { file: f, config: configData[f] }; })));
         }
 
         var keys = Object.keys(returnData);

@@ -12,6 +12,9 @@
             position: relative;
             align-items: center;
             justify-content: center;
+            height: 100%;
+            width: 100%;
+            position: fixed;
         }
         textarea{
             width:45%;
@@ -34,12 +37,15 @@
         input.style.height = document.body.scrollHeight - 50 + 'px';
         output.style.height = document.body.scrollHeight - 50 + 'px';
 
-        button.onclick = function(){
-            return fetch('/random', {
-                                method: 'post',
-                                body: input.value
-                            }).then(function(req){return req.json();}).then(function(data){
-                output.value = JSON.stringify(data, null, 4);;
+        input.onblur = getRandom;
+        button.onclick = getRandom;
+        
+        function getRandom(){
+            return fetch('/random?test=true', {
+                method: 'post',
+                body: JSON.stringify({data:input.value})
+                }).then(function(req){return req.json();}).then(function(req){
+                output.value = req.data;
             });
         };
     </script>

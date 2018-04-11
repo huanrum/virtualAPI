@@ -180,13 +180,16 @@
         var header = document.createElement('div');
         var info = document.createElement('span');
         var helper = document.createElement('span');
+        var random = document.createElement('span');
         var panel = document.createElement('div');
         header.className = 'text-align-center';
         header.appendChild(info);
         header.appendChild(helper);
+        header.appendChild(random);
         document.body.appendChild(header);
         document.body.appendChild(panel);
         helper.innerHTML = ' - <a class="helper">帮助</a>';
+        random.innerHTML = ' - <a class="helper">自动生成数据测试</a>';
         info.innerHTML = ' URL里面参数越靠后优先级越高,点击API的<strong>Method</strong>可以进行测试,点击<strong>URL</strong>可以打开和关闭返回数据结构。';
 
         var groups = {};
@@ -214,6 +217,9 @@
         };
         helper.onclick = function () {
             window.open('bin/helper/index.html');
+        };
+        random.onclick = function () {
+            window.open('bin/random/index.html');
         };
 
         function createGroup(item, contentEl) {

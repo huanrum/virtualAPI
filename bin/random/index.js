@@ -33,7 +33,7 @@ module.exports = (function (emnuData, getValue) {
             }
 
             if (typeof str === 'string') {
-                return getRealValue(str, getString(str, tempData));
+                return getRealValue(str,tempData);
             } else if (str instanceof Array) {
                 return str.map(function (item) {
                     return random(item, null, tempData);
@@ -51,25 +51,39 @@ module.exports = (function (emnuData, getValue) {
             }
         }
 
-        function getRealValue(str, regex) {
+        function getRealValue(str,tempData) {
             var raelValue = {
                 true: true,
                 false: false,
                 null: null
             };
-            if (/\[.*\]/.test(str)) {
-                if (/^\-?\s*\d*\s*(\.\s*\d*\s*)?$/.test(regex)) {
-                    return parseFloat(regex);
-                } else if(/\.json$/i.test(regex)){
-                    if (fs.existsSync(regex)) {
-                        return JSON.parse(fs.readFileSync(regex).toString());
-                    }else if(someValue.path && fs.existsSync(someValue.path + '/' + regex)){
-                        return JSON.parse(fs.readFileSync(someValue.path + '/' + regex).toString());
-                    }
-                }
+            
+            if(/^\s*\[((?!(\[|\])).)*\]\s*$/i.test(str)){
+                str = replace(str,i=>JSON.parse(i));
+            }else{
+                str = str.replace(/\[(((?!(\[|\])).)*)\]/mg,function(strChild){
+                    return replace(strChild,i=>i);
+                });
             }
+
+            var regex = getString(str, tempData);
             var value = raelValue[regex.toLocaleLowerCase().trim()];
             return typeof value === 'undefined' ? regex : value;
+
+            function replace(strChild,fn){
+                var value = /\[(.*)\]/.exec(strChild)[1];
+                if (/^\-?\s*\d*\s*(\.\s*\d*\s*)?$/.test(value)) {
+                    return parseFloat(value);
+                } else if(/\.json$/i.test(value)){
+                    if (fs.existsSync(value)) {
+                        return fn(fs.readFileSync(value).toString());
+                    }else if(someValue.path && fs.existsSync(someValue.path + '/' + value)){
+                        return fn(fs.readFileSync(someValue.path + '/' + value).toString());
+                    }
+                }else{
+                    return strChild;
+                } 
+            }
         }
 
         function tempDataFn() {
@@ -111,7 +125,7 @@ module.exports = (function (emnuData, getValue) {
         }
 
         function getString(regex, tempData) {
-            var regs = regex.match(/\[((?!\[).)*\]/g);
+            var regs = regex.match(/\[((?!(\[|\])).)*\]/g);
             if (regs) {
                 regs.forEach(function (reg) {
                     if (!/[\(\)\{\}]/.test(reg)) {

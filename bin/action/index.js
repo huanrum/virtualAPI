@@ -6,10 +6,7 @@ var cmd = require('./cmd');
 var helper = require('./../helper');
 
 module.exports = (function () {
-    var configs = [];
-    var sourceDiv = __dirname.replace('\\views\\_dev\\service', '') + '/views/';
-    var baseDir = __dirname.replace('\\views\\_dev\\service', '') + '/views/';
-    var messageList = {};
+    var configs = [], messageList = {};
 
     action.config = function (web,fn) {
         configs.push({
@@ -24,19 +21,12 @@ module.exports = (function () {
 
     function action(request, response) {
         var _actions = request.url.split('?')[1];
-        if (!_actions) {
-            allModules(baseDir).then(content => response.end(content));
-        } else if (/^\d+$/.test(_actions)) {
+        if (/^\d+$/.test(_actions)) {
             response.setHeader("Content-Type", 'text/plain;charset=utf-8');
             response.end(message(_actions));
         } else {
             actions(_actions.split('=').map(i=>decodeURIComponent(i)),request.headers.referer).then(id => response.end(id));
         }
-    }
-
-
-    function allModules(_path) {
-        return fs.readFileSync(__dirname + '/index.html').replace(/${dirs}/g, JSON.stringify(fs.readdirSync(_path)));
     }
 
     function message(actionId) {
@@ -45,9 +35,8 @@ module.exports = (function () {
         return JSON.stringify(messages);
     }
 
-    function contextmenu(_actions,referer,messageFn){
+    function contextmenu(_actions,dirPath,messageFn){
         var action = /contextmenu\[(.+)\]/i.exec(_actions[0])[1].trim();
-        var dirPath = helper.config(referer+'/'+_actions[1]);
         switch (action.toLocaleLowerCase()) {
             case 'open':
                 cmd(path.dirname(dirPath), messageFn, '', 'start ' + dirPath);
@@ -58,9 +47,11 @@ module.exports = (function () {
 
     function actions(_actions,referer) {
         var id = Date.now() + '';
+        var sourceDiv = helper.config(referer);
+        var dirPath = helper.config(referer+'/'+_actions[1]);
         var promisses = configs.filter(cf=>new RegExp('\/?views\/+'+cf.web.replace(/\-/g,'\\-')+'\/','i').test(referer + '/' + _actions[1]+ '/')).map(cfn => cfn.fn(cmd, messageFn, _actions, referer)).filter(i => !!i);
         if(/contextmenu\[.+\]/.test(_actions[0])){
-            Promise.all(promisses).then(()=>contextmenu(_actions,referer,messageFn));
+            Promise.all(promisses).then(()=>contextmenu(_actions,dirPath,messageFn));
         }else if (!promisses.length) {
             switch (_actions[0].toLocaleLowerCase()) {
                 case 'branch':
@@ -72,15 +63,8 @@ module.exports = (function () {
                 case 'update':
                     cmd(sourceDiv, messageFn, '', 'git pull origin ' + child_process.execSync('git symbolic-ref --short -q HEAD').toString());
                     break;
-                case 'scss':
-                    cmd(sourceDiv, messageFn, _actions[1], 'gulp scss');
-                    break;
-                case 'open':
-                    cmd(sourceDiv, messageFn, _actions[1], 'gulp scss');
-                    break;
                 default:
-                    messageFn('!!没有对应的处理');
-                    break;
+                    return Promise.resolve('!!没有对应的处理');
             }
         }
 

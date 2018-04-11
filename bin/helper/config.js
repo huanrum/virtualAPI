@@ -22,7 +22,7 @@ module.exports = (function () {
     function configPath(webModule){
         var paths = config().web;
         if(webModule){
-            var basePath = __dirname + '/../../views/';
+            var basePath = path.join(__dirname + '/../../views/');
             if(/https?:\/\/.*\/views\/*/.test(webModule)){
                 webModule = webModule.replace(/https?:\/\/.*\/views\/*/i,basePath);
             }

@@ -68,7 +68,7 @@ var createServer = function (options) {
                     }
                     //对请求的数据处理后再返回
                     else if (/^\/*random/.test(request.url)) {
-                        helper.getBodyData(request).then(bodyData => {
+                        helper.getBodyData(request,true).then(bodyData => {
                             response.writeHead(200, { 'Content-Type': 'text/plain;charset=utf-8' });
                             response.end(JSON.stringify(randomFn(JSON.parse(bodyData.toString() || '{}'))));
                         });

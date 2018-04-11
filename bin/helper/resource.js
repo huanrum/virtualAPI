@@ -31,10 +31,22 @@ module.exports = {
         return [this.netInfo().address, '127.0.0.1', '1'].indexOf(clientIp) !== -1;
     },
     /**
+     * 获取参数
+     */
+    getRequestParameter:function(request){
+        var parameter = {clientIp : this.getClientIp(request)};
+        request.url.split('?').pop().split('#').shift().split('&').forEach(kv=>{
+            parameter[kv.split('=')[0]] = decodeURIComponent(kv.split('=')[1]);
+        });
+        return Object.assign(parameter,request.headers);
+    },
+    /**
      * 
      * @param {*} request 
+     * @param {*} replace 
      */
-    getBodyData: function (request) {
+    getBodyData: function (request,replace) {
+        var parameters = this.getRequestParameter(request);
         return new Promise(succ => {
             var bufferHelper = new BufferHelper();
             if (!request.on) {
@@ -44,7 +56,15 @@ module.exports = {
                     bufferHelper.concat(chunk);
                 });
                 request.on('end', function () {
-                    succ(bufferHelper.toBuffer());
+                    if(replace){
+                        var result = bufferHelper.toString();
+                        Object.keys(parameters).forEach(k=>{
+                            result = result.replace(new RegExp(':\s*'+k,'ig'),parameters[k]);
+                        });
+                        succ(result);
+                    }else{
+                        succ(bufferHelper.toBuffer());
+                    }
                 });
             }
         });

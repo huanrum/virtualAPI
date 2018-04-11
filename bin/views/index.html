@@ -311,18 +311,8 @@
                 action.style.color = '#' + (new Date(10000).setDate(Array.prototype.reduce.call(pack, (acc, val) => acc + val.charCodeAt(), 999999))).toString(16).slice(-8, -2);
 
                 action.onclick = function () {
-                    var count = 0, interval = setInterval(function () {
-                        action.innerHTML = '<strong>' + pack + '</strong>打包 ' + (Array(count++ % 4 + 1).join('.'));
-                        action.style.background = '#99ff99';
-                    }, 500);
-
-                    fetch(location.origin + '/action/?' + pack.toLocaleLowerCase() + '=' + dir, { method: 'GET' }).then(function (r) { return r.text() }).then(function (id) {
-                        runMessage(id, null, function () {
-                            clearInterval(interval);
-                            dirs[dir] = new Date();
-                            action.innerHTML = '<strong>' + pack + '</strong>打包 <i>' + times(new Date()) + '</i>';
-                            action.style.background = '#9f9f9f';
-                        });
+                    runBuild('<strong>' + pack + '</strong>打包 ','<strong>' + pack + '</strong>打包 ',pack.toLocaleLowerCase() + '=' + dir,action,action,null,function () {
+                        dirs[dir] = new Date();
                     });
                 };
             } else if (Object.keys(dirs).some(function (i) { return /\[.+\]/.test(i) })) {
@@ -375,26 +365,40 @@
         }
 
         function runBuild(bar, text, parms, toolbar, a, message, callback) {
-
+            var background = toolbar.style.background;
+            var backtext = a.innerHTML;
             var count = 0, interval = setInterval(function () {
                 a.innerHTML = bar + ' ' + (Array(count++ % 4 + 1).join('.'));
                 toolbar.style.background = '#99ff99';
             }, 500);
 
             fetch(location.origin + '/action/?' + parms, { method: 'GET' }).then(function (r) { return r.text() }).then(function (id) {
-                message.innerHTML = '';
-                runMessage(id, message, function (data) {
+                if(message){
+                    message.innerHTML = '';
+                }
+                if(/^\d+$/.test(id)){
+                    runMessage(id, message, function (data) {
+                        clearInterval(interval);
+                        a.innerHTML = text + ' <i>' + times(new Date()) + '</i>';
+                        toolbar.style.background = '#9f9f9f';
+                        if (callback) {
+                            callback(data);
+                        }
+                    });
+                }else{
                     clearInterval(interval);
-                    a.innerHTML = text + ' <i>' + times(new Date()) + '</i>';
-                    toolbar.style.background = '#9f9f9f';
-                    if (callback) {
-                        callback(data);
-                    }
-                });
+                    a.innerHTML = backtext;
+                    toolbar.style.background = background;
+                    showDialog('提示',id);
+                }
+                
             });
         }
 
         function showDialog(title, message, btns, callback) {
+            btns = btns || [];
+            callback = callback || function(){};
+            
             var dialogBack = document.createElement('div');
             var dialog = document.createElement('div');
             var header = document.createElement('div');
