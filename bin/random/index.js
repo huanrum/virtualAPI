@@ -66,9 +66,13 @@ module.exports = (function (emnuData, getValue) {
                 });
             }
 
-            var regex = getString(str, tempData);
-            var value = raelValue[regex.toLocaleLowerCase().trim()];
-            return typeof value === 'undefined' ? regex : value;
+            if(typeof str === 'object'){
+                return str;
+            }else{
+                var regex = getString(str, tempData);
+                var value = raelValue[regex.toLocaleLowerCase().trim()];
+                return typeof value === 'undefined' ? regex : value;
+            }
 
             function replace(strChild,fn){
                 var value = /\[(.*)\]/.exec(strChild)[1];

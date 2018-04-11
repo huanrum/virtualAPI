@@ -1,69 +1,71 @@
 <script>
-    window.document.addEventListener('keydown', function (e) {
-        if (e.altKey && e.shiftKey && e.ctrlKey && e.key === 'B') {
-            build(pack);
-        }
-    });
-
-    function loading(message) {
-        var loading = document.createElement('div');
-        document.body.appendChild(loading);
-        loading.style.position = 'fixed';
-        loading.style.zIndex = 9999;
-        loading.style.width = '100%';
-        loading.style.height = '100%';
-        loading.style.top = 0;
-        loading.style.left = 0;
-        loading.style.background = 'rgba(128,128,128,0.9)';
-        loading.style.textAlign = 'center';
-        loading.style.padding = '4em auto';
-        loading.style.color = '#ffffff';
-        loading.style.fontWeight = '600';
-        loading.style.overflow = 'auto';
-        loading.innerHTML = message || '';
-        
-        return loading;
-    }
-
-    function build(pack) {
-        var dir = location.pathname.split('/').filter(function (i) {
-            return !!i;
-        }).slice(-2).shift();
-        
-        if(build.doing){
-            return;
-        }else{
-            build.doing = true;
-        }
-        fetch(location.origin + '/action/?' + pack.toLocaleLowerCase() + '=' + dir, {
-            method: 'GET'
-        }).then(function (r) {
-            return r.text()
-        }).then(function (id) {
-            runMessage(id, loading('build'),0, () => {
-                setTimeout(()=>{
-                    build.doing = false;
-                    location.reload();
-                },5000);
-                
-            });
-        });
-    }
-
-    function runMessage(id, loading, count, callBack) {
-        fetch(location.origin + '/action/?' + id, {
-            method: 'GET'
-        }).then(function (r) {
-            return r.json()
-        }).then(function (data) {
-            data = data || [];
-            loading.innerHTML +=  '<br>' + id + ' ==> ' + count + '<br>' + data.join('<br>');
-            loading.scrollTop = loading.scrollHeight;
-            if (!data.filter(i => /^!!/.test(i)).length) {
-                setTimeout(() => runMessage(id, loading,count + 1, callBack), 500);
-            } else {
-                callBack(data);
+    (function (pack) {
+        window.document.addEventListener('keydown', function (e) {
+            if (e.altKey && e.shiftKey && e.ctrlKey && e.key === 'B') {
+                build(pack);
             }
         });
-    }
+
+        function loading(message) {
+            var loading = document.createElement('div');
+            document.body.appendChild(loading);
+            loading.style.position = 'fixed';
+            loading.style.zIndex = 9999;
+            loading.style.width = '100%';
+            loading.style.height = '100%';
+            loading.style.top = 0;
+            loading.style.left = 0;
+            loading.style.background = 'rgba(128,128,128,0.9)';
+            loading.style.textAlign = 'center';
+            loading.style.padding = '4em auto';
+            loading.style.color = '#ffffff';
+            loading.style.fontWeight = '600';
+            loading.style.overflow = 'auto';
+            loading.innerHTML = message || '';
+
+            return loading;
+        }
+
+        function build(pack) {
+            var dir = location.pathname.split('/').filter(function (i) {
+                return !!i;
+            }).slice(-2).shift();
+
+            if (build.doing) {
+                return;
+            } else {
+                build.doing = true;
+            }
+            fetch(location.origin + '/action/?' + pack.toLocaleLowerCase() + '=' + dir, {
+                method: 'GET'
+            }).then(function (r) {
+                return r.text()
+            }).then(function (id) {
+                runMessage(id, loading('build'), 0, () => {
+                    setTimeout(() => {
+                        build.doing = false;
+                        location.reload();
+                    }, 5000);
+
+                });
+            });
+        }
+
+        function runMessage(id, loading, count, callBack) {
+            fetch(location.origin + '/action/?' + id, {
+                method: 'GET'
+            }).then(function (r) {
+                return r.json()
+            }).then(function (data) {
+                data = data || [];
+                loading.innerHTML += '<br>' + id + ' ==> ' + count + '<br>' + data.join('<br>');
+                loading.scrollTop = loading.scrollHeight;
+                if (!data.filter(i => /^!!/.test(i)).length) {
+                    setTimeout(() => runMessage(id, loading, count + 1, callBack), 500);
+                } else {
+                    callBack(data);
+                }
+            });
+        }
+    })('_$pack$_');
 </script>

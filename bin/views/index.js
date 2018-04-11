@@ -131,9 +131,7 @@ module.exports = (function () {
 
                 if(debug){
                     content = content.replace(/<\/body>/,function(src){
-                        return fs.readFileSync(__dirname + '/../debug/index.html').toString().replace(/<script>/,function(script){
-                            return script + '\r\nvar pack = "' + helper.packTool(path.dirname(file)) + '"';
-                        }) + '\r\n' + src;
+                        return fs.readFileSync(__dirname + '/../debug/index.html').toString().replace('_$pack$_',helper.packTool(path.dirname(file))) + '\r\n' + src;
                     });
                 }
 

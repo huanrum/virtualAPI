@@ -39,6 +39,18 @@
 
         input.onblur = getRandom;
         button.onclick = getRandom;
+
+        input.value = [
+            ':clientIP',
+            '[ip]',
+            '[DATE]',
+            '[device]',
+            '[10-100]',
+            '[()4]',
+            '[aaa,bbb,100-200]',
+            '[(@)4]',
+            '[service\\tng-mobile\\data\\proxy.json]'
+        ].join('\n\n');
         
         function getRandom(){
             return fetch('/random?test=true', {
