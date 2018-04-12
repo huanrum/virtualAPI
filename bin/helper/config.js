@@ -30,7 +30,7 @@ module.exports = (function () {
             if(filterPath){
                 return path.join(webModule).toLocaleLowerCase().replace(path.join(basePath,filterPath).toLocaleLowerCase(),paths[filterPath]);
             }else{
-               return webModule; 
+               return path.join(webModule); 
             }
             
         }else{

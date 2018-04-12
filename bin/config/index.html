@@ -138,8 +138,8 @@
         .common-dialog-back .common-dialog.max-window {
             width: 96%;
             height: 96%;
-            left: 2%!important;
-            top: 2%!important;
+            left: 2% !important;
+            top: 2% !important;
             margin-left: 0;
             transform: none;
         }
@@ -216,7 +216,9 @@
 
 <body>
     <script>
-        fetch(location.origin + '/config/').then(function (i) { return i.json(); }).then(function (modules) {
+        fetch(location.origin + '/config/').then(function (i) {
+            return i.json();
+        }).then(function (modules) {
             Object.keys(modules).forEach(function (mod, index) {
                 var fieldset = document.createElement('fieldset');
                 var legend = document.createElement('legend');
@@ -244,70 +246,117 @@
                     };
                 }
 
-                fetch(location.origin + '/config/' + mod).then(function (i) { return i.json(); }).then(function (data) {
-                    Object.keys(data).forEach(createdRow);
-
-                    aButton.onclick = function () {
-                        if (/modify/.test(legend.className)) {
-                            showDialog('提交', '提交所有的改动').then(function () {
-                                fetch(location.origin + '/config/' + mod, { method: 'POST', body: JSON.stringify(data) }).then(function (i) { return i.json(); }).then(function (req) {
-                                    if(req && Object.keys(req).length){
-                                        var uiList = Object.keys(req).map(function(key){
-                                            return '<li><input type="checkbox" value="'+key+'"><label>'+key+(req[key]?'新增':'覆盖')+'</label></li>';
-                                        }).join('');
-
-                                        showDialog('更新相关的服务器目录', '<ul>'+uiList+'</ul>').then(function (content) {
-                                            Array.prototype.forEach.call(content[0].children,function(el){
-                                                if(el.querySelector('input').checked){
-                                                    fetch(location.origin + '/config/' + mod + '?' + el.querySelector('input').value);
-                                                }
-                                            });
-                                        });  
-                                    }
-                                    legend.className = legend.className.replace('modify', '');
-                                })
-                            });
-                        } else {
-                            showDialog('添加'+modules[mod]+'Key', '<input>').then(function (content) {
-                                var key = content[0].value;
-                                data[key] = '';
-                                createdRow(key);
-                            });
-                        }
-                    };
-
-                    function createdRow(key) {
-                        var row = document.createElement('div');
-                        var label = document.createElement('label');
-                        var input = document.createElement('input');
-                        var remove = document.createElement('div');
-
-                        label.innerHTML = key;
-                        input.value = data[key];
-                        remove.inner = 'Remove';
-
-                        row.appendChild(remove);
-                        row.appendChild(label);
-                        row.appendChild(input);
-
-                        content.appendChild(row);
-
-                        input.onchange = function () {
-                            data[key] = input.value.trim();
-                            legend.className += legend.className.replace('modify', '') + ' modify';
-                        };
-
-                        remove.onclick = function () {
-                            showDialog('删除'+modules[mod]+'Key', '确定要删除，确定请点击确定按钮。').then(function () {
-                                delete data[key];
-                                content.removeChild(row);
-                                legend.className += legend.className.replace('modify', '') + ' modify';
-                            });
-                        }
+                fetch(location.origin + '/config/' + mod).then(function (i) {
+                    return i.json();
+                }).then(function (data) {
+                    if (index) {
+                        createGroup(data,null,modules,mod,legend,content,aButton);
+                    } else {
+                        fetch(location.origin + '/config/edit').then(function (i) {
+                            return i.json();
+                        }).then(function (edit) {
+                            createGroup(data,edit,modules,mod,legend,content,aButton);
+                        });
                     }
                 });
             });
         });
+
+
+        function createGroup(data,editData,modules,mod,legend,content,aButton) {
+            Object.keys(data).forEach(function(key){
+                createdRow(data,key,modules,mod,editData,legend,content);
+            });
+
+            aButton.onclick = function () {
+                if (/modify/.test(legend.className)) {
+                    showDialog('提交', '提交所有的改动').then(function () {
+                        fetch(location.origin + '/config/' + mod, {
+                            method: 'POST',
+                            body: JSON.stringify(data)
+                        }).then(function (i) {
+                            return i.json();
+                        }).then(function (req) {
+                            if (req && Object.keys(req).length) {
+                                var uiList = Object.keys(req).map(function (key) {
+                                    return '<li><input type="checkbox" value="' + key +
+                                        '"><label>' + key + (req[key] ? '新增' : '覆盖') +
+                                        '</label></li>';
+                                }).join('');
+
+                                showDialog('更新相关的服务器目录', '<ul>' + uiList + '</ul>').then(function (
+                                    content) {
+                                    Array.prototype.forEach.call(content[0].children,
+                                        function (el) {
+                                            if (el.querySelector('input').checked) {
+                                                fetch(location.origin + '/config/' +
+                                                    mod + '?' + el.querySelector(
+                                                        'input').value);
+                                            }
+                                        });
+                                });
+                            }
+                            legend.className = legend.className.replace('modify', '');
+                        })
+                    });
+                } else {
+                    showDialog('添加' + modules[mod] + 'Key', '<input>').then(function (content) {
+                        var key = content[0].value;
+                        data[key] = '';
+                        createdRow(data,key,modules,mod,editData,legend,content);
+                    });
+                }
+            };
+
+            
+        }
+
+        function createdRow(data,key,modules,mod,editData,legend,content) {
+                var row = document.createElement('div');
+                var label = document.createElement('label');
+                var input = document.createElement('input');
+                var remove = document.createElement('div');
+
+                label.innerHTML = key;
+                
+                input.value = data[key];
+
+                row.appendChild(remove);
+                row.appendChild(label);
+                row.appendChild(input);
+
+                content.appendChild(row);
+
+                if(editData){
+                    label.title = editData[key] || '';
+                    label.onclick = function(){
+                        showDialog('修改' + modules[mod] + ' ' + key + ' 的编辑路径', '<input style="width: calc(100% - 0.6em);" value="'+(editData[key]||'')+'">').then(function (children) {
+                            if(children[0].value && children[0].value !== editData[key]){
+                                editData[key] = children[0].value;
+                                label.title = editData[key];
+                                fetch(location.origin + '/config/edit', {
+                                    method: 'POST',
+                                    body: JSON.stringify(editData)
+                                });
+                            }
+                        });
+                    };
+                }
+
+                input.onchange = function () {
+                    data[key] = input.value.trim();
+                    legend.className += legend.className.replace('modify', '') + ' modify';
+                };
+
+                remove.onclick = function () {
+                    showDialog('删除' + modules[mod] + 'Key', '确定要删除，确定请点击确定按钮。').then(function () {
+                        delete data[key];
+                        content.removeChild(row);
+                        legend.className += legend.className.replace('modify', '') + ' modify';
+                    });
+                }
+            }
+
 
 
         function showDialog(title, elementHtml) {

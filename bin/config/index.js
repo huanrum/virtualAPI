@@ -3,12 +3,14 @@ var fs = require("fs");
 module.exports = (function(){
     var data = {
         web : getContent(__dirname +  '/../config/web.json'),
-        mete : getContent(__dirname +  '/../config/mete.json')
+        mete : getContent(__dirname +  '/../config/mete.json'),
+        software : getContent(__dirname +  '/../config/software.json')
     };
 
     var info = {
         web:'发布的网站配置',
-        mete:'文件类型'
+        mete:'文件类型',
+        software:'关联应用'
     };
 
     return function (helper,request,response){
@@ -37,8 +39,10 @@ module.exports = (function(){
                         }else{
                             if(fs.existsSync(file)){
                                 response.end(fs.readFileSync(file).toString());
-                            }else{
+                            }else if(data[mod]){
                                 response.end('{}');
+                            }else{
+                                response.end('null');
                             }
                         }
                     }
@@ -47,11 +51,11 @@ module.exports = (function(){
         }
     };
 
-    function getContent(file){
+    function getContent(file,defaultValue){
         if(fs.existsSync(file)){
             return JSON.parse(fs.readFileSync(file).toString());
         }else{
-            return {};
+            return defaultValue!==undefined?defaultValue:{};
         }
     }
 

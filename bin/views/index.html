@@ -250,6 +250,19 @@
             window.close();
         };
 
+        setting.oncontextmenu = function(e){
+            window.createContextmenu(e,['open[打开文件(夹)]','vscode[打开编辑器]'].map(i=>({
+                    name:/\[(.*)\]/.test(i)?/\[(.*)\]/.exec(i)[1]:i,
+                    fn:()=>{
+                        fetch(location.origin + '/action/?contextmenu[' + i.replace(/\[.*\]/m,'').toLocaleLowerCase() + ']=', { method: 'GET' });
+                        if(/@/.test(i)){
+                            setTimeout(()=>window.location.reload(),1000);
+                        }
+                    }
+                })));
+                e.preventDefault();
+            };
+
     </script>
     <script>
         var selectList = [], contextmenu = ['open[打开文件(夹)]'];

@@ -3,6 +3,7 @@ var path = require("path");
 var child_process = require('child_process');
 
 var cmd = require('./cmd');
+var config = require('./../config');
 var helper = require('./../helper');
 
 module.exports = (function () {
@@ -35,11 +36,16 @@ module.exports = (function () {
         return JSON.stringify(messages);
     }
 
-    function contextmenu(_actions,dirPath,messageFn){
+    function contextmenu(_actions,referer,messageFn){
+        var dirPath = helper.config((referer+'/'+_actions[1]).replace(/\/views\/*$/,'/views/../'));
         var action = /contextmenu\[(.+)\]/i.exec(_actions[0])[1].trim();
         switch (action.toLocaleLowerCase()) {
             case 'open':
                 cmd(path.dirname(dirPath), messageFn, '', 'start ' + dirPath);
+            break;
+            case 'vscode':
+                var software = config().software.vscode;
+                cmd(path.dirname(software), messageFn, '', path.basename(software) + ' ' + dirPath);
             break;
         }
     }
@@ -48,10 +54,10 @@ module.exports = (function () {
     function actions(_actions,referer) {
         var id = Date.now() + '';
         var sourceDiv = helper.config(referer);
-        var dirPath = helper.config(referer+'/'+_actions[1]);
+        
         var promisses = configs.filter(cf=>new RegExp('\/?views\/+'+cf.web.replace(/\-/g,'\\-')+'\/','i').test(referer + '/' + _actions[1]+ '/')).map(cfn => cfn.fn(cmd, messageFn, _actions, referer)).filter(i => !!i);
         if(/contextmenu\[.+\]/.test(_actions[0])){
-            Promise.all(promisses).then(()=>contextmenu(_actions,dirPath,messageFn));
+            Promise.all(promisses).then(()=>contextmenu(_actions,referer,messageFn));
         }else if (!promisses.length) {
             switch (_actions[0].toLocaleLowerCase()) {
                 case 'branch':
