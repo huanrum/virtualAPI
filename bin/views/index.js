@@ -137,7 +137,7 @@ module.exports = (function () {
 
                 data = new Buffer(content.toString());
             } else if (merge && fs.existsSync(file.replace(/\.js.*/, '')) || filterConfigs.some(cfn => cfn.files.some(i => path.join(cfn.path + '/' + i).toLocaleLowerCase() === path.join(file).toLocaleLowerCase()))) {
-                data = new Buffer(helper.readAllJSContent(data.toString(), file.replace(/\.js.*/, '')));
+                data = new Buffer(helper.readAllJSContent(data.toString(), file.replace(/\.js.*/, ''),f=>filterConfigs.some(cfn=>cfn.exclude&&cfn.exclude.test(f))));
             }
 
             

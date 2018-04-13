@@ -45,13 +45,15 @@ module.exports = (function () {
         /**
          * 获取目录下的所有文件
          */
-        readAllJSFile: function (source, dir, to) {
+        readAllJSFile: function (source, dir, to, exclude) {
+            exclude = exclude || function(){};
             if (fs.statSync(dir).isDirectory()) {
                 fs.readdirSync(dir).forEach(child => {
+                    if(exclude(path.join(dir , child))){return;}
                     if (/\.js$/.test(child)) {
                         source += to(dir, child);
                     } else {
-                        source = this.readAllJSFile(source, dir + '/' + child, to);
+                        source = this.readAllJSFile(source, dir + '/' + child, to, exclude);
                     }
 
                 });
@@ -61,13 +63,15 @@ module.exports = (function () {
         /**
          * 读取所有内容
          */
-        readAllJSContent: function (source, dir) {
+        readAllJSContent: function (source, dir, exclude) {
+            exclude = exclude || function(){};
             if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
                 fs.readdirSync(dir).forEach(child => {
+                    if(exclude(path.join(dir , child))){return;}
                     if (/\.js$/.test(child)) {
                         source += "\r\n\r\n /****** " + (child) + " ******/ \r\n" + fs.readFileSync(dir + '/' + child, { encoding: 'utf-8' }) + ';';
                     } else {
-                        source = "\r\n\r\n" + this.readAllJSContent(source, dir + '/' + child);
+                        source = "\r\n\r\n" + this.readAllJSContent(source, dir + '/' + child, exclude);
                     }
                 });
             }
