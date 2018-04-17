@@ -2,7 +2,9 @@
     (function (pack) {
         window.document.addEventListener('keydown', function (e) {
             if (e.altKey && e.shiftKey && e.ctrlKey && e.key === 'B') {
-                build(pack);
+                if(pack){
+                    build(pack);
+                }
             }
         });
 

@@ -285,8 +285,8 @@
                                 }).join('');
 
                                 showDialog('更新相关的服务器目录', '<ul>' + uiList + '</ul>').then(function (
-                                    content) {
-                                    Array.prototype.forEach.call(content[0].children,
+                                    outContent) {
+                                    Array.prototype.forEach.call(outContent[0].children,
                                         function (el) {
                                             if (el.querySelector('input').checked) {
                                                 fetch(location.origin + '/config/' +
@@ -300,8 +300,8 @@
                         })
                     });
                 } else {
-                    showDialog('添加' + modules[mod] + 'Key', '<input>').then(function (content) {
-                        var key = content[0].value;
+                    showDialog('添加' + modules[mod] + 'Key', '<input>').then(function (outContent) {
+                        var key = outContent[0].value;
                         data[key] = '';
                         createdRow(data,key,modules,mod,editData,legend,content);
                     });
