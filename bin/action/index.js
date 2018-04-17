@@ -39,6 +39,9 @@ module.exports = (function () {
     function contextmenu(_actions,referer,messageFn){
         var dirPath = helper.config((referer+'/'+_actions[1]).replace(/\/views\/*$/,'/views/../'));
         var action = /contextmenu\[(.+)\]/i.exec(_actions[0])[1].trim();
+        if(!fs.statSync(dirPath).isDirectory()){
+            dirPath = path.dirname(dirPath);
+        }
         switch (action.toLocaleLowerCase()) {
             case 'open':
                 cmd(path.dirname(dirPath), messageFn, '', 'start ' + dirPath);
@@ -57,7 +60,7 @@ module.exports = (function () {
         
         var promisses = configs.filter(cf=>new RegExp('\/?views\/+'+cf.web.replace(/\-/g,'\\-')+'\/','i').test(referer + '/' + _actions[1]+ '/')).map(cfn => cfn.fn(cmd, messageFn, _actions, referer)).filter(i => !!i);
         if(/contextmenu\[.+\]/.test(_actions[0])){
-            Promise.all(promisses).then(()=>contextmenu(_actions,referer,messageFn));
+            Promise.all(promisses).then(()=>contextmenu(_actions,referer.split('?').shift(),messageFn));
         }else if (!promisses.length) {
             switch (_actions[0].toLocaleLowerCase()) {
                 case 'branch':

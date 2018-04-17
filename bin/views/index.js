@@ -93,7 +93,7 @@ module.exports = (function () {
 
             fs.readdirSync(divPath).forEach(function (i) {
                 var config = configs.filter(cfn => cfn.path && cfn.version && path.join(divPath + '/' + i).toLocaleLowerCase().indexOf(path.join(cfn.path).toLocaleLowerCase()) !== -1).pop();
-                dirs['['+ helper.packTool(path.join(divPath + '/' + i)) + ']' + i] =  config?config.version(i):{};
+                dirs['['+ (helper.gitignore(divPath + '/' + i)?'':helper.packTool(path.join(divPath + '/' + i))) + ']' + i] =  config?config.version(i):{};
             });
 
             if (/\/views\/*$/.test(_path)) {
@@ -103,9 +103,12 @@ module.exports = (function () {
                 });
             }
 
-            succ(fs.readFileSync(__dirname + '/index.html', 'utf-8').toString().replace('window.$data = {};', 'window.$data = ' + decodeURIComponent(JSON.stringify({
+            succ(fs.readFileSync(__dirname + '/index.html', 'utf-8').toString()
+            .replace(/<title>.*<\/title>/,`<title>${_path.replace(/\/*views\/*/,'')||'Views'}<\/title>`)
+            .replace('window.$data = {};', 'window.$data = ' + decodeURIComponent(JSON.stringify({
                 _path: _path, dirs: dirs, replace: replace, options: options, branch: branch, netSegment:netSegment
-            }, null, 4))).replace('/*addToolbar:(function(){})();*/', addToolbar.replace(/<\/?script>/gi, '')));
+            }, null, 4)))
+            .replace('/*addToolbar:(function(){})();*/', addToolbar.replace(/<\/?script>/gi, '')));
         });
     }
 
@@ -119,11 +122,19 @@ module.exports = (function () {
             var data = fs.readFileSync(file.replace(/\/\//g, '/'));
             if (/(\/|\\)(index|default)\.html/.test(file)) {
                 var weinre = options.ip + ':' + options.weinre;
-                var content = data.toString().replace(/\?\d+/g, '').replace(/<head>/, function (str) {
-                    return str + (/<title>.*<\/title>/.test(data.toString())?(''):('\n\r<title>' + path.basename(file.replace('index.html', '')) + '</title>'));
-                }).replace(/<body((?!>).)*>/, function (str) {
+                var content = data.toString().replace(/<body((?!>).)*>/, function (str) {
                     return str + '\n\t' + (options.ip !== '127.0.0.1' && options.weinre && !helper.localhost(request)? ('<script src="http://' + weinre + '/target/target-script-min.js#anonymous"></script>') : '');
                 });
+
+                if(/<title>.*<\/title>/.test(content)){
+                    content = content.replace(/<title>.*<\/title>/,function(str){
+                        return '<title>' + (/<title>(.*)<\/title>/.exec(str)[1] || path.basename(file.replace('index.html', ''))) + '</title>';
+                    });
+                }else{
+                    content = content.replace(/\?\d+/g, '').replace(/<head>/, function (str) {
+                        return str + '\n\r<title>' + path.basename(file.replace('index.html', '')) + '</title>';
+                    });
+                }
 
                 filterConfigs.forEach(cfn => {
                     content = cfn.fn(file, content, merge, debug, request.url.split('?')[1]||'');

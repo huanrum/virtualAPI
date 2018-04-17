@@ -146,6 +146,20 @@ module.exports = (function () {
                     console.log(request.url,e);
                 }
             });
+        },
+
+        gitignore: function(filePath){
+            var gitignorePath = get(path.dirname(filePath));
+            if(!gitignorePath){
+                return false;
+            }
+            var gitignore = fs.readFileSync(gitignorePath+'/.gitignore').toString().replace(/(\\|\/)/mg,'\\\\').replace(/\./mg,'\\.').replace(/\*/mg,'\.\*').split('\r\n').filter(i=>!!i&&!/^\s*\#+/.test(i));
+            filePath = path.join(filePath)+'\\';
+            return gitignore.some(i=>new RegExp(gitignorePath.replace(/(\\|\/)/mg,'\\\\')+'\\\\'+i,'i').test(filePath));
+
+            function get(dir){
+                return fs.readdirSync(dir).some(i=>/\.gitignore/.test(i))? dir:(dir !== path.dirname(dir)&&get(path.dirname(dir)));
+            }
         }
     };
 })();
