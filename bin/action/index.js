@@ -46,6 +46,10 @@ module.exports = (function () {
             case 'open':
                 cmd(path.dirname(dirPath), messageFn, '', 'start ' + dirPath);
             break;
+            case 'pull':
+                cmd(dirPath, messageFn, '', ['git symbolic-ref --short -q HEAD','git pull origin {@@@@}']);
+                
+            break;
             case 'vscode':
                 var software = config().software.vscode;
                 cmd(path.dirname(software), messageFn, '', path.basename(software) + ' ' + dirPath);

@@ -254,10 +254,11 @@
             window.createContextmenu(e,['open[打开文件(夹)]','vscode[打开编辑器]'].map(i=>({
                     name:/\[(.*)\]/.test(i)?/\[(.*)\]/.exec(i)[1]:i,
                     fn:()=>{
-                        fetch(location.origin + '/action/?contextmenu[' + i.replace(/\[.*\]/m,'').toLocaleLowerCase() + ']=', { method: 'GET' });
-                        if(/@/.test(i)){
-                            setTimeout(()=>window.location.reload(),1000);
-                        }
+                        fetch(location.origin + '/action/?contextmenu[' + i.replace(/\[.*\]/m,'').toLocaleLowerCase() + ']=', { method: 'GET' }).then(function(i){return i.json();}).then(function(id){
+                            if(/@/.test(i)){
+                                setTimeout(()=>window.location.reload(),500);
+                              }
+                        });
                     }
                 })));
                 e.preventDefault();
@@ -265,7 +266,7 @@
 
     </script>
     <script>
-        var selectList = [], contextmenu = ['open[打开文件(夹)]'];
+        var selectList = [], contextmenu = ['open[打开文件(夹)]','pull[#更新代码]'];
         var dirs = window.$data.dirs;
         var list = document.getElementById('list');
         var toolbars = document.getElementById('toolbar');
@@ -308,10 +309,21 @@
                 window.createContextmenu(e,contextmenu.map(i=>({
                     name:/\[(.*)\]/.test(i)?/\[(.*)\]/.exec(i)[1]:i,
                     fn:()=>{
-                        fetch(location.origin + '/action/?contextmenu[' + i.replace(/\[.*\]/m,'').toLocaleLowerCase() + ']=' + dir, { method: 'GET' });
-                        if(/@/.test(i)){
-                            setTimeout(()=>window.location.reload(),1000);
-                        }
+                        fetch(location.origin + '/action/?contextmenu[' + i.replace(/\[.*\]/m,'').toLocaleLowerCase() + ']=' + dir, { method: 'GET' }).then(function(i){return i.json();}).then(function(id){
+
+                            if(/@/.test(i)){
+                                setTimeout(()=>window.location.reload(),500);
+                            }
+
+                            if(/#/.test(i) && /^\d+$/.test(id)){
+                                var message = document.createElement('div');
+                                var closeDialog = showDialog(dir + /\[(.*)\]/.test(i)?/\[(.*)\]/.exec(i)[1]:i, message, []);
+                                runMessage(id, message, function(){
+                                    closeDialog();
+                                })
+                            }
+
+                        });
                     }
                 })));
                 e.preventDefault();
@@ -325,7 +337,7 @@
 
                 action.onclick = function () {
                     runBuild('<strong>' + pack + '</strong>打包 ','<strong>' + pack + '</strong>打包 ',pack.toLocaleLowerCase() + '=' + dir,action,action,null,function () {
-                        dirs[dir] = new Date();
+                        dirs[_dir] = new Date();
                     });
                 };
             } else if (Object.keys(dirs).some(function (i) { return /\[.+\]/.test(i) })) {

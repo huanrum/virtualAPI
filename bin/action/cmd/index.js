@@ -3,24 +3,36 @@ var child_process = require('child_process');
 
 module.exports = (function () {
 
-    return function useCMD(sourceDiv,messageFn, dirs, cmd, isChild) {
+    return function useCMD(sourceDiv,messageFn, dirs, cmd, isChild, callback) {
         if(!Array.isArray(dirs)){
             dirs = [dirs];
+        }
+        if(!Array.isArray(cmd)){
+            cmd = [cmd];
+        }
+        if(typeof isChild === 'function'){
+            callback = isChild;
+            isChild = false;
         }
         messageFn('命令 开始');
         setTimeout(function () {
             messageFn('切换位置');
-            runCmd(isChild, dirs.map(dir=>[sourceDiv.split(':')[0] + ':', 'cd ' + sourceDiv.replace(/\\/g,'/') + '/' + dir, cmd].join(' && ')), function (data) {
+            var cmdlist = dirs.map(dir=>cmd.map(c=>[sourceDiv.split(':')[0] + ':', 'cd ' + sourceDiv.replace(/\\/g,'/') + '/' + dir, c].join(' && ')));
+            runCmd(isChild, cmdlist.reduce((ls,l)=>ls.concat(l)), function (data) {
                 if (!data) {
                     messageFn('....');
                 } else {
                     messageFn('' + (data.message || '......'));
                 }
             }, function (message) {
-                messageFn('命令 完成');
-                setTimeout(function () {
-                    messageFn('!!' + message);
-                }, 1000);
+                if(callback){
+                    callback(message);
+                }else{
+                    messageFn('命令 完成');
+                    setTimeout(function () {
+                        messageFn('!!' + message);
+                    }, 1000);
+                }
             });
         }, 500);
     };
@@ -28,7 +40,7 @@ module.exports = (function () {
     function runCmd(isChild, list, runFn, callback) {
         var _callback = callback || function () {};
 
-        function cmd(lts) {
+        function cmd(lts,data) {
             var cb = function (error,stdout) {
                 then(lts, stdout);
             };
@@ -37,7 +49,7 @@ module.exports = (function () {
                 ls.stdout.on('data', cb);
                 ls.stderr.on('data', cb);
             } else {
-                child_process.exec(list.shift(), cb);
+                child_process.exec(list.shift().replace(/{@+}/,data), cb);
             }
         }
 
@@ -46,7 +58,7 @@ module.exports = (function () {
             runFn(data);
             if (lts.length) {
                 setTimeout(function () {
-                    cmd(lts);
+                    cmd(lts,data.split(/[\r\n]/).filter(i=>!!i).join(' '));
                 }, 1000);
             } else {
                 callback(data);
@@ -58,7 +70,7 @@ module.exports = (function () {
                 _callback(...arguments);
                 success(...arguments);
             };
-            cmd(list);
+            cmd(list,'');
         });
     }
 })();
