@@ -15,6 +15,19 @@
                 transform: rotate(360deg);
             }
         }
+
+        @keyframes shake_a {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .shake_friend{
+            animation: shake_a 2s linear infinite;
+        }
         
 
         #setting {
@@ -131,6 +144,14 @@
             right: 100px;
         }
 
+        .friends .friends-item{
+            color:#00AAEF;
+        }
+        .friends .friends-item.logout{
+            color:#a3d5ef;
+            opacity: 0.8;
+        }
+
         .dialogBack {
             position: fixed;
             top: 0;
@@ -225,6 +246,31 @@
             color: #00AAEF;
             text-decoration:underline;
         }
+
+        .dialog .content .message{
+            width:30em;
+            height:20em;
+        }
+        .message-content{
+            height: 75%;
+            overflow: auto;
+        }
+        .message-content .self{
+            text-align: right;
+        }
+        .message-input{
+            width: 100%;
+            height: 18%;
+            border-top: 1px solid #696969;
+            overflow: auto;
+        }
+        
+        .message-button {
+            height: 8%;
+            background: rgb(12, 112, 53);
+            text-align: center;
+        }
+        
     </style>
 </head>
 
@@ -317,7 +363,7 @@
 
                             if(/#/.test(i) && /^\d+$/.test(id)){
                                 var message = document.createElement('div');
-                                var closeDialog = showDialog(dir + /\[(.*)\]/.test(i)?/\[(.*)\]/.exec(i)[1]:i, message, []);
+                                var closeDialog = showDialog(dir + /\[(.*)\]/.test(i)?/\[(.*)\]/.exec(i)[1]:i, message);
                                 runMessage(id, message, function(){
                                     closeDialog();
                                 })
@@ -430,6 +476,8 @@
             var content = document.createElement('div');
             var footer = document.createElement('div');
 
+            var clossBtn = document.createElement('a');
+
             dialogBack.className = 'dialogBack';
             dialog.className = 'dialog';
             header.className = 'header';
@@ -442,17 +490,20 @@
             dialogBack.appendChild(dialog);
             document.body.appendChild(dialogBack);
 
-            header.innerHTML = title + ' <a>&times;</a>';
+            header.innerHTML = title;
+            clossBtn.innerHTML = '&times;';
+            header.appendChild(clossBtn);
             if (typeof message === 'string') {
                 content.innerHTML = message;
             } else {
                 content.appendChild(message);
             }
-            header.onclick = function () {
+
+            clossBtn.onclick = function () {
                 document.body.removeChild(dialogBack);
             };
 
-            ['取消', ...btns].forEach(function (btn, index) {
+            (btns || ['取消']).forEach(function (btn, index) {
                 var button = document.createElement('a');
                 button.innerHTML = btn;
                 footer.appendChild(button);
@@ -499,43 +550,134 @@
     </script>
 
     <script>
-        fetch('/websocket?ip=' + location.hostname).then(function (req) { return req.json(); }).then(req => {
-            var ws = new WebSocket(req.message);
-            ws.onopen = function (e) {
-                ws.send(JSON.stringify({ data: Date.now(), action: 'login' }));
-            }
-            ws.onmessage = function (e) {
-                var data = JSON.parse(e.data).data;
-                if (data && data.url) {
-                    setTimeout(showDialog('Open web', data.url, ['Confirm'], function () {
-                        window.open(data.url);
-                    }), 2000);
-                }
-                if (data && data.friends) {
-                    updateFriends(data.friends);
-                }
-            };
-            window.addEventListener("beforeunload", function () {
-                ws.send(JSON.stringify({
-                    action: 'logout'
-                }));
-            });
-        });
-    </script>
-
-    <script>
         (function(){
+            var selfId = Date.now() + '';
+            var wsSendMessage = function(){};
+            var updateFunList = {};
             var friends = document.createElement('div');
             friends.className = 'friends';
             document.body.appendChild(friends);
 
-            function updateFriends(list) {
-                friends.innerHTML = '';
-                list.forEach(function (i) {
-                    var item = document.createElement('div');
-                    friends.appendChild(item);
-                    item.innerHTML = i;
-                })
+            fetch('/websocket?ip=' + location.hostname).then(function (req) { return req.json(); }).then(req => {
+                var ws = new WebSocket(req.message);
+                wsSendMessage = function(to,data){
+                    ws.send(JSON.stringify({
+                        action: 'message',
+                        to: to,
+                        data:data
+                    }));
+                };
+                ws.onopen = function (e) {
+                    ws.send(JSON.stringify({ data: selfId, action: 'login' }));
+                }
+                ws.onmessage = function (e) {
+                    var dataMessage = JSON.parse(e.data);
+                    switch(dataMessage.action){
+                        case 'login':
+                            if(dataMessage.data){
+                                dataMessage.data.forEach(function(f){updateFunList[f] = addFirend(f);});
+                            }else if(!updateFunList[dataMessage.from]){
+                                updateFunList[dataMessage.from] = addFirend(dataMessage.from)
+                            }else {
+                                updateFunList[dataMessage.from](true);
+                            }
+                        break;
+                        case 'logout':
+                            updateFunList[dataMessage.from](false);
+                        break;
+                        default:
+                            if (dataMessage.data && dataMessage.data.url) {
+                                setTimeout(showDialog('Open web', dataMessage.data.url, ['Confirm'], function () {
+                                    window.open(dataMessage.data.url);
+                                }), 2000);
+                            }
+                            updateFunList[dataMessage.from](dataMessage.data);
+                        break;
+                    }
+                };
+                window.addEventListener("beforeunload", function () {
+                    ws.send(JSON.stringify({
+                        action: 'logout'
+                    }));
+                });
+            });
+
+            function addFirend(id){
+                if(selfId==id){return;}
+                var messageList = [];
+                var item = document.createElement('div');
+
+                friends.appendChild(item);
+                item.className = 'friends-item';
+                item.innerHTML = id;
+                item.onclick = openDialog;
+
+                return function(message){
+                    if(typeof message === 'boolean'){
+                        if(message){
+                            item.onclick = openDialog;
+                            item.className = item.className.replace(/\s*logout\s*/,'')
+                        }else{
+                            item.onclick = null;
+                            item.className += ' logout ';
+                        }
+                    }else{
+                        item.className += ' shake_friend ';
+                        setTimeout(function(){
+                            item.className = item.className.replace(/\s*shake_friend\s*/,'')
+                        },2 * 1000);
+                        messageList.push(message);
+                        if(showDialog.dialog){
+                            showDialog.dialog(message);
+                        }
+                    }
+                    
+                };
+
+                function openDialog(){
+                    var messageElement = document.createElement('div');
+                    var messageListElement = document.createElement('div');
+                    var messageSendElement = document.createElement('textarea'); 
+                    var messageButtonElement = document.createElement('div'); 
+
+                    messageElement.className = 'message';
+                    messageListElement.className = 'message-content';
+                    messageSendElement.className = 'message-input';
+                    messageButtonElement.className = 'message-button';
+                    messageButtonElement.innerHTML = '发送';
+                    
+                    messageElement.appendChild(messageListElement);
+                    messageElement.appendChild(messageSendElement);
+                    messageElement.appendChild(messageButtonElement);
+
+                    messageList.forEach(function(m){messageListElement.appendChild(showMessage(item));});
+
+                    showDialog(id+' <==> '+selfId,messageElement,[]);
+                    showDialog.dialog = function(message){
+                        messageListElement.appendChild(showMessage(message));
+                    };
+
+                    messageButtonElement.onclick = function(){
+                        if(messageSendElement.value){
+                            messageListElement.appendChild(sendMessage({message:messageSendElement.value}));
+                            messageSendElement.value = '';
+                        }
+                    };
+
+                    function showMessage(data){
+                        var messageRow = document.createElement('div');
+                        messageRow.innerHTML = data.message;
+                        return messageRow;
+                    }
+
+                    function sendMessage(data){
+                        var messageRow = document.createElement('div');
+                        messageRow.className = 'self';
+                        messageRow.innerHTML = data.message;
+                        wsSendMessage(id,data);
+                        return messageRow;
+                    }
+                };
             }
         })();
     </script>
