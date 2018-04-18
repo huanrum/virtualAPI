@@ -192,6 +192,7 @@ module.exports = (function (emnuData, getValue) {
 
 }, function getValue(someValue) {
     var data = {
+        now: ()=>Date.now(),
         date: new Date().toLocaleString(),
         dir: __dirname
     };
@@ -199,6 +200,7 @@ module.exports = (function (emnuData, getValue) {
         data[key.toLocaleLowerCase()] = someValue[key];
     });
     return function (model) {
-        return data[model.toLocaleLowerCase()];
+        var result = data[model.toLocaleLowerCase()];
+        return (typeof result === 'function')?result(data):result;
     };
 });

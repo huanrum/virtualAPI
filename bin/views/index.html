@@ -141,16 +141,32 @@
         .friends {
             position: fixed;
             top: 0;
-            right: 100px;
+            right: 10px;
+            transform: translate(calc(100% - 20px),calc(20px - 100%));
+            background: #696969;
+            border-radius: 8px;
+            padding: 8px;
         }
-
+        .friends:hover{
+            transform: none;
+        }
+        .friends .self-name{
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 20px;
+        }
         .friends .friends-item{
             color:#00AAEF;
+        }
+        .friends .friends-item:hover{
+            color: #a3d5ef;
         }
         .friends .friends-item.logout{
             color:#a3d5ef;
             opacity: 0.8;
         }
+
+        
 
         .dialogBack {
             position: fixed;
@@ -551,7 +567,6 @@
 
     <script>
         (function(){
-            var selfId = Date.now() + '';
             var wsSendMessage = function(){};
             var updateFunList = {};
             var friends = document.createElement('div');
@@ -568,7 +583,10 @@
                     }));
                 };
                 ws.onopen = function (e) {
-                    ws.send(JSON.stringify({ data: selfId, action: 'login' }));
+                    fetch('/random',{method:'POST',body:JSON.stringify({name:"[(@)1]([now])"})}).then(function (req) { return req.json(); }).then(req => {
+                        friends.innerHTML = '<div class="self-name">'+req.name.replace(/\(.*\)/,'')+'</div>';
+                        ws.send(JSON.stringify({ data:  req.name, action: 'login' }));
+                    });
                 }
                 ws.onmessage = function (e) {
                     var dataMessage = JSON.parse(e.data);
@@ -603,13 +621,13 @@
             });
 
             function addFirend(id){
-                if(selfId==id){return;}
                 var messageList = [];
                 var item = document.createElement('div');
 
                 friends.appendChild(item);
                 item.className = 'friends-item';
-                item.innerHTML = id;
+                item.innerHTML = id.replace(/\(.*\)/,'');
+                item.title = id;
                 item.onclick = openDialog;
 
                 return function(message){
@@ -652,7 +670,7 @@
 
                     messageList.forEach(function(m){messageListElement.appendChild(showMessage(item));});
 
-                    showDialog(id+' <==> '+selfId,messageElement,[]);
+                    showDialog(id,messageElement,[]);
                     showDialog.dialog = function(message){
                         messageListElement.appendChild(showMessage(message));
                     };
