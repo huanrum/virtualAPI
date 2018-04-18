@@ -119,6 +119,7 @@ module.exports = (function () {
         var getParm = name => request.url.split('?').pop().split('&').filter(i=>i.split('=')[0].toLocaleLowerCase()===name.toLocaleLowerCase()).pop();
         return new Promise(succ => {
             var merge = getParm('merge'),debug = getParm('debug') || options.debug;
+            var title = path.basename(file.replace('index.html', '')).replace(/\b\w+\b/g, word=>word.substring(0,1).toUpperCase()+word.substring(1));
             var data = fs.readFileSync(file.replace(/\/\//g, '/'));
             if (/(\/|\\)(index|default)\.html/.test(file)) {
                 var weinre = options.ip + ':' + options.weinre;
@@ -128,11 +129,11 @@ module.exports = (function () {
 
                 if(/<title>.*<\/title>/.test(content)){
                     content = content.replace(/<title>.*<\/title>/,function(str){
-                        return '<title>' + (/<title>(.*)<\/title>/.exec(str)[1] || path.basename(file.replace('index.html', ''))) + '</title>';
+                        return '<title>' + (/<title>(.*)<\/title>/.exec(str)[1] || title) + '</title>';
                     });
                 }else{
                     content = content.replace(/\?\d+/g, '').replace(/<head>/, function (str) {
-                        return str + '\n\r<title>' + path.basename(file.replace('index.html', '')) + '</title>';
+                        return str + '\n\r<title>' + title + '</title>';
                     });
                 }
 
