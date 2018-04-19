@@ -1,6 +1,7 @@
 var fs = require("fs");
 
 module.exports = (function (emnuData, getValue) {
+    var _someValue = null;
     //根据传入的模型对象构建出一个完整的对象
     //第二个参数是产生数组的 例如 3-5 表示生成数组长度3-5
     //str是字符串或者是对象
@@ -15,7 +16,15 @@ module.exports = (function (emnuData, getValue) {
     //      [1+1]表示从1开始步长1递增,数字1是可以省略的
     //      [@]表示拼音
     return function (someValue) {
-        var replaceValue = getValue(someValue);
+        var _path = '';
+        if(typeof someValue === 'object'){
+            _someValue = someValue;
+            _path = someValue.path;
+        }else{
+            _path = someValue;
+        }
+        
+        var replaceValue = getValue(_someValue);
         return random;
 
 
@@ -81,8 +90,8 @@ module.exports = (function (emnuData, getValue) {
                 } else if(/\.json$/i.test(value)){
                     if (fs.existsSync(value)) {
                         return fn(fs.readFileSync(value).toString());
-                    }else if(someValue.path && fs.existsSync(someValue.path + '/' + value)){
-                        return fn(fs.readFileSync(someValue.path + '/' + value).toString());
+                    }else if(_path && fs.existsSync(_path + '/' + value)){
+                        return fn(fs.readFileSync(_path + '/' + value).toString());
                     }
                 }else{
                     return strChild;
