@@ -264,15 +264,17 @@
         }
 
         .dialog .content .message{
-            width:30em;
+            /* width:30em; */
             height:20em;
         }
         .message-content{
             height: 75%;
             overflow: auto;
+            color:#333333;
         }
         .message-content .self{
             text-align: right;
+            color:#696969;
         }
         .message-input{
             width: 100%;
@@ -313,7 +315,7 @@
         };
 
         setting.oncontextmenu = function(e){
-            window.createContextmenu(e,['open[打开文件(夹)]','vscode[打开编辑器]'].map(i=>({
+            window.createContextmenu(e,['open[打开文件(夹)]','editor[打开编辑器]'].map(i=>({
                     name:/\[(.*)\]/.test(i)?/\[(.*)\]/.exec(i)[1]:i,
                     fn:()=>{
                         fetch(location.origin + '/action/?contextmenu[' + i.replace(/\[.*\]/m,'').toLocaleLowerCase() + ']=', { method: 'GET' }).then(function(i){return i.json();}).then(function(id){
@@ -328,7 +330,7 @@
 
     </script>
     <script>
-        var selectList = [], contextmenu = ['open[打开文件(夹)]','pull[#更新代码]'];
+        var selectList = [], contextmenu = ['open[打开文件(夹)]'].concat(window.$data.menus);
         var dirs = window.$data.dirs;
         var list = document.getElementById('list');
         var toolbars = document.getElementById('toolbar');

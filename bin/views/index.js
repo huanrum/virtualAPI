@@ -88,12 +88,14 @@ module.exports = (function () {
             var replace = `${options.ip}:${options.port}/${_path}`;
             var addToolbar = fs.existsSync(htmlPath) ? fs.readFileSync(htmlPath).toString() : '';
             var divPath = helper.config(basePath + _path || basePath);
-            var dirs = {}, branch = helper.branch(divPath);
+            var dirs = {}, menus = [], branch = helper.branch(divPath);
             var netSegment = helper.net(request) || helper.localhost(request);
 
             fs.readdirSync(divPath).forEach(function (i) {
-                var config = configs.filter(cfn => cfn.path && cfn.version && path.join(divPath + '/' + i).toLocaleLowerCase().indexOf(path.join(cfn.path).toLocaleLowerCase()) !== -1).pop();
-                dirs['['+ (helper.gitignore(divPath + '/' + i)?'':helper.packTool(path.join(divPath + '/' + i))) + ']' + i] =  config?config.version(i):{};
+                if(!exclude(i)){
+                    var config = configs.filter(cfn => cfn.path && cfn.version && path.join(divPath + '/' + i).toLocaleLowerCase().indexOf(path.join(cfn.path).toLocaleLowerCase()) !== -1).pop();
+                    dirs['['+ (helper.gitignore(divPath + '/' + i)?'':helper.packTool(path.join(divPath + '/' + i))) + ']' + i] =  config?config.version(i):{};
+                }
             });
 
             if (/\/views\/*$/.test(_path)) {
@@ -101,15 +103,24 @@ module.exports = (function () {
                 Object.keys(allPath).forEach(function (i) {
                     dirs['['+helper.packTool(allPath[i]) + ']' + i] = {};
                 });
+                menus = ['editor[打开编辑器]','pull[#更新代码]'];
             }
 
             succ(fs.readFileSync(__dirname + '/index.html', 'utf-8').toString()
             .replace(/<title>.*<\/title>/,`<title>${_path.replace(/\/*views\/*/,'')||'Views'}<\/title>`)
             .replace('window.$data = {};', 'window.$data = ' + decodeURIComponent(JSON.stringify({
-                _path: _path, dirs: dirs, replace: replace, options: options, branch: branch, netSegment:netSegment
+                _path: _path, dirs: dirs, replace: replace, options: options, branch: branch, netSegment:netSegment, menus:menus
             }, null, 4)))
             .replace('/*addToolbar:(function(){})();*/', addToolbar.replace(/<\/?script>/gi, '')));
         });
+
+        function exclude(d){
+            return [
+                /^\./i,/\.sh$/i,/\.template$/i,
+                /(node_modules|dev-server\.js|webpack\.config\.js|gulpfile\.js|Gruntfile\.js|package\.json|web\.config|package-lock\.json)/i
+            ].some(i=>i.test(d));
+            
+        }
     }
 
 

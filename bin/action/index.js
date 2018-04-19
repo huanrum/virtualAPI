@@ -38,20 +38,24 @@ module.exports = (function () {
 
     function contextmenu(_actions,referer,messageFn){
         var dirPath = helper.config((referer+'/'+_actions[1]).replace(/\/views\/*$/,'/views/../'));
-        var action = /contextmenu\[(.+)\]/i.exec(_actions[0])[1].trim();
+        var actions = /contextmenu\[(.+)\]/i.exec(_actions[0])[1].trim().toLocaleLowerCase().split(':');
         if(!fs.statSync(dirPath).isDirectory()){
             dirPath = path.dirname(dirPath);
         }
-        switch (action.toLocaleLowerCase()) {
+        switch (actions[0]) {
             case 'open':
-                cmd(path.dirname(dirPath), messageFn, '', 'start ' + dirPath);
+                if(fs.existsSync(path.join(dirPath,_actions[1]))){
+                    cmd(path.dirname(dirPath), messageFn, '', 'start ' + path.join(dirPath,_actions[1]));
+                }else{
+                    cmd(path.dirname(dirPath), messageFn, '', 'start ' + dirPath);
+                } 
             break;
             case 'pull':
                 cmd(dirPath, messageFn, '', ['git symbolic-ref --short -q HEAD','git pull origin {@@@@}']);
-                
             break;
-            case 'vscode':
-                var software = config().software.vscode;
+            case 'editor':
+                var dirs = fs.readdirSync(dirPath);
+                var software = config().software[Object.keys(config().software).filter(i=>dirs.some(d=>i==d)).pop()||'.vscode'];
                 cmd(path.dirname(software), messageFn, '', path.basename(software) + ' ' + dirPath);
             break;
         }

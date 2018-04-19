@@ -20,7 +20,7 @@ module.exports = (function () {
             var sqlType = /.*\/db\/+(((?![\/\?]).)+)/.exec(request.url);
            
             if(sqlType && sqlType[1].toLocaleLowerCase()){
-                var dbFun = getDbFun(sqlType[1]);
+                var dbFun = getDbFun(sqlType[1])();
                 if(dbFun){
                     dbFun(getArguments, request, response, JSON.parse(bodyData.toString()||'{}'));
                 }else{

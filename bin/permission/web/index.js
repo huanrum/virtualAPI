@@ -40,7 +40,7 @@ module.exports = (function(){
         }
         //WEB操作控制服务端
         else if (/^\/*action\/+/i.test(request.url)) {
-            return helper.localhost(request);
+            return true;//helper.localhost(request);
         }
         //资源文件
         else if (resource.test(request.url)) {
