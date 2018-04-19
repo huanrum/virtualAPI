@@ -209,7 +209,7 @@ module.exports = (function () {
                             configData[fileName.replace(path.join(__dirname + '/../../'), '')] = Object.assign({}, jsNew, JSON.parse(JSON.stringify(json).replace(/</g, '&lt;').replace(/>/g, '&gt;')));
 
                             Object.keys(json).concat(Object.keys(js)).forEach(function (key) {
-                                returnData[key.replace(/\(.*\)/g, '')] = Object.assign(Object.create({random:random(dirpath)}),{
+                                returnData[key.replace(/\(.*\)/g, '')] = Object.assign(Object.create({random:random}),{
                                     path: dirpath,
                                     data: json[key],
                                     js: js[key]
