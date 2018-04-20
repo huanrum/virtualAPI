@@ -55,7 +55,7 @@ module.exports = (function () {
             break;
             case 'editor':
                 var dirs = fs.readdirSync(dirPath);
-                var software = config().software[Object.keys(config().software).filter(i=>dirs.some(d=>i==d)).pop()||'.vscode'];
+                var software = config().software[Object.keys(config().software).filter(i=>dirs.some(d=>i==d)).shift()||'.vscode'];
                 cmd(path.dirname(software), messageFn, '', path.basename(software) + ' ' + dirPath);
             break;
         }

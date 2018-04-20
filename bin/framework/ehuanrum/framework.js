@@ -25,7 +25,7 @@
             chaceData.menu.appendChild(__createMenu(ehuanrum('router') || {}, routerUrl, go, ''));
             //如果有对应的main处理逻辑就先运行它
             if (ehuanrum('main')) {
-                ehuanrum('main')(goin);
+                ehuanrum('main')(goin,chaceData.content);
             } else {
                 goin();
             }
@@ -237,7 +237,7 @@
                 var args = arguments;
                 templist.forEach(function (i) { i.apply(scope, args) });
             }
-        };
+        }
     }
 
     //完成菜单和路由的构建，它是不对外公开的,若外部定义了相关的menuAction操作就用外部的，否则就用默认的
@@ -271,7 +271,7 @@
                         });
                     });
                     childMenu.style.display = childMenu.style.display === 'none' ? 'block' : 'none';
-                };
+                }
             }
         }
 
@@ -303,6 +303,30 @@
             }
         }
         return { enumerable: true };
+    }
+
+    function _$extendArray(list,render) {
+        ['push', 'pop', 'shift', 'unshift','sort'].forEach(function (funName) {
+            Object.defineProperty(list, funName, {
+                configurable: true,
+                value: function () {
+                    var result = Array.prototype[funName].apply(list, arguments);
+                    render(list);
+                    return result;
+                }
+            });
+        });
+        Object.defineProperty(list, 'replace', {
+            configurable: true,
+            value: function () {
+                list.length = 0;
+                Array.prototype.forEach.call(arguments,function(arg){
+                    Array.prototype.push.apply(list, arg||[]);
+                });
+                render(list);
+                return list;
+            }
+        });
     }
 
     //计算表达式需要关注里面的每一个变量
@@ -342,30 +366,6 @@
                 }
             });
         }
-    }
-
-    function _$extendArray(list,render) {
-        ['push', 'pop', 'shift', 'unshift','sort'].forEach(function (funName) {
-            Object.defineProperty(list, funName, {
-                configurable: true,
-                value: function () {
-                    var result = Array.prototype[funName].apply(list, arguments);
-                    render(list);
-                    return result;
-                }
-            });
-        });
-        Object.defineProperty(list, 'replace', {
-            configurable: true,
-            value: function () {
-                list.length = 0;
-                Array.prototype.forEach.call(arguments,function(arg){
-                    Array.prototype.push.apply(list, arg||[]);
-                });
-                render(list);
-                return list;
-            }
-        });
     }
 
     //给对象设值或取值，field可以是复杂的路径:a.b.0.a
@@ -527,16 +527,17 @@
                         return tempData;
                     }
                 });
+
                 if(tempData instanceof Array){
                     _$extendArray(tempData,function(list){
                         oldObject[from] = list;
-                        oldObject.$eval();
-                        newObject.$eval();
                     });
                 }
             });
             return newObject;
         }
+
+        
 
         function initBindingDefineProperty() {
             if (!data.$eval || (data.$eval === data.__proto__.$eval)) {
@@ -577,7 +578,7 @@
         function initBindingElement(element) {
             if(element.render){return;}
             element.render = true;
-            setTimeout(function(){delete element.render;},10);
+            setTimeout(function(){delete element.render;},100);
 
             //把[]关起来的属性设置双向绑定
             var controls = ehuanrum('control');
@@ -719,9 +720,8 @@
 
     ///defineProperty,实现双向绑定
     function defineProperty(element, data, field, value) {
-        
         if (!element.parentNode) { return; }
-
+       
         //关联的element属性名以on开头的都是事件
         if (/^\s*on/.test(field)) {
             events();
@@ -863,9 +863,6 @@
             if (chaceData.binding) {
                 binding(document.createComment(element.outerHTML)).update(parentNode, nextSibling);
             }
-            data.$eval(function(){
-                render(extendArray($value(data, value || fields[1])));
-            });
             render(extendArray($value(data, value || fields[1])));
 
             function extendArray(list) {
@@ -882,9 +879,9 @@
                     //}
                 });
                 elements = map(vals || [], function (item, i, obj, da) {
-                    var bindElement = {};//(elements.filter(function (it) { return it.t === item; })[0] || { t: item, e: bindElement });
+                    var bindElement = null;//(elements.filter(function (it) { return it.t === item; })[0] || { t: item, e: bindElement });
                     if (!bindElement.e || bindElement.e.scope().item !== bindElement.t) {
-                        if (/^\d+$/.test(i)) {
+                       if (/^\d+$/.test(i)) {
                             Object.defineProperty(da, '$index', {
                                 enumerable: false,
                                 get: function () {

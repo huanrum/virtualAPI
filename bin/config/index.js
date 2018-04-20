@@ -1,10 +1,18 @@
 var fs = require("fs");
 
 module.exports = (function(){
+
+    var packTools = {
+        'Gulp':'gulpfile.js',
+        'Grunt':'gruntfile.js',
+        'Webpack':'webpack.config.js' 
+    };
+
     var data = {
         web : getContent(__dirname +  '/../config/web.json'),
         mete : getContent(__dirname +  '/../config/mete.json'),
-        software : getContent(__dirname +  '/../config/software.json')
+        software : getContent(__dirname +  '/../config/software.json'),
+        pack: packTools
     };
 
     var info = {
@@ -12,6 +20,8 @@ module.exports = (function(){
         mete:'文件类型',
         software:'关联应用'
     };
+
+    
 
     return function (helper,request,response){
         if(!request){

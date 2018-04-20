@@ -10,6 +10,11 @@ module.exports = (function () {
         ping: ping
     };
 
+    /**
+     * 入口，备份数据
+     * @param {*} url 
+     * @param {*} value 
+     */
     function base(url, value) {
         var key = url.split('?').shift().replace(/https?:\/{2}((?!\/).)*/, '');
         var file = __dirname + '/../../backup/' + key + '.json';
@@ -31,7 +36,10 @@ module.exports = (function () {
     }
 
     
-
+    /**
+     * ping 对应的地址
+     * @param {*} urls 
+     */
     function ping(urls) {
         var netInfo = helper.netInfo();
         if (!Array.isArray(urls)) {

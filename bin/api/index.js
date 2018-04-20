@@ -31,7 +31,12 @@ module.exports = (function () {
     };
 
     return api;
-
+    /**
+     * 入口
+     * @param {*} options 
+     * @param {*} request 
+     * @param {*} response 
+     */
     function api(options, request, response) {
         if (!request) {
             return fs.readFileSync(__dirname + '/index.html').toString().replace('window.configData = []', 'window.configData = ' + JSON.stringify(Object.keys(configData).map(f => {
@@ -68,6 +73,10 @@ module.exports = (function () {
             });
         }
 
+        /**
+         * 找到符合条件的所有api地址
+         * @param {*} filterUrlKV 
+         */
         function run(filterUrlKV) {
             var key = filterUrlKV[Math.max.apply(Math, Object.keys(filterUrlKV))];
             return new Promise(succ => {
@@ -163,7 +172,12 @@ module.exports = (function () {
 
 
 
-        // 解析url获取参数
+        /**
+         * 解析url获取参数
+         * @param {*} key 
+         * @param {*} urlAndParms 
+         * @param {*} headers 
+         */
         function getParameters(key, urlAndParms, headers) {
             var parameters = {
                 test: headers.test
@@ -190,7 +204,12 @@ module.exports = (function () {
         }
     }
 
-
+    /**
+     * 读取所有配置初始化api
+     * @param {*} dirpath 
+     * @param {*} configData 
+     * @param {*} returnData 
+     */
     function initConfig(dirpath, configData, returnData) {
         if (fs.existsSync(dirpath)) {
             fs.readdirSync(dirpath).forEach(function (item) {

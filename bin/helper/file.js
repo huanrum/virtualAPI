@@ -17,6 +17,9 @@ module.exports = (function () {
                 fs.mkdirSync(dirpath);
             }
         },
+        /**
+         * 删除文件
+         */
         rmdirs: function(_path) {
             var files = [];
             if( fs.existsSync(_path) ) {
@@ -61,7 +64,7 @@ module.exports = (function () {
             return source;
         },
         /**
-         * 读取所有内容
+         * 读取目录下所有内容
          */
         readAllJSContent: function (source, dir, exclude) {
             exclude = exclude || function(){};
@@ -78,54 +81,8 @@ module.exports = (function () {
             return source;
         },
         /**
-         * 文件的mete类型
+         * multiparty/express 提交文件
          */
-        type: function (type) {
-            return ({
-                "css": "text/css",
-                "gif": "image/gif",
-                "html": "text/html;charset=utf-8",
-                "ico": "image/x-icon",
-                "jpeg": "image/jpeg",
-                "jpg": "image/jpeg",
-                "js": "text/javascript;charset=utf-8",
-                "json": "application/json;charset=utf-8",
-                "pdf": "application/pdf",
-                "png": "image/png",
-                "svg": "image/svg+xml",
-                "swf": "application/x-shockwave-flash",
-                "tiff": "image/tiff",
-                "txt": "text/plain;charset=utf-8",
-                "wav": "audio/x-wav",
-                "wma": "audio/x-ms-wma",
-                "wmv": "video/x-ms-wmv",
-                "xml": "text/xml;charset=utf-8"
-            })[type];
-        },
-        /**
-         * 获取相应的打包工具
-         */
-        packTool: function (dir) {
-            
-            if(fs.existsSync(dir) && fs.statSync(dir).isDirectory()){
-                var allfiles = fs.readdirSync(dir);
-                if (allfiles.some(i => i.toLocaleLowerCase() === 'gulpfile.js')) {
-                    return 'Gulp';
-                } else if (allfiles.some(i => i.toLocaleLowerCase() === 'gruntfile.js')) {
-                    return 'Grunt';
-                } else if (allfiles.some(i => i.toLocaleLowerCase() === 'webpack.config.js')) {
-                    return 'Webpack';
-                } else if (path.dirname(dir) !== dir) {
-                    return this.packTool(path.dirname(dir));
-                } else {
-                    return '';
-                }
-            }else{
-                return '';
-            }
-            
-        },
-
         upload: function(request,dirPath){
             this.initModule(['multiparty','express']).then(multiparty => {
                 try{
@@ -147,7 +104,9 @@ module.exports = (function () {
                 }
             });
         },
-
+        /**
+         * 获取git排除条件
+         */
         gitignore: function(filePath){
             var gitignorePath = get(path.dirname(filePath));
             if(!gitignorePath){

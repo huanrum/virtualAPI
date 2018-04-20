@@ -8,7 +8,10 @@ module.exports = (function () {
         ftpUpload:ftpUpload
     };
 
-
+    /**
+     * 初始化ftp
+     * @param {*} option 
+     */
     function ftpClient(option) {
         return new Promise(succ => {
             this.initModule('ssh2').then(shh2 => {
@@ -26,7 +29,11 @@ module.exports = (function () {
             });
         });
     }
-
+    /**
+     * ftp上传文件
+     * @param {*} origin 
+     * @param {*} target 
+     */
     function ftpUpload(origin, target) {
         return new Promise(function (succ) {
             var readStream = fs.createReadStream(origin);
