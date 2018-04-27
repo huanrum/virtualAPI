@@ -107,7 +107,7 @@ module.exports = (function () {
             }
 
             succ(fs.readFileSync(__dirname + '/index.html', 'utf-8').toString()
-            .replace(/<title>.*<\/title>/,`<title>${_path.replace(/\/*views\/*/,'')||'Views'}<\/title>`)
+            .replace(/<title>.*<\/title>/,`<title>${hump(_path.replace(/\/*views\/*/,''))||'Views'}<\/title>`)
             .replace('window.$data = {};', 'window.$data = ' + decodeURIComponent(JSON.stringify({
                 _path: _path, dirs: dirs, replace: replace, options: options, branch: branch, netSegment:netSegment, menus:menus
             }, null, 4)))
@@ -120,6 +120,10 @@ module.exports = (function () {
                 /(node_modules|dev-server\.js|webpack\.config\.js|gulpfile\.js|Gruntfile\.js|package\.json|web\.config|package-lock\.json)/i
             ].some(i=>i.test(d));
             
+        }
+
+        function hump(s){
+            return s.split('-').map(i=>i.slice(0,1).toLocaleUpperCase() + i.slice(1).toLocaleLowerCase()).join('');
         }
     }
 

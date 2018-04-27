@@ -526,7 +526,7 @@
                 button.innerHTML = btn;
                 footer.appendChild(button);
                 button.onclick = function () {
-                    if(!index || (index && callback(index,btn) !== false)){
+                    if(!btns || callback(index,btn) !== false){
                         document.body.removeChild(dialogBack);
                     }
                 };
@@ -699,6 +699,24 @@
                     }
                 };
             }
+        })();
+    </script>
+
+    <script>
+        (function(){
+            window.document.addEventListener('keydown', function (e) {
+            if (e.altKey && e.shiftKey && e.ctrlKey) {
+                switch (e.key) {
+                    case 'Z':
+                        window.close();
+                        break;
+                    case 'O':
+                        fetch(location.origin + '/action/?contextmenu[open]=');
+                        break;
+                }
+
+            }
+        });
         })();
     </script>
 </body>
