@@ -1,0 +1,51 @@
+<script>
+    var setting = document.getElementById('setting');
+    setting.onclick = function () {
+        window.open('http://' + window.$data.options.ip + ':' + window.$data.options.port + '/bin/config/index.html');
+    };
+    var callback = document.getElementById('callback');
+    callback.onclick = function () {
+        window.close();
+    };
+
+    setting.oncontextmenu = function(e){
+        window.createContextmenu(e,['open[打开文件(夹)]','editor[打开编辑器]'].map(i=>({
+                name:/\[(.*)\]/.test(i)?/\[(.*)\]/.exec(i)[1]:i,
+                fn:()=>{
+                    fetch(location.origin + '/action/?contextmenu[' + i.replace(/\[.*\]/m,'').toLocaleLowerCase() + ']=', { method: 'GET' }).then(function(i){return i.json();}).then(function(id){
+                        if(/@/.test(i)){
+                            setTimeout(()=>window.location.reload(),500);
+                          }
+                    });
+                }
+            })));
+            e.preventDefault();
+        };
+
+</script>
+<script>
+    (function(){
+        var contextmenu = document.createElement('ul');
+        contextmenu.className = 'context-menu';
+        window.onclick=function(e){
+            if(contextmenu && contextmenu.parentNode){
+                contextmenu.parentNode.removeChild(contextmenu);
+            }
+        };
+
+        window.createContextmenu = function(e,menus){
+            contextmenu.innerHTML = '';
+            document.body.appendChild(contextmenu);
+            menus.forEach(menu=>{
+                var menuitem = document.createElement('li');
+                menuitem.innerHTML = menu.name;
+                menuitem.onclick = menu.fn || menu;
+                contextmenu.appendChild(menuitem);
+            });
+
+            //根据事件对象中鼠标点击的位置，进行定位
+            contextmenu.style.left=e.clientX+'px';
+            contextmenu.style.top=e.clientY+'px';
+        };
+    })();
+</script>

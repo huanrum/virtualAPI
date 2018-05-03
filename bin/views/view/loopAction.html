@@ -1,0 +1,42 @@
+<script>
+    (function(){
+        var cacheData = {loopAction:[]};
+        /**
+         * 
+         */
+        window.loopAction = function(fn,count){
+            cacheData.loopAction.push({fn:fn,count:count});
+        };
+
+        window.document.addEventListener('keydown', function (e) {
+            if (e.altKey && e.shiftKey && e.ctrlKey) {
+                switch (e.key) {
+                    case 'A':
+                        cacheData.auto = !cacheData.auto;
+                        setTimeout(showDialog('循环处理提示', cacheData.auto?'开启':'关闭'),2000);
+                        break;
+                    case 'Z':
+                        window.close();
+                        break;
+                    case 'O':
+                        fetch(location.origin + '/action/?contextmenu[open]=');
+                        break;
+                }
+
+            }
+        });
+
+        //每60秒询问一下
+        (function loonFn(){
+            if(cacheData.auto){
+                cacheData.loopAction = cacheData.loopAction.filter(function(la){
+                    la.fn();
+                    la.count = la.count - 1;
+                    return la.count !== 0;
+                }); 
+            }
+            setTimeout(loonFn,60 * 1000);
+        })();
+
+    })();
+</script>
