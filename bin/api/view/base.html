@@ -60,6 +60,78 @@
         return str.replace(/\s/g, '&nbsp;&nbsp;');
     }
 
+    function httpjsonp(url, el_data) {
+        var callback = Date.now();
+        var urlParm = Object.keys(el_data).map(function (key) {
+            return key + '=' + encodeURIComponent(el_data[key]);
+        }).join('&');
+        var urlFull = url + (urlParm ? ('?' + urlParm) : '');
+        return new Promise(function (resolve) {
+            var jsonp = document.createElement('script');
+            jsonp.src = urlFull + (/\?/.test(urlFull) ? ('&callback=httpjsonp[' + callback + ']') : ('?callback=httpjsonp[' + callback + ']'));
+            httpjsonp[callback] = function (req) {
+                delete httpjsonp[callback];
+                resolve.apply(resolve, arguments);
+                document.body.removeChild(jsonp);
+            };
+            document.body.appendChild(jsonp);
+        });
+    }
+
+    function http(methodData, urlFull, headers, el_data) {
+        urlFull = urlFull.replace(/^\[.*\]/, '').replace(/\(.*\)/g, '');
+        if (/:/.test(urlFull)) {
+            return Promise.resolve({
+                status: 200,
+                text: function () {
+                    return "必填参数没有填写";
+                }
+            });
+        } else {
+            if (methodData === 'GET' || methodData === 'HEADER') {
+                var urlParm = Object.keys(el_data).map(function (key) {
+                    return key + '=' + encodeURIComponent(el_data[key]);
+                }).join('&');
+                return fetch(urlFull + (urlParm ? ('?' + urlParm) : ''), {
+                    method: methodData,
+                    headers: headers
+                });
+            } else {
+                var formData = el_data;
+                if (Object.keys(el_data).filter(i => el_data[i] instanceof Blob).length) {
+                    var formData = new FormData();
+                    Object.keys(el_data).forEach(function (k) {
+                        if (el_data[k]) {
+                            formData.append(k, el_data[k]);
+                        }
+                    });
+                    //headers['Content-Type'] = 'multipart/form-data;boundary=AaB03x;';
+                }
+                return fetch(urlFull, {
+                    method: methodData,
+                    headers: headers,
+                    body: formData
+                });
+            }
+        }
+    }
+
+
+    function showMessage(message, time) {
+        time = time || 10;
+        var dialog = document.createElement('div');
+        dialog.className = 'common-dialog-Message';
+        dialog.innerHTML = message;
+        dialog.style.opacity = 1;
+        document.body.appendChild(dialog);
+        var handel = setInterval(function () {
+            dialog.style.opacity = dialog.style.opacity - (1 / time);
+            if (dialog.style.opacity < 0) {
+                document.body.removeChild(dialog);
+                clearInterval(handel);
+            }
+        }, 1000);
+    }
 
     function showDialog(isDisable, methodData, urlData, returnData, default_data, callback) {
         var dialogPanl = document.createElement('div');
@@ -185,8 +257,12 @@
             var disable = document.createElement('a');
             var copy = document.createElement('a');
             var confrom = document.createElement('a');
+            var jsonp = document.createElement('a');
 
             footer.appendChild(confrom);
+            if (/get/i.test(methodData)) {
+                footer.appendChild(jsonp);
+            }
             if (typeof isDisable === 'boolean') {
                 footer.appendChild(disable);
             }
@@ -195,17 +271,19 @@
 
             disable.innerHTML = isDisable ? 'Enable' : 'Disable';
             copy.innerHTML = 'Copy';
+            jsonp.innerHTML = 'Jsonp';
             confrom.innerHTML = methodData;
 
             copy.style.opacity = isDisable ? 0.2 : 1.0;
             confrom.style.opacity = isDisable ? 0.2 : 1.0;
+            jsonp.style.opacity = isDisable ? 0.2 : 1.0;
 
             disable.onclick = function () {
-                http(urlData.split('/').map(function (i) {
+                http(methodData, urlData.split('/').map(function (i) {
                     return /:/.test(i) && el_data[i.replace(':', '')] || i;
                 }).join('/'), {
                     disable: !isDisable
-                }).then(function (req) {
+                }, el_data).then(function (req) {
                     if (req.status === 200) {
                         return req.json();
                     }
@@ -226,6 +304,24 @@
                 });
             };
 
+            jsonp.onclick = function () {
+                if (isDisable) {
+                    message.innerHTML = '此API不可用！';
+                    return;
+                }
+                var httpUrl = urlData.split('?').map(function (u) {
+                    return u.split('/').map(function (i) {
+                        return /:/.test(i) && el_data[i.replace(':', '')] || i;
+                    }).join('/')
+                }).join('?');
+
+                httpjsonp(httpUrl, el_data).then(function (req) {
+                    message.style.display = '';
+                    messageDiv.style.display = 'none';
+                    message.value = linefeed(JSON.stringify(req, null, 4));
+                });
+            };
+
             confrom.onclick = function () {
                 if (isDisable) {
                     message.innerHTML = '此API不可用！';
@@ -236,35 +332,36 @@
                         return /:/.test(i) && el_data[i.replace(':', '')] || i;
                     }).join('/')
                 }).join('?');
-                http(httpUrl, {}).then(function (req) {
+                http(methodData, httpUrl, {}, el_data).then(function (req) {
                     if (req.status === 200) {
                         if (req.headers && /text\/plain/.test(req.headers.get('Content-Type'))) {
                             return req.json();
                         } else {
-                            try{
-                                if(req.headers && req.headers.get('Content-Type')){
+                            try {
+                                if (req.headers && req.headers.get('Content-Type')) {
                                     return req.blob();
-                                }else{
+                                } else {
                                     return req.text();
                                 }
-                            }catch(e){
+                            } catch (e) {
                                 return req.text();
                             }
                         }
                     }
                 }).then(function (req) {
-                    if(req instanceof Blob){
+                    if (req instanceof Blob) {
                         message.style.display = 'none';
                         messageDiv.style.display = '';
                         messageDiv.className = 'text-align-center';
-                        messageDiv.innerHTML = '<div class="download"><a href="' + httpUrl + '">' + req.type + '</a></div>';
+                        messageDiv.innerHTML = '<div class="download"><a href="' + httpUrl + '">' + req.type +
+                            '</a></div>';
 
                         var image = new Image();
-                        image.onload = function(){
-                            messageDiv.innerHTML = '<img src="'+ URL.createObjectURL(req) +'">';
+                        image.onload = function () {
+                            messageDiv.innerHTML = '<img src="' + URL.createObjectURL(req) + '">';
                         }
                         image.src = URL.createObjectURL(req);
-                    }else{
+                    } else {
                         message.style.display = '';
                         messageDiv.style.display = 'none';
                         message.value = linefeed(JSON.stringify(req, null, 4));
@@ -303,61 +400,7 @@
                 confrom.click();
             }, 100);
 
-            function http(urlFull, headers) {
-                urlFull = urlFull.replace(/^\[.*\]/, '').replace(/\(.*\)/g, '');
-                if (/:/.test(urlFull)) {
-                    return Promise.resolve({
-                        status:200,
-                        text: function () {
-                            return "必填参数没有填写";
-                        }
-                    });
-                } else {
-                    if (methodData === 'GET' || methodData === 'HEADER') {
-                        var urlParm = Object.keys(el_data).map(function (key) {
-                            return key + '=' + encodeURIComponent(el_data[key]);
-                        }).join('&');
-                        return fetch(urlFull + (urlParm ? ('?' + urlParm) : ''), {
-                            method: methodData,
-                            headers: headers
-                        });
-                    } else {
-                        var formData = el_data;
-                        if (Object.keys(el_data).filter(i => el_data[i] instanceof Blob).length) {
-                            var formData = new FormData();
-                            Object.keys(el_data).forEach(function (k) {
-                                if (el_data[k]) {
-                                    formData.append(k, el_data[k]);
-                                }
-                            });
-                            //headers['Content-Type'] = 'multipart/form-data;boundary=AaB03x;';
-                        }
-                        return fetch(urlFull, {
-                            method: methodData,
-                            headers: headers,
-                            body: formData
-                        });
-                    }
-                }
-            }
         }
-
-        function showMessage(message, time) {
-            time = time || 10;
-            var dialog = document.createElement('div');
-            dialog.className = 'common-dialog-Message';
-            dialog.innerHTML = message;
-            dialog.style.opacity = 1;
-            document.body.appendChild(dialog);
-            var handel = setInterval(function () {
-                dialog.style.opacity = dialog.style.opacity - (1 / time);
-                if (dialog.style.opacity < 0) {
-                    document.body.removeChild(dialog);
-                    clearInterval(handel);
-                }
-            }, 1000);
-        }
-
 
         function drag(canDragElement, element) {
             var temp = {};
