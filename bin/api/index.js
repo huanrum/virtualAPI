@@ -96,10 +96,16 @@ module.exports = (function () {
                                 });
                                 response.end(fs.readFileSync(datas.replace(webModuleReg,helper.config(webModuleReg.exec(datas)[1]))));
                             } else {
+                                var jsonp = request.url.split('?').pop().split('&').filter(i=>/^callback\s*=\s*.+/i.test(i)).pop();
                                 response.writeHead(200, {
                                     'Content-Type': 'text/plain;charset=utf-8'
                                 });
-                                response.end(JSON.stringify(datas));
+                                if(jsonp){
+                                    response.end(';' + jsonp.split('=')[1] + '(' +JSON.stringify(datas) + ')');
+                                }else{
+                                    response.end(JSON.stringify(datas));
+                                }
+                                
                             }
                         } else {
                             succ();
