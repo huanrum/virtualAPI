@@ -4,7 +4,7 @@
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                <title>View List</title>
+                <title>Action</title>
                 <style>
                     body>div{
                         padding:0.2rem 1rem;
@@ -28,56 +28,7 @@
             </head>
             <body>
                 <script>
-                    var dirs = ${dirs};
-                    var useInterval = (function(){
-                        var getMessage = {};
-                        setInterval(function(){
-                            Object.keys(getMessage).forEach(function(id){
-                                fetch('action?'+id, {method: 'GET'}).then(function(req){return req.text()}).then(function(message){
-                                    getMessage[id](message);
-                                    if(!message){
-                                        delete getMessage[id];
-                                    }
-                                });
-                            });
-                        },1000);
-
-                        return function(id,callBack){
-                            getMessage[id] = callBack;
-                        }
-                    })();
-                    dirs.forEach(function(dir){
-                        var item = document.createElement('div');
-                        var module = document.createElement('div');
-                        var actions = document.createElement('div');
-                        var message = document.createElement('div');
-                        
-                        item.append(module);
-                        item.append(actions);
-                        item.append(message);
-                        document.body.append(item);
-                        module.innerHTML = dir;
-
-                        ['Gulp'].forEach(function(actionName){
-                            var action = document.createElement('a');
-                            actions.append(action);
-                            action.innerHTML = actionName;
-                            action.onclick = function(){
-                                if(!message.innerHTML){
-                                    fetch('action?'+actionName+'='+dir, {method: 'GET'}).then(function(req){return req.text()}).then(function(id){
-                                        useInterval(id,function(data){
-                                            message.innerHTML = data;
-                                            if(message.innerHTML){
-                                                action.className = 'runing';
-                                            }else{
-                                                action.className = ''; 
-                                            }
-                                        });
-                                    });
-                                }
-                            };
-                        })
-                    });
+                    
                 </script>
             </body>
         </html>

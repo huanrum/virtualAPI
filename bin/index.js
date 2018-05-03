@@ -100,6 +100,7 @@ var createServer = function (options) {
     // 终端打印如下信息
     console.log('\x1B[32m', 'Server running at http://' + options.ip + ':' + options.port + '/');
 
+    child_process.exec('start http://' + options.ip + ':' + options.port + '/');
 };
 
 

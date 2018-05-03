@@ -6,198 +6,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
-    <style>
-        body {
-            position: relative;
-        }
-
-        .text-align-center {
-            text-align: center;
-        }
-
-        .helper {
-            color: #ac5600;
-            cursor: pointer;
-            font-weight: 700;
-        }
-
-        .module-group {
-            margin: 1em 0.2em;
-        }
-
-        .config-group {
-            margin: 1em;
-        }
-
-        .config-group legend:hover {
-            cursor: pointer;
-            color: #99ff99;
-        }
-
-        .config-item {
-            margin: 1em;
-        }
-
-        .config-item .config-url>* {
-            display: inline-block;
-            min-width: 6em;
-            font-weight: bold;
-        }
-
-        .config-item .config-url:hover {
-            cursor: pointer;
-            opacity: 0.6;
-        }
-
-        .config-item .config-return {
-            margin: 0.5em 0 0 6em;
-            min-height: 6em;
-            width: calc(100% - 8em);
-            background: #d3d3d3;
-        }
-
-        /*dialog*/
-
-        .common-dialog-back {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(123, 123, 123, 0.6);
-        }
-
-        .common-dialog-Message {
-            position: absolute;
-            margin-left: 80%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            padding: 2px;
-            border-radius: 10px;
-            background: #669966;
-        }
-
-        .common-dialog-back .common-dialog {
-            position: absolute;
-            margin-left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            padding: 2px;
-            border-radius: 10px;
-            background: #f3f3f3;
-        }
-
-        .common-dialog-back .common-dialog.max-window {
-            width: 96%;
-            height: 96%;
-            left: 2% !important;
-            top: 2% !important;
-            margin-left: 0;
-            transform: none;
-        }
-
-        .common-dialog-back .common-dialog .common-dialog-header {
-            height: 2em;
-            background: #666699;
-            padding: 0.5em;
-        }
-
-        .common-dialog-back .common-dialog .common-dialog-header label {
-            color: #ffffff;
-        }
-
-        .common-dialog-back .common-dialog .common-dialog-header label sup {
-            color: rgba(168, 168, 168, 0.4);
-        }
-
-        .common-dialog-back .common-dialog .common-dialog-header a {
-            float: right;
-            cursor: pointer;
-        }
-
-        .common-dialog-back .common-dialog .common-dialog-content {
-            max-height: 33em;
-            min-width: 12em;
-        }
-
-        .common-dialog-back .common-dialog .common-dialog-content>* {
-            margin: 0.3em;
-        }
-
-        .common-dialog-back .common-dialog .common-dialog-content div div {
-            display: inline-block;
-            width: 12em;
-        }
-
-        .common-dialog-back .common-dialog .common-dialog-content div input {
-            background: #f3f3f3;
-            border: none;
-            border-bottom: 1px solid #666699;
-        }
-
-        .common-dialog-back .common-dialog .common-dialog-message {
-            width: calc(100% - 1rem);
-            height: 100%;
-            background: #d3d3d3;
-            margin: 0.5em;
-            max-height: 33em;
-            min-height: 10em;
-            overflow: auto;
-        }
-
-        .common-dialog-back .common-dialog .common-dialog-footer {
-            border-top: 1px solid #d3d3d3;
-            text-align: center;
-            padding: 2px;
-        }
-
-        .common-dialog-back .common-dialog .common-dialog-footer a {
-            border: 1px solid #666699;
-            margin: 2px 1em;
-            padding: 1px;
-            cursor: pointer;
-        }
-
-        .common-dialog-back .common-dialog .common-dialog-footer a:hover {
-            opacity: 0.8;
-            color: #f3f3f3;
-        }
-    </style>
+    <!--html>style.html</html-->
 </head>
 
 <body>
+    <!--html>base.html</html-->
     <script>
-        window.configData = [];
-    </script>
-    <script>
+        
+        var header = document.createElement('div');
+        var info = document.createElement('span');
+        var panel = document.createElement('div');
+        header.className = 'text-align-center';
+        header.appendChild(info);
+        document.body.appendChild(header);
+        document.body.appendChild(panel);
+
+        info.innerHTML = ' URL里面参数越靠后优先级越高,点击API的<strong>Method</strong>可以进行测试,点击<strong>URL</strong>可以打开和关闭返回数据结构。';
+        info.onclick = function () {
+            var close = Array.prototype.some.call(panel.children, function (fieldset) {
+                return fieldset.lastChild.style.display === 'none';
+            });
+            Array.prototype.forEach.call(panel.children, function (fieldset) {
+                fieldset.lastChild.style.display = close ? 'block' : 'none';
+            })
+        };
+
+        ['[帮助]bin/helper/index.html','[自动生成数据测试]bin/random/index.html','[web视图]/views/','[命令行]/bin/action/index.html'].forEach(function(url){
+            var tb = document.createElement('span');
+            tb.innerHTML = ' - <a class="helper">'+/\[(.*)\]/.exec(url)[1]+'</a>';
+            tb.onclick = function () {
+                window.open(url.replace(/\[.*\]/,''));
+            };
+            header.appendChild(tb);;
+        });
+
+        /*****下面的是API视图*****/
         var methodColor = {
             GET: '#337733',
             POST: '#CCCC66',
             PUT: '#66CCCC',
             DELETE: '#FF3333'
         };
-
-        var header = document.createElement('div');
-        var info = document.createElement('span');
-        var helper = document.createElement('span');
-        var random = document.createElement('span');
-        var panel = document.createElement('div');
-        header.className = 'text-align-center';
-        header.appendChild(info);
-        header.appendChild(helper);
-        header.appendChild(random);
-        document.body.appendChild(header);
-        document.body.appendChild(panel);
-        helper.innerHTML = ' - <a class="helper">帮助</a>';
-        random.innerHTML = ' - <a class="helper">自动生成数据测试</a>';
-        info.innerHTML = ' URL里面参数越靠后优先级越高,点击API的<strong>Method</strong>可以进行测试,点击<strong>URL</strong>可以打开和关闭返回数据结构。';
-
         var groups = {};
-        window.configData.forEach(function (item) {
+        window.$data.forEach(function (item) {
             var groupKey = item.file.split(/[\/\\]/).filter(i => !!i)[1];
             groups[groupKey] = (groups[groupKey] || []).concat([item]);
         });
-
 
         Object.keys(groups).forEach(function (key) {
             var groupEl = document.createElement('div');
@@ -207,20 +61,6 @@
             });
             panel.appendChild(createGroup(key, groupEl));
         });
-        info.onclick = function () {
-            var close = Array.prototype.some.call(panel.children, function (fieldset) {
-                return fieldset.lastChild.style.display === 'none';
-            });
-            Array.prototype.forEach.call(panel.children, function (fieldset) {
-                fieldset.lastChild.style.display = close ? 'block' : 'none';
-            })
-        };
-        helper.onclick = function () {
-            window.open('bin/helper/index.html');
-        };
-        random.onclick = function () {
-            window.open('bin/random/index.html');
-        };
 
         function createGroup(item, contentEl) {
             var fieldset = document.createElement('fieldset');
@@ -315,359 +155,6 @@
             return parent;
         }
 
-        function linefeed(str) {
-            return str;
-            var live = 0,
-                line = false;
-            var br = function () {
-                return line ? '' : '<br>';
-            }
-            for (var i = 0; i < str.length; i++) {
-                if (str[i] === '"' && str[i - 1] !== '\\') {
-                    line = !line;
-                }
-                switch (str[i]) {
-                    case '[':
-                        live = live + 1;
-                        break;
-                    case ']':
-                        live = live - 1;
-                        break;
-                    case '{':
-                        live = live + 1;
-                        if (',;[]'.indexOf(str[i - 1]) === -1) {
-                            str = str.slice(0, i + 1) + br() + Array(live + 1).join('    ') + str.slice(i + 1);
-                            i = i + live * 4 + 4;
-                        } else {
-                            str = str.slice(0, i) + br() + Array(live).join('    ') + str[i] + br() + Array(live + 1).join(
-                                '    ') + str.slice(i + 1);
-                            i = i + live * 4 + live * 4 + 4;
-                        }
-                        break;
-                    case '}':
-                        live = live - 1;
-                        if (',;[]'.indexOf(str[i + 1]) === -1) { //下一个不是这些符号
-                            str = str.slice(0, i) + br() + Array(live + 1).join('    ') + '}' + Array(live + 1).join(
-                                '    ') + str.slice(i + 1);
-                            i = i + live * 4 + live * 4 + 4;
-                        } else {
-                            if (',;'.indexOf(str[i + 1]) === -1) { //下一个不是这些符号
-                                str = str.slice(0, i) + br() + Array(live + 1).join('    ') + '}' + br() + Array(live).join(
-                                    '    ') + str.slice(i + 1);
-                                i = i + live * 4 + live * 4;
-                            } else {
-                                str = str.slice(0, i) + br() + Array(live + 1).join('    ') + '}' + str.slice(i + 1);
-                                i = i + live * 4 + 4;
-                            }
-                        }
-                        break;
-                    case ',':
-                        if (str[i + 1] === '"') {
-                            str = str.slice(0, i + 1) + br() + Array(live + 1).join('    ') + str.slice(i + 1);
-                            i = i + live * 4 + 4;
-                        }
-                        break;
-                    case ';':
-                        str = str.slice(0, i + 1) + br() + Array(live + 1).join('    ') + str.slice(i + 1);
-                        i = i + live * 4 + 4;
-                        break;
-                }
-            }
-            return str.replace(/\s/g, '&nbsp;&nbsp;');
-        }
-
-
-        function showDialog(isDisable, methodData, urlData, returnData, default_data, callback) {
-            var dialogPanl = document.createElement('div');
-            var dialog = document.createElement('div');
-
-            var header = document.createElement('div');
-            var content = document.createElement('div');
-            var message = document.createElement('textarea');
-            var footer = document.createElement('div');
-
-            initHeader();
-            initFooter(initContent());
-            message.readOnly = true;
-
-            document.body.onkeyup = function (e) {
-                if (e.keyCode === 27) {
-                    dialogPanl.parentNode.removeChild(dialogPanl);
-                }
-            };
-
-            dialogPanl.className = 'common-dialog-back';
-            dialog.className = 'common-dialog';
-            header.className = 'common-dialog-header';
-            content.className = 'common-dialog-content';
-            message.className = 'common-dialog-message';
-            footer.className = 'common-dialog-footer';
-            dialogPanl.appendChild(dialog);
-            dialog.appendChild(header);
-            dialog.appendChild(content);
-            dialog.appendChild(message);
-            dialog.appendChild(footer);
-
-            message.style.maxWidth = document.body.offsetWidth * 2 / 3 + 'px';
-            document.body.appendChild(dialogPanl);
-            drag(header, dialog);
-
-            function initHeader() {
-                var title = document.createElement('label');
-                var close = document.createElement('a');
-                title.innerHTML = urlData.split('?')[0].replace(/^\[.*\]/, '').replace(/\(.*\)/g, '');
-                close.innerHTML = '&times;';
-                header.appendChild(title);
-                header.appendChild(close);
-                header.ondblclick = function () {
-                    if (/max-window/.test(dialog.className)) {
-                        dialog.className = dialog.className.replace(/\smax-window/, '');
-                        message.style.maxWidth = document.body.offsetWidth * 2 / 3 + 'px';
-                        message.style.maxHeight = '';
-                    } else {
-                        dialog.className = dialog.className + ' max-window';
-                        message.style.maxWidth = 'none';
-                        message.style.maxHeight = dialog.offsetHeight - header.offsetHeight - content.offsetHeight -
-                            footer.offsetHeight - 45 + 'px';
-                    }
-                };
-                close.onclick = function () {
-                    dialogPanl.parentNode.removeChild(dialogPanl);
-                    callback();
-                };
-            }
-
-            function initContent() {
-                var el_data = {};
-                match(urlData.split('?')[0].replace(/^\[.*\]/, '').replace(/\(.*\)/g, '').match(/:[0-9a-zA-Z_]+/g),
-                    false);
-                match(returnData.match(/:[0-9a-zA-Z_]+/g), true);
-                match(urlData.match(/\(.*\)/g) && urlData.match(/\(.*\)/g)[0].replace(/[\(\)]/g, '').split(','), true);
-                return el_data;
-
-                function match(parms, enumerable) {
-                    if (parms) {
-                        parms.forEach(function (key_type) {
-                            var kts = key_type.split(':').filter(i => !!i);
-                            if (/:(null|false|true|undefined|\d+)/.test(kts[0])) {
-                                return;
-                            }
-                            if (typeof el_data[kts[0]] === 'undefined' && !/:\d+/.test(kts[0])) {
-                                Object.defineProperty(el_data, kts[0], {
-                                    enumerable: enumerable,
-                                    get: initRow(kts[0], kts[1], default_data[kts[0]], enumerable)
-                                });
-                            }
-                        });
-                    }
-                }
-
-                function initRow(key, type, dafaultValue, nullable) {
-                    var row = document.createElement('div');
-                    var label = document.createElement('div');
-                    var value = document.createElement('input');
-                    label.innerHTML = key.replace(':', '') + (nullable ? '' : '*');
-                    value.value = dafaultValue || '';
-                    row.appendChild(label);
-                    row.appendChild(value);
-                    content.appendChild(row);
-                    setTimeout(function () {
-                        value.focus();
-                    }, 200);
-
-                    switch (type) {
-                        case 'file':
-                            var file = null;
-                            value.type = 'file';
-                            value.onchange = function (evt) {
-                                file = (evt.__files_ || (evt.target && evt.target.files))[0];
-                            };
-                            return function () {
-                                return file;
-                            };
-                        default:
-                            return function () {
-                                return value.value;
-                            };
-                    }
-                }
-            }
-
-
-            function initFooter(el_data) {
-                var disable = document.createElement('a');
-                var copy = document.createElement('a');
-                var confrom = document.createElement('a');
-
-                footer.appendChild(confrom);
-                if (typeof isDisable === 'boolean') {
-                    footer.appendChild(disable);
-                }
-
-                footer.appendChild(copy);
-
-                disable.innerHTML = isDisable ? 'Enable' : 'Disable';
-                copy.innerHTML = 'Copy';
-                confrom.innerHTML = methodData;
-
-                copy.style.opacity = isDisable ? 0.2 : 1.0;
-                confrom.style.opacity = isDisable ? 0.2 : 1.0;
-
-                disable.onclick = function () {
-                    http(urlData.split('/').map(function (i) {
-                        return /:/.test(i) && el_data[i.replace(':', '')] || i;
-                    }).join('/'), {
-                        disable: !isDisable
-                    }).then(function (req) {
-                        if (req.status === 200) {
-                            return req.json();
-                        }
-                        return req.text();
-                    }).then(function () {
-                        isDisable = !isDisable;
-                        disable.innerHTML = isDisable ? 'Enable' : 'Disable';
-                        copy.style.opacity = isDisable ? 0.2 : 1.0;
-                        confrom.style.opacity = isDisable ? 0.2 : 1.0;
-                        if (isDisable) {
-                            message.innerHTML = '此API不可用！';
-                        } else {
-                            setTimeout(function () {
-                                confrom.click();
-                            }, 100);
-                        }
-                        callback(isDisable);
-                    });
-                };
-
-                confrom.onclick = function () {
-                    if (isDisable) {
-                        message.innerHTML = '此API不可用！';
-                        return;
-                    }
-                    http(urlData.split('/').map(function (i) {
-                        return /:/.test(i) && el_data[i.replace(':', '')] || i;
-                    }).join('/'), {}).then(function (req) {
-                        if (req.status === 200) {
-                            return req.json();
-                        }
-                        return req.text();
-                    }).then(function (req) {
-                        message.value = linefeed(JSON.stringify(req, null, 4));
-                    });
-                };
-
-                copy.onclick = function (item) {
-                    if (isDisable) {
-                        return;
-                    }
-                    var textarea = document.createElement("textarea");
-                    textarea.style.position = 'fixed';
-                    textarea.style.opacity = 0.01;
-                    document.body.appendChild(textarea);
-                    textarea.value = message.innerText.replace(/[0-9a-zA-Z_\"]\s+[0-9a-zA-Z_\"]/g, function (str1) {
-                        return str1[0] + ' ' + str1[str1.length - 1];
-                    });
-                    textarea.select(); // 选择对象 
-                    Array(10).forEach(function (v, i) {
-                        setTimeout(function () {
-                            document.execCommand("Copy", 'false', null);
-                        }, 10 * i);
-                    });
-                    setTimeout(function () {
-                        document.execCommand("Copy", 'false', null);
-                        showMessage('已经复制了数据');
-                        document.body.removeChild(textarea);
-                    }, 200);
-                }
-
-                setTimeout(function () {
-                    confrom.click();
-                }, 100);
-
-                function http(urlFull, headers) {
-                    urlFull = urlFull.replace(/^\[.*\]/, '').replace(/\(.*\)/g, '');
-                    if (/:/.test(urlFull)) {
-                        message.innerHTML = "必填参数没有填写";
-                    } else {
-                        if (methodData === 'GET' || methodData === 'HEADER') {
-                            var urlParm = Object.keys(el_data).map(function (key) {
-                                return key + '=' + encodeURIComponent(el_data[key]);
-                            }).join('&');
-                            return fetch(urlFull + (urlParm ? ('?' + urlParm) : ''), {
-                                method: methodData,
-                                headers: headers
-                            });
-                        } else {
-                            var formData = el_data;
-                            if(Object.keys(el_data).filter(i => el_data[i] instanceof  Blob).length){
-                                var formData = new FormData();
-                                Object.keys(el_data).forEach(function (k) {
-                                    if (el_data[k]) {
-                                        formData.append(k, el_data[k]);
-                                    }
-                                });
-                                //headers['Content-Type'] = 'multipart/form-data;boundary=AaB03x;';
-                            }
-                            return fetch(urlFull, {
-                                method: methodData,
-                                headers: headers,
-                                body: formData
-                            });
-                        }
-                    }
-                }
-            }
-
-            function showMessage(message, time) {
-                time = time || 10;
-                var dialog = document.createElement('div');
-                dialog.className = 'common-dialog-Message';
-                dialog.innerHTML = message;
-                dialog.style.opacity = 1;
-                document.body.appendChild(dialog);
-                var handel = setInterval(function () {
-                    dialog.style.opacity = dialog.style.opacity - (1 / time);
-                    if (dialog.style.opacity < 0) {
-                        document.body.removeChild(dialog);
-                        clearInterval(handel);
-                    }
-                }, 1000);
-            }
-
-
-            function drag(canDragElement, element) {
-                var temp = {};
-                canDragElement.addEventListener('mousedown', function (e) {
-                    var style = window.getComputedStyle(element);
-                    if (/max-window/.test(element.className)) {
-                        return;
-                    }
-                    if (e.clientX < (parseInt(style.left) || 0) + (parseInt(style.width) || 0) - 15 ||
-                        e.clientY < (parseInt(style.top) || 0) + (parseInt(style.height) || 0) - 15) {
-                        mousedown(e);
-                    }
-                });
-                window.addEventListener('mouseup', function () {
-                    temp.e = null;
-                    element.style.cursor = 'default';
-                    window.removeEventListener('mousemove', mousemove);
-                });
-
-                function mousedown(e) {
-                    var style = window.getComputedStyle(element);
-                    temp.e = e;
-                    temp.x = e.clientX - (parseInt(style.left) || 0);
-                    temp.y = e.clientY - (parseInt(style.top) || 0);
-                    element.style.cursor = 'move';
-                    window.addEventListener('mousemove', mousemove);
-                }
-
-                function mousemove(e) {
-                    element.style.left = e.clientX - temp.x + 'px';
-                    element.style.top = e.clientY - temp.y + 'px';
-                }
-            }
-        }
     </script>
 </body>
 

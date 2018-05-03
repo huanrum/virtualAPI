@@ -119,6 +119,18 @@ module.exports = (function () {
             function get(dir){
                 return fs.readdirSync(dir).some(i=>/\.gitignore/.test(i))? dir:(dir !== path.dirname(dir)&&get(path.dirname(dir)));
             }
+        },
+        /**
+         * 
+         */
+        repalceContent: function(baseDir,strContent,data){
+            return strContent.replace(/<body((?!>).)*>/, function(str){
+                var dataStr = JSON.stringify(data, null, 4);
+                return str + '\r\n<script>\r\nwindow.$data = ' + dataStr + '\r\n</script>\r\n';
+            })
+            .replace(/<!--html>.*<\/html-->/img,function(str){
+                return fs.readFileSync(baseDir + /<!--html>(.*)<\/html-->/.exec(str)[1]).toString();
+            });
         }
     };
 })();

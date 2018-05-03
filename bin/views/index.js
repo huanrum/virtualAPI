@@ -106,11 +106,10 @@ module.exports = (function () {
                 menus = ['editor[打开编辑器]','pull[#更新代码]'];
             }
 
-            succ(fs.readFileSync(__dirname + '/index.html', 'utf-8').toString()
-            .replace(/<title>.*<\/title>/,`<title>${hump(_path.replace(/\/*views\/*/,''))||'Views'}<\/title>`)
-            .replace('window.$data = {};', 'window.$data = ' + decodeURIComponent(JSON.stringify({
+            succ(helper.repalceContent(__dirname + '/view/' ,fs.readFileSync(__dirname + '/index.html', 'utf-8').toString(),{
                 _path: _path, dirs: dirs, replace: replace, options: options, branch: branch, netSegment:netSegment, menus:menus
-            }, null, 4)))
+            })
+            .replace(/<title>.*<\/title>/,`<title>${hump(_path.replace(/\/*views\/*/,''))||'Views'}<\/title>`)
             .replace('/*addToolbar:(function(){})();*/', addToolbar.replace(/<\/?script>/gi, '')));
         });
 
