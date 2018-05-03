@@ -23,11 +23,15 @@ module.exports = (function () {
                 if (/https?:\/\/.*\/views\/*/.test(webModule)) {
                     webModule = webModule.replace(/https?:\/\/.*\/views\/*/i, basePath);
                 }
-                var filterPath = Object.keys(paths).sort((a, b) => a.length - b.length).filter(i => path.join(webModule).toLocaleLowerCase().indexOf(path.join(basePath, i).toLocaleLowerCase()) !== -1).pop();
-                if (filterPath) {
-                    return path.join(webModule).toLocaleLowerCase().replace(path.join(basePath, filterPath).toLocaleLowerCase(), paths[filterPath]);
-                } else {
-                    return path.join(webModule);
+                if(Object.keys(paths).some(i=>i.toLocaleLowerCase()===webModule.toLocaleLowerCase())){
+                    return paths[Object.keys(paths).filter(i=>i.toLocaleLowerCase()===webModule.toLocaleLowerCase()).pop()];
+                }else{
+                    var filterPath =  Object.keys(paths).sort((a, b) => a.length - b.length).filter(i => path.join(webModule).toLocaleLowerCase().indexOf(path.join(basePath, i).toLocaleLowerCase()) !== -1).pop();
+                    if (filterPath) {
+                        return path.join(webModule).toLocaleLowerCase().replace(path.join(basePath, filterPath).toLocaleLowerCase(), paths[filterPath]);
+                    } else {
+                        return path.join(webModule);
+                    }
                 }
 
             } else {

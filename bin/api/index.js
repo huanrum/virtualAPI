@@ -83,12 +83,18 @@ module.exports = (function () {
                 helper.getBodyData(request).then(bodyData => {
                     returnResult(key, request, toObject(bodyData.toString() || '{}')).then(function(data){
                         if (data) {
+                            var webModuleReg = /\^(((?!\/).)*)/;
                             var datas = random(returnData[key].path)(data);
                             if (typeof datas === 'string' && fs.existsSync(returnData[key].path + '/' + datas)) {
                                 response.writeHead(200, {
                                     'Content-Type': helper.type(datas.split('.').pop())
                                 });
                                 response.end(fs.readFileSync(returnData[key].path + '/' + datas));
+                            } else if (webModuleReg.test(datas) && fs.existsSync(datas.replace(webModuleReg,helper.config(webModuleReg.exec(datas)[1])))) {
+                                response.writeHead(200, {
+                                    'Content-Type': helper.type(datas.split('.').pop())
+                                });
+                                response.end(fs.readFileSync(datas.replace(webModuleReg,helper.config(webModuleReg.exec(datas)[1]))));
                             } else {
                                 response.writeHead(200, {
                                     'Content-Type': 'text/plain;charset=utf-8'
