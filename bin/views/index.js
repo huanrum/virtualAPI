@@ -156,8 +156,9 @@ module.exports = (function () {
                 });
 
                 if(debug){
+                    var commandHost = 'http://' + options.ip + ':' + options.port + '/';
                     content = content.replace(/<\/body>/,function(src){
-                        return fs.readFileSync(__dirname + '/../debug/index.html').toString().replace('_$pack$_',helper.packTool(path.dirname(file))) + '\r\n' + src;
+                        return fs.readFileSync(__dirname + '/../debug/index.html').toString().replace('_$pack$_',helper.packTool(path.dirname(file))).replace(/\^\//mg,commandHost) + '\r\n' + src;
                     });
                 }
 

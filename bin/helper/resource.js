@@ -33,36 +33,69 @@ module.exports = {
     /**
      * 获取参数
      */
-    getRequestParameter:function(request){
-        var parameter = {clientIp : this.getClientIp(request)};
-        request.url.split('?').pop().split('#').shift().split('&').forEach(kv=>{
+    getRequestParameter: function (request) {
+        var parameter = {
+            clientIp: this.getClientIp(request)
+        };
+        request.url.split('?').pop().split('#').shift().split('&').forEach(kv => {
             parameter[kv.split('=')[0]] = decodeURIComponent(kv.split('=')[1]);
         });
-        return Object.assign(parameter,request.headers);
+        return Object.assign(parameter, request.headers);
+    },
+    /**
+     * 解析url获取参数
+     * @param {*} key 
+     * @param {*} urlAndParms 
+     * @param {*} headers 
+     */
+    getParameters: function (key, request) {
+        var urlAndParms = request.url.split('?'), headers = request.headers;
+        var parameters = {
+            test: headers.test
+        };
+
+        var keys = key.split('?')[0].replace(/\[.*\]/, '').split('/').filter(function (i) {
+            return !!i;
+        });
+        var urls = urlAndParms[0].split('/').filter(function (i) {
+            return !!i;
+        });
+
+        if (urlAndParms[1]) {
+            urlAndParms[1].split('&').forEach(function (str) {
+                parameters[str.split('=')[0]] = decodeURIComponent(str.split('=')[1]);
+            });
+        }
+        for (var i = 0; i < keys.length; i++) {
+            if (/:.*/.test(keys[i])) {
+                parameters[keys[i].replace(':', '')] = urls[i];
+            }
+        }
+        return Object.assign(parameters, headers);
     },
     /**
      * 
      * @param {*} request 
      * @param {*} replace 
      */
-    getBodyData: function (request,replace) {
+    getBodyData: function (request, replace) {
         var parameters = this.getRequestParameter(request);
         return new Promise(succ => {
             var bufferHelper = new BufferHelper();
             if (!request.on) {
-                succ(JSON.stringify(request.body||{}));
+                succ(JSON.stringify(request.body || {}));
             } else {
                 request.on("data", function (chunk) {
                     bufferHelper.concat(chunk);
                 });
                 request.on('end', function () {
-                    if(replace){
+                    if (replace) {
                         var result = bufferHelper.toString();
-                        Object.keys(parameters).forEach(k=>{
-                            result = result.replace(new RegExp(':\s*'+k,'ig'),parameters[k]);
+                        Object.keys(parameters).forEach(k => {
+                            result = result.replace(new RegExp(':\s*' + k, 'ig'), parameters[k]);
                         });
                         succ(result);
-                    }else{
+                    } else {
                         succ(bufferHelper.toBuffer());
                     }
                 });

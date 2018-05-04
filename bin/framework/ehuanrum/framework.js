@@ -4,33 +4,44 @@
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
         typeof define === 'function' && define.amd ? define(factory) :
-            (global.ehr = global.$ehr = factory());
-})(this, (function (global,_eval) {
+        (global.ehr = global.$ehr = factory());
+})(this, (function (global, _eval) {
     'use strict';
 
-    var chaceData = { temp: {}, data: {}, load: [], binding$id: 0 };
+    var chaceData = {
+        temp: {},
+        data: {},
+        load: [],
+        binding$id: 0
+    };
 
     if (window) {
+        chaceData.files = [];
         chaceData.menu = document.createElement('div');
         chaceData.content = document.createElement('div');
         chaceData.menu.className = 'ehuanrum-menu';
         chaceData.content.className = 'ehuanrum-content';
         //界面加载完成后去主动给界面做数据绑定处理
         window.addEventListener('load', function () {
-            var routerUrl = {}, active = null, history = [],paths = location.hash.replace('#', '').split('/');
-            binding(document.body, window);
-            binding(chaceData.menu, window);
-            binding(chaceData.content, window);
-            //根据对应的router功能构建菜单
-            chaceData.menu.appendChild(__createMenu(ehuanrum('router') || {}, routerUrl, go, ''));
-            //如果有对应的main处理逻辑就先运行它
-            if (ehuanrum('main')) {
-                ehuanrum('main')(goin,chaceData.content);
-            } else {
-                goin();
-            }
+            var routerUrl = {},
+                active = null,
+                history = [],
+                paths = location.hash.replace('#', '').split('/');
+            loadFile(chaceData.files).then(function () {
+                binding(document.body, window);
+                binding(chaceData.menu, window);
+                binding(chaceData.content, window);
+                //根据对应的router功能构建菜单
+                chaceData.menu.appendChild(__createMenu(ehuanrum('router') || {}, routerUrl, go, ''));
+                //如果有对应的main处理逻辑就先运行它
+                if (ehuanrum('main')) {
+                    ehuanrum('main')(goin, chaceData.content);
+                } else {
+                    goin();
+                }
+            });
 
-            function goin(hideMenu,defaultUrl) {
+            function goin(hideMenu, defaultUrl) {
                 //添加菜单和内容显示用的容器,并根据路径初始化界面
                 if (ehuanrum('router') && !hideMenu) {
                     document.body.appendChild(chaceData.menu);
@@ -38,11 +49,15 @@
                 } else {
                     document.body.appendChild(chaceData.content);
                 }
-                if(ehuanrum('router')){
-                    var menu = paths.filter(function (i) { return !!i; }).join('/');
-                    go(menu?('/' + menu):(defaultUrl || 'router.main'), paths.pop() || paths.pop() || 'default');
+                if (ehuanrum('router')) {
+                    var menu = paths.filter(function (i) {
+                        return !!i;
+                    }).join('/');
+                    go(menu ? ('/' + menu) : (defaultUrl || 'router.main'), paths.pop() || paths.pop() || 'default');
                 }
-                Object.defineProperty(ehuanrum('router')||{},'goto',{value:go});
+                Object.defineProperty(ehuanrum('router') || {}, 'goto', {
+                    value: go
+                });
             }
 
             /**
@@ -51,16 +66,16 @@
              */
             function go(menu) {
                 //路由跳转
-                if(typeof menu === 'number'){
+                if (typeof menu === 'number') {
                     var hash = location.hash;
-                    if(menu<0){
+                    if (menu < 0) {
                         hash = history[history.length + menu];
-                    }else{
+                    } else {
                         hash = history[history.lastIndexOf(hash) + menu];
                     }
-                    arguments[0] = hash.replace('#','') || ('#/no-Found-'+Date.now());
+                    arguments[0] = hash.replace('#', '') || ('#/no-Found-' + Date.now());
                     go.apply(this, arguments);
-                }else if (typeof menu === 'string') {
+                } else if (typeof menu === 'string') {
                     history.push(location.hash);
                     location.hash = '#' + menu.replace(/^\s*router\./, '/');
                     arguments[0] = routerUrl[menu.replace(/^\s*router\./, '/')];
@@ -75,13 +90,51 @@
                     chaceData.content.innerHTML = '<div style="position: absolute;top:10em;left:50%;">没有对应的页面,请确认输入的地址！</div>';
                 }
             }
+
+            /**
+             * 加载文件
+             * @param {*} urls 
+             */
+            function loadFile(urls) {
+                return new Promise(function (resolve) {
+                    Promise.all(urls.map(function (u) {
+                        return load(u);
+                    })).then(resolve);
+                });
+    
+                function load(url) {
+                    return new Promise(function (resolve) {
+                        if (/\.js$/.test(url) || /^https?:\/\//.test(url)) {
+                            var script = document.createElement('script');
+                            script.src = url;
+                            script.onload = resolve;
+                            document.body.appendChild(script);
+                        } else if (/\.css$/.test(url)) {
+                            var style = document.createElement('link');
+                            style.type = 'text/css';
+                            style.rel = 'stylesheet';
+                            style.href = url;
+                            style.onload = resolve;
+                            document.head.appendChild(style);
+                        } else {
+                            resolve();
+                        }
+                    });
+                }
+            }
         });
     }
 
     //把下面的几个功能提供出去
-    ehuanrum('filter', function () { return filter; });
-    ehuanrum('binding', function () { return binding; });
-    ehuanrum('value', function () { return $value; });
+    ehuanrum('filter', function () {
+        return filter;
+    });
+    ehuanrum('binding', function () {
+        return binding;
+    });
+    ehuanrum('value', function () {
+        return $value;
+    });
 
     return function () {
         return ehuanrum;
@@ -99,8 +152,8 @@
     function ehuanrum(field, value) {
         field = field || '';
         if (typeof field !== 'string' || /^\d+$/.test(field)) {
-            //如果第一个参数是方法就表示是要添加界面加载完成和关闭界面的时候需要的事件处理
-            if (typeof field === 'function' && window) {
+             //如果第一个参数是方法就表示是要添加界面加载完成和关闭界面的时候需要的事件处理
+             if (typeof field === 'function' && window) {
                 window.addEventListener('load', field);
                 if (typeof value === 'function') {
                     //$window.addEventListener('unload',value);
@@ -112,27 +165,35 @@
                 //如果是数字就表示要设置版本号
             } else if (/^\d+$/.test(field)) {
                 chaceData.version = field;
-                //其他的都认为是需要主动做数据双向绑定处理的，最好是DOM元素否则会报错，至于其他类型等以后再加
+                //如果是数组就表示要加载文件
             } else {
-                binding(field, value)
+                //其他的都认为是需要主动做数据双向绑定处理的，最好是DOM元素否则会报错，至于其他类型等以后再加
+                binding(field, value);
             }
             return;
         }
 
+        if (/\.js$/.test(field)||/\.css$/.test(field)||/^https?:\/\//.test(field)) {
+            chaceData.files.push(field);
+            return ;
+        } 
+
         //field可能是a.b这样的结构所以需要拆分
         field = field.trim().replace(/_/g, '.');
 
-        if (field[0] === '>') {
+        if (/^>/.test(field)) {
             return chaceData.temp[field.slice(1)];
         }
 
         //如果有两个参数，就是存数据
         if (value) {
             //如果以.结束的field是为了把value在包裹一下
-            if (field[field.length - 1] === '.') {
+            if (/\.$/.test(field)) {
                 var $value = value;
                 field = field.slice(0, field.length - 1);
-                value = function () { return $value; };
+                value = function () {
+                    return $value;
+                };
             }
             chaceData.temp[field] = value;
 
@@ -140,7 +201,9 @@
             if (!Object.getOwnPropertyNames(chaceData.data).length) {
                 var temp = chaceData.temp;
                 chaceData.temp = {};
-                Object.keys(temp).sort(function (a, b) { return a.length - b.length; }).forEach(function (field) {
+                Object.keys(temp).sort(function (a, b) {
+                    return a.length - b.length;
+                }).forEach(function (field) {
                     chaceData.temp[field] = temp[field];
                 });
             }
@@ -150,7 +213,9 @@
                 return chaceData.data;
                 //如果temp里面已经有了就可以计算出缓存值
             } else if (chaceData.temp[field]) {
-                var tempField, fields = field.split('.'), lastField = fields.pop(), chaceTempData = chaceData.data;
+                var tempField, fields = field.split('.'),
+                    lastField = fields.pop(),
+                    chaceTempData = chaceData.data;
                 value = chaceData.temp[field];
 
                 while (fields.length) {
@@ -190,7 +255,8 @@
                 }
             }
 
-            var $fields = field.split('.'), $chaceTempData = chaceData.data;
+            var $fields = field.split('.'),
+                $chaceTempData = chaceData.data;
             while ($fields.length > 1) {
                 $chaceTempData = $chaceTempData[$fields.shift()];
             }
@@ -214,18 +280,18 @@
         }).join('');
     }
 
-    function _realValue(){
-        for(var i=0;i<arguments.length;i++){
-            if(arguments[i]){
+    function _realValue() {
+        for (var i = 0; i < arguments.length; i++) {
+            if (arguments[i]) {
                 return arguments[i];
             }
         }
-        for(var j=0;j<arguments.length;j++){
-            if(arguments[j] !== undefined){
+        for (var j = 0; j < arguments.length; j++) {
+            if (arguments[j] !== undefined) {
                 return arguments[j];
             }
         }
-        
+
     }
 
     function _event(scope) {
@@ -235,7 +301,9 @@
                 templist.push(fn);
             } else {
                 var args = arguments;
-                templist.forEach(function (i) { i.apply(scope, args) });
+                templist.forEach(function (i) {
+                    i.apply(scope, args)
+                });
             }
         }
     }
@@ -302,11 +370,13 @@
                 }
             }
         }
-        return { enumerable: true };
+        return {
+            enumerable: true
+        };
     }
 
-    function _$extendArray(list,render) {
-        ['push', 'pop', 'shift', 'unshift','sort'].forEach(function (funName) {
+    function _$extendArray(list, render) {
+        ['push', 'pop', 'shift', 'unshift', 'sort'].forEach(function (funName) {
             Object.defineProperty(list, funName, {
                 configurable: true,
                 value: function () {
@@ -320,8 +390,8 @@
             configurable: true,
             value: function () {
                 list.length = 0;
-                Array.prototype.forEach.call(arguments,function(arg){
-                    Array.prototype.push.apply(list, arg||[]);
+                Array.prototype.forEach.call(arguments, function (arg) {
+                    Array.prototype.push.apply(list, arg || []);
                 });
                 render(list);
                 return list;
@@ -331,7 +401,9 @@
 
     //计算表达式需要关注里面的每一个变量
     function _descriptorFileds(data, expression, fn) {
-        expression.replace(/\'((?!\').)*\'/g, '').split(/[+\-*/%\|\&\(\)=\?\:,!><]/).filter(function (i) { return !!i.trim(); }).forEach(function (fi) {
+        expression.replace(/\'((?!\').)*\'/g, '').split(/[+\-*/%\|\&\(\)=\?\:,!><]/).filter(function (i) {
+            return !!i.trim();
+        }).forEach(function (fi) {
             if (/\[.*\]/.test(fi)) {
                 fi.match(/\[[0-9a-zA-Z\.]*\]/g).forEach(function (f) {
                     fi = fi.replace(f, '.' + $value(data, f.replace(/[\[\]]/g, '')));
@@ -362,7 +434,7 @@
                     fn();
                 },
                 get: function () {
-                    return _realValue(descriptor.get && descriptor.get() , descriptor.value , $value(td.__proto__, tf));
+                    return _realValue(descriptor.get && descriptor.get(), descriptor.value, $value(td.__proto__, tf));
                 }
             });
         }
@@ -372,7 +444,7 @@
     function $value($obj, $field, $value) {
         if (!/^[0-9a-zA-Z\._$@]*$/.test($field)) {
             //计算表达式
-            return _eval($obj, $field.replace(/\s+/mg,' '), valuer);
+            return _eval($obj, $field.replace(/\s+/mg, ' '), valuer);
         } else {
             //取值
             return valuer($obj, $field, $value);
@@ -389,7 +461,7 @@
                 fields[0] = 'value';
                 return valuer(newObj, fields.join('.'), value);
             }
-            if (field instanceof Array) {//获取一个真值
+            if (field instanceof Array) { //获取一个真值
                 for (var i = 0; i < field.length; i++) {
                     if ((typeof obj[field[i]] === 'number') || obj[field[i]]) {
                         return obj[field[i]];
@@ -500,13 +572,15 @@
         return elements;
 
         function _$extend(oldObject, newObject, pros) {
-            var fromPros = pros, toPros = pros;
+            var fromPros = pros,
+                toPros = pros;
             if (!(pros instanceof Array)) {
                 fromPros = Object.keys(pros);
                 toPros = Object.values(pros);
             }
             toPros.forEach(function (to, i) {
-                var from = fromPros[i], tempData = $value(oldObject, from);
+                var from = fromPros[i],
+                    tempData = $value(oldObject, from);
                 Object.defineProperty(oldObject, from, {
                     configurable: true,
                     enumerable: true,
@@ -528,8 +602,8 @@
                     }
                 });
 
-                if(tempData instanceof Array){
-                    _$extendArray(tempData,function(list){
+                if (tempData instanceof Array) {
+                    _$extendArray(tempData, function (list) {
                         oldObject[from] = list;
                     });
                 }
@@ -537,25 +611,48 @@
             return newObject;
         }
 
-        
+
 
         function initBindingDefineProperty() {
             if (!data.$eval || (data.$eval === data.__proto__.$eval)) {
 
-                Object.defineProperty(data, '$id', { value: ++chaceData.binding$id });
-                Object.defineProperty(data, '$destroy', { value: _event(data) });
-                Object.defineProperty(data, '$eval', { value: _event(data) });
-                Object.defineProperty(data, '$real', { value: function () { return JSON.parse(JSON.stringify(data) || 'null'); } });
-                Object.defineProperty(data, '$extend', { value: function (newObject, pros) { return _$extend(data, newObject, pros); } });
-                Object.defineProperty(data, '$value', { value: function (filed,value) { return $value(data, filed,value); } });
+                Object.defineProperty(data, '$id', {
+                    value: ++chaceData.binding$id
+                });
+                Object.defineProperty(data, '$destroy', {
+                    value: _event(data)
+                });
+                Object.defineProperty(data, '$eval', {
+                    value: _event(data)
+                });
+                Object.defineProperty(data, '$real', {
+                    value: function () {
+                        return JSON.parse(JSON.stringify(data) || 'null');
+                    }
+                });
+                Object.defineProperty(data, '$extend', {
+                    value: function (newObject, pros) {
+                        return _$extend(data, newObject, pros);
+                    }
+                });
+                Object.defineProperty(data, '$value', {
+                    value: function (filed, value) {
+                        return $value(data, filed, value);
+                    }
+                });
 
 
                 if (controller) {
                     controller(data, elements);
                 }
-                if (data === global) { return; }//不给window/global添加set/get
-                Object.keys(data).filter(function (i) { return typeof data[i] !== 'function' && !(data[i] instanceof Node); }).forEach(function (pro) {
-                    var oldVal = data[pro], descriptor = __getOwnPropertyDescriptor(data, pro) || {};
+                if (data === global) {
+                    return;
+                } //不给window/global添加set/get
+                Object.keys(data).filter(function (i) {
+                    return typeof data[i] !== 'function' && !(data[i] instanceof Node);
+                }).forEach(function (pro) {
+                    var oldVal = data[pro],
+                        descriptor = __getOwnPropertyDescriptor(data, pro) || {};
                     Object.defineProperty(data, pro, {
                         configurable: true,
                         enumerable: descriptor.enumerable,
@@ -576,25 +673,32 @@
         }
 
         function initBindingElement(element) {
-            if(element.render){return;}
+            if (element.render) {
+                return;
+            }
             element.render = true;
-            setTimeout(function(){delete element.render;},100);
+            setTimeout(function () {
+                delete element.render;
+            }, 100);
 
             //把[]关起来的属性设置双向绑定
             var controls = ehuanrum('control');
 
             Array.prototype.filter.call(element.attributes || [], function (attr) {
-                /*ng,Vue都支持这个*/ /*ng,Vue属性*/ /*ng,Vue事件*/
+                /*ng,Vue都支持这个*/
+                /*ng,Vue属性*/ /*ng,Vue事件*/
                 return /\{\{.*\}\}/.test(attr.value) || /^\[.+\]$/.test(attr.name) || /^:.+$/.test(attr.name) || /^\(.+\)$/.test(attr.name) || /^@.+$/.test(attr.name);
             }).sort(function (a, b) {
                 return /:/.test(b.name) - /:/.test(a.name);
             }).forEach(function (attr) {
                 if (!/:/.test(attr.name) && !/^\[style\./.test(attr.name) && $value(controls, attr.name.slice(1, -1)) && element.parentNode) {
-                    $value(controls, attr.name.slice(1, -1).replace(/[_\-]/g, '.')).call({ defineProperty: _descriptorFileds }, element, data, attr.value);
+                    $value(controls, attr.name.slice(1, -1).replace(/[_\-]/g, '.')).call({
+                        defineProperty: _descriptorFileds
+                    }, element, data, attr.value);
                 } else if (/\{\{.*\}\}/.test(attr.value)) {
-                    defineProperty(element, data, $name(element,attr.name), attr.value.replace(/\{\{/g, '').replace(/\}\}/g, ''));
+                    defineProperty(element, data, $name(element, attr.name), attr.value.replace(/\{\{/g, '').replace(/\}\}/g, ''));
                 } else {
-                    defineProperty(element, data, $name(element,((/^\(.+\)$/.test(attr.name) || /^@.+$/.test(attr.name)) ? 'on' : '') + attr.name.replace(/^[\[\]\(\):@]/g, '').replace(/[\[\]\(\):@]$/g, '')), attr.value);
+                    defineProperty(element, data, $name(element, ((/^\(.+\)$/.test(attr.name) || /^@.+$/.test(attr.name)) ? 'on' : '') + attr.name.replace(/^[\[\]\(\):@]/g, '').replace(/[\[\]\(\):@]$/g, '')), attr.value);
 
                 }
                 if (!chaceData.binding) {
@@ -606,7 +710,9 @@
                 }
             });
 
-            if (!element.parentNode || ['SCRIPT'].indexOf(element.tagName) !== -1) { return; }
+            if (!element.parentNode || ['SCRIPT'].indexOf(element.tagName) !== -1) {
+                return;
+            }
             initChildren.apply(element, element.childNodes);
         }
 
@@ -663,7 +769,7 @@
                         } else if (parent.insertBefore) {
                             parent.insertBefore(el, next);
                         }
-                    } else {
+                    } else if(parent !== el.parentNode){
                         parent.appendChild(el);
                     }
                 } else if (el.parentNode) {
@@ -673,35 +779,40 @@
             }
         }
 
-        function $name(element,name) {
+        function $name(element, name) {
             var fildEl = element;
-            return name.split('.').map(function(n1,i,list){
-                var fildName = getAllName(fildEl).filter(function(n){return toName(n1).toLocaleLowerCase() === n.toLocaleLowerCase();}).pop();
-                if(fildName){
-                    if(i<list.length-1){
+            return name.split('.').map(function (n1, i, list) {
+                var fildName = getAllName(fildEl).filter(function (n) {
+                    return toName(n1).toLocaleLowerCase() === n.toLocaleLowerCase();
+                }).pop();
+                if (fildName) {
+                    if (i < list.length - 1) {
                         fildEl = element[fildName];
                     }
                     return fildName;
-                }else{
+                } else {
                     return n1;
                 }
             }).join('.');
 
-            function toName(name){
-                var result = name ,replaces = {
-                    class: 'className'
-                };
+            function toName(name) {
+                var result = name,
+                    replaces = {
+                        class: 'className'
+                    };
                 Object.keys(replaces).forEach(function (field) {
                     result = result.replace(field, replaces[field]);
                 });
-                result = result.split(/[_\-]/).map(function (i) { return i[0].toLocaleUpperCase() + i.slice(1); }).join('');
+                result = result.split(/[_\-]/).map(function (i) {
+                    return i[0].toLocaleUpperCase() + i.slice(1);
+                }).join('');
                 return result[0].toLocaleLowerCase() + result.slice(1);
             }
 
-            function getAllName(elClass){
-                if(elClass){
+            function getAllName(elClass) {
+                if (elClass) {
                     return Object.keys(elClass).concat(getAllName(elClass.__proto__));
-                }else{
+                } else {
                     return [];
                 }
             }
@@ -720,8 +831,10 @@
 
     ///defineProperty,实现双向绑定
     function defineProperty(element, data, field, value) {
-        if (!element.parentNode) { return; }
-       
+        if (!element.parentNode) {
+            return;
+        }
+
         //关联的element属性名以on开头的都是事件
         if (/^\s*on/.test(field)) {
             events();
@@ -761,7 +874,7 @@
                     }
                 });
             }
-            if($value(element, field) !== tempV){
+            if ($value(element, field) !== tempV) {
                 $value(element, field, tempV);
             }
         }
@@ -795,9 +908,12 @@
         }
 
         function property() {
-            var values = value.split('.'), lastValue = values.pop();
+            var values = value.split('.'),
+                lastValue = values.pop();
             var descriptor = __getOwnPropertyDescriptor(values.length ? $value(data, values.join('.')) : data, lastValue);
-            data.$eval(function () { $value(element, field, $value(data, value)); });
+            data.$eval(function () {
+                $value(element, field, $value(data, value));
+            });
             if (field === 'value') {
                 element.addEventListener('keyup', function () {
                     $value(data, value, $value(element, field));
@@ -828,13 +944,16 @@
                     }
                 },
                 get: function () {
-                    return _realValue((field === 'value' && element.value) , (descriptor.get && descriptor.get()) , descriptor.value);
+                    return _realValue((field === 'value' && element.value), (descriptor.get && descriptor.get()), descriptor.value);
                 }
             });
         }
 
         function foreach(fields) {
-            var elements = [], nextSibling = element.nextSibling, parentNode = element.parentNode, descriptor = __getOwnPropertyDescriptor(data, value || fields[1]);
+            var elements = [],
+                nextSibling = element.nextSibling,
+                parentNode = element.parentNode,
+                descriptor = __getOwnPropertyDescriptor(data, value || fields[1]);
             var outerHTML = element.outerHTML.replace('[' + field + ']="' + value + '"', '');
             element.parentNode.removeChild(element);
             descriptor.value = descriptor.value || [];
@@ -867,25 +986,27 @@
 
             function extendArray(list) {
                 if (list instanceof Array) {
-                    _$extendArray(list,render);
+                    _$extendArray(list, render);
                 }
                 return list;
             }
 
             function render(vals) {
-                elements.forEach(function (it,index) {
+                elements.forEach(function (it, index) {
                     //if(vals[index] !== it.t){
-                        it.e.update();
+                    it.e.update();
                     //}
                 });
                 elements = map(vals || [], function (item, i, obj, da) {
-                    var bindElement = null;//(elements.filter(function (it) { return it.t === item; })[0] || { t: item, e: bindElement });
+                    var bindElement = {}; //(elements.filter(function (it) { return it.t === item; })[0] || { t: item, e: bindElement });
                     if (!bindElement.e || bindElement.e.scope().item !== bindElement.t) {
-                       if (/^\d+$/.test(i)) {
+                        if (/^\d+$/.test(i)) {
                             Object.defineProperty(da, '$index', {
                                 enumerable: false,
                                 get: function () {
-                                    return map($value(data, fields[1]) || [], function (x) { return '' + JSON.stringify(x); }).indexOf('' + JSON.stringify(item));
+                                    return map($value(data, fields[1]) || [], function (x) {
+                                        return '' + JSON.stringify(x);
+                                    }).indexOf('' + JSON.stringify(item));
                                 }
                             });
                         }
@@ -893,7 +1014,7 @@
                             configurable: true,
                             enumerable: true,
                             get: function () {
-                                return _realValue(vals[i],item);
+                                return _realValue(vals[i], item);
                             },
                             set: function (val) {
                                 vals[i] = val;
@@ -902,7 +1023,9 @@
                         da.__proto__ = data;
                         bindElement.e = binding(outerHTML, da);
                         bindElement.e.update(parentNode, nextSibling);
-                        data.$eval(function(){da.$eval.apply(da,arguments);});
+                        data.$eval(function () {
+                            da.$eval.apply(da, arguments);
+                        });
                     } else {
                         bindElement.e.update(parentNode);
                         bindElement.e.scope().$eval();
@@ -912,11 +1035,11 @@
                 });
 
                 function map(obj, fn) {
-                    if(/^\d+$/.test(obj)){
-                        return Array(+obj).fill(1).map(function(v, i, list){
+                    if (/^\d+$/.test(obj)) {
+                        return Array(+obj).fill(1).map(function (v, i, list) {
                             return mapEach(i, i, i, list.length);
                         });
-                    }else if (obj.length) {
+                    } else if (obj.length) {
                         return Array.prototype.map.call(obj, function (v, i, list) {
                             return mapEach(v, i, i, list.length);
                         });
@@ -928,9 +1051,15 @@
                     return [];
 
                     function mapEach(val, pro, index, count) {
-                        var result = { $index: pro };
-                        Object.defineProperty(result, '$first', { value: index === 0 });
-                        Object.defineProperty(result, '$last', { value: index + 1 === count });
+                        var result = {
+                            $index: pro
+                        };
+                        Object.defineProperty(result, '$first', {
+                            value: index === 0
+                        });
+                        Object.defineProperty(result, '$last', {
+                            value: index + 1 === count
+                        });
                         return fn(val, pro, obj, result);
                     }
                 }
@@ -940,12 +1069,11 @@
     }
 
 
-})(this,function (_obj, _str, _valuer) {
-    with (_obj) {
+})(this, function (_obj, _str, _valuer) {
+    with(_obj) {
         return eval(_str);
     }
 }));
-
 /**
  * Created by Administrator on 2017/3/28.
  */

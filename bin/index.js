@@ -17,6 +17,7 @@ var api = require('./api');
 var random = require('./random');
 var permission = require('./permission');
 var framework = require('./framework');
+var log = require('./log');
 
 
 var createServer = function (options) {
@@ -38,6 +39,13 @@ var createServer = function (options) {
                     //测试API
                     else if (/^\/*test\/+/.test(request.url)) {
                         response.end(JSON.stringify(true));
+                    }
+                     //测试API
+                    else if (/^\/*debug\/+/.test(request.url)) {
+                        log(request,response,'debug');
+                    }
+                    else if (/^\/*log\/+/.test(request.url)) {
+                        log(request,response);
                     }
                     else if (/^\/*framework\/+/.test(request.url)) {
                         framework(helper, request, response);
@@ -100,7 +108,7 @@ var createServer = function (options) {
     // 终端打印如下信息
     console.log('\x1B[32m', 'Server running at http://' + options.ip + ':' + options.port + '/');
 
-    child_process.exec('start http://' + options.ip + ':' + options.port + '/');
+    //child_process.exec('start http://' + options.ip + ':' + options.port + '/');
 };
 
 

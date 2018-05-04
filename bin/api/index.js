@@ -140,7 +140,7 @@ module.exports = (function () {
 
 
     function returnResult(key, request, bodyData) {
-        var parameters = getParameters(key, request.url.split('?'), request.headers);
+        var parameters = helper.getParameters(key, request);
 
         return new Promise(function (resolve) {
             var apiFn = typeof returnData[key].js === 'function' ? returnData[key].js(JSON.parse(JSON.stringify(returnData[key].data || defaultReturn)), parameters, bodyData, request) : returnData[key].data;
@@ -180,39 +180,6 @@ module.exports = (function () {
             } catch (e) {
                 return configStr;
             }
-        }
-
-
-
-        /**
-         * 解析url获取参数
-         * @param {*} key 
-         * @param {*} urlAndParms 
-         * @param {*} headers 
-         */
-        function getParameters(key, urlAndParms, headers) {
-            var parameters = {
-                test: headers.test
-            };
-
-            var keys = key.split('?')[0].replace(/\[.*\]/, '').split('/').filter(function (i) {
-                return !!i;
-            });
-            var urls = urlAndParms[0].split('/').filter(function (i) {
-                return !!i;
-            });
-
-            if (urlAndParms[1]) {
-                urlAndParms[1].split('&').forEach(function (str) {
-                    parameters[str.split('=')[0]] = decodeURIComponent(str.split('=')[1]);
-                });
-            }
-            for (var i = 0; i < keys.length; i++) {
-                if (/:.*/.test(keys[i])) {
-                    parameters[keys[i].replace(':', '')] = urls[i];
-                }
-            }
-            return Object.assign(parameters, headers);
         }
     }
 
