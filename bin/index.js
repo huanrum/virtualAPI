@@ -17,6 +17,7 @@ var api = require('./api');
 var random = require('./random');
 var permission = require('./permission');
 var framework = require('./framework');
+var debugFn = require("./debug");
 var log = require('./log');
 
 
@@ -42,7 +43,7 @@ var createServer = function (options) {
                     }
                      //测试API
                     else if (/^\/*debug\/+/.test(request.url)) {
-                        log(request,response,'debug');
+                        debugFn(request,response);
                     }
                     else if (/^\/*log\/+/.test(request.url)) {
                         log(request,response);

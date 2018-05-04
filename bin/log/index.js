@@ -22,7 +22,7 @@ module.exports = (function log() {
                         response.end(fs.readFileSync(baseDir + '/' + parameters.filename).toString());
                     }else{
                         response.writeHead(404, { 'Content-Type': 'text/html;charset=utf-8' });
-                        response.end(fs.readdirSync(baseDir).map(i=>'<div><a href="file" target="_blank">file<a></div>'.replace(/file/g,i)).join(''));
+                        response.end(fs.readdirSync(baseDir).map(i=>'<div style="text-align: center;"><a href="file" target="_blank">file</a></div>'.replace(/file/g,i)).join(''));
                     }
                 }
             });

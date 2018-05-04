@@ -12,6 +12,14 @@
 <body>
     <!--html>base.html</html-->
     <script>
+
+        var helpers = [
+            '[帮助]bin/helper/index.html',
+            '[自动生成数据测试]bin/random/index.html',
+            '[web视图]/views/',
+            '[命令行]/bin/action/index.html',
+            '[日志]/log/'
+        ];
         
         var header = document.createElement('div');
         var info = document.createElement('span');
@@ -31,7 +39,7 @@
             })
         };
 
-        ['[帮助]bin/helper/index.html','[自动生成数据测试]bin/random/index.html','[web视图]/views/','[命令行]/bin/action/index.html'].forEach(function(url){
+        helpers.forEach(function(url){
             var tb = document.createElement('span');
             tb.innerHTML = ' - <a class="helper">'+/\[(.*)\]/.exec(url)[1]+'</a>';
             tb.onclick = function () {

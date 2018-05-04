@@ -3,7 +3,6 @@ var path = require('path');
 
 var helper = require('./../helper');
 var random = require("./../random");
-var debugFn = require("./../debug");
 
 var log = require("./../log");
 
@@ -152,7 +151,6 @@ module.exports = (function () {
         });
 
         function done(configStr) {
-            debugFn(request, parameters, bodyData, returnData[key].data, log);
             if (typeof (returnData[key] && returnData[key].js) === 'function') {
                 console.log('\x1B[38m', 'use localhost api :' + key);
             } else {
