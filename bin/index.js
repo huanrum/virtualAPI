@@ -19,6 +19,7 @@ var permission = require('./permission');
 var framework = require('./framework');
 var debugFn = require("./debug");
 var log = require('./log');
+var jsonp = require('./jsonp');
 
 
 var createServer = function (options) {
@@ -74,6 +75,9 @@ var createServer = function (options) {
                     //用于处理其他域名下的API请求
                     else if (/^\/*proxy\/*/i.test(request.url)) {
                         proxy(request, response);
+                    }
+                    else if (/^\/*jsonp\/*/.test(request.url)) {
+                        jsonp(request,response);
                     }
                     //对请求的数据处理后再返回
                     else if (/^\/*random/.test(request.url)) {

@@ -65,10 +65,10 @@
         var urlParm = Object.keys(el_data).map(function (key) {
             return key + '=' + encodeURIComponent(el_data[key]);
         }).join('&');
-        var urlFull = url + (urlParm ? ('?' + urlParm) : '');
+        var urlFull = encodeURIComponent(location.origin + '/' + url + (urlParm ? ('?' + urlParm) : '')); 
         return new Promise(function (resolve) {
             var jsonp = document.createElement('script');
-            jsonp.src = urlFull + (/\?/.test(urlFull) ? ('&callback=httpjsonp[' + callback + ']') : ('?callback=httpjsonp[' + callback + ']'));
+            jsonp.src = 'jsonp?url=' +    urlFull + '&callback=httpjsonp[' + callback + ']';
             httpjsonp[callback] = function (req) {
                 delete httpjsonp[callback];
                 resolve.apply(resolve, arguments);
