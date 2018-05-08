@@ -20,10 +20,7 @@ module.exports = (function () {
             if (!promises.length) {
                 var api = path.join(request.headers.api).replace(':\\', '://').replace(/\\/g, '/');
                 var options = {
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        "Content-Length": bodyData.length
-                    },
+                    headers: request.headers,
                     method: request.method,
                     host: api.split('//')[1].split(/(:|\/)/).shift(),
                     port: parseInt(api.split(':')[2] || 80),

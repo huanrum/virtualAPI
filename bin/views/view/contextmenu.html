@@ -8,6 +8,10 @@
         window.close();
     };
 
+    if(window.$data.publish){
+        setting.parentNode.removeChild(setting);
+    }
+
     setting.oncontextmenu = function(e){
         window.createContextmenu(e,['open[打开文件(夹)]','editor[打开编辑器]'].map(i=>({
                 name:/\[(.*)\]/.test(i)?/\[(.*)\]/.exec(i)[1]:i,

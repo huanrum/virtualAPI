@@ -83,9 +83,11 @@ module.exports = (function () {
     }
 
     function views(options,request, response, _path) {
+        var host = request.headers.host;
         return new Promise(succ => {
             var htmlPath = helper.config(__dirname + '/../../service/' + _path.replace('/views', '') + '/views/index.html');
-            var replace = `${options.ip}:${options.port}/${_path}`;
+            var publish = !/^[\d\\.]+(:\d+)?$/.test(request.headers.host);
+            var replace = request.headers.host + `/${_path}`;
             var addToolbar = fs.existsSync(htmlPath) ? fs.readFileSync(htmlPath).toString() : '';
             var divPath = helper.config(basePath + _path || basePath);
             var dirs = {}, menus = [], branch = helper.branch(divPath);
@@ -107,7 +109,7 @@ module.exports = (function () {
             }
 
             succ(helper.repalceContent(__dirname + '/view/' ,fs.readFileSync(__dirname + '/index.html', 'utf-8').toString(),{
-                _path: _path, dirs: dirs, replace: replace, options: options, branch: branch, netSegment:netSegment, menus:menus
+                publish: publish, _path: _path, dirs: dirs, replace: replace, options: options, branch: branch, netSegment:netSegment, menus:menus
             })
             .replace(/<title>.*<\/title>/,`<title>${hump(_path.replace(/\/*views\/*/,''))||'Views'}<\/title>`)
             .replace('/*addToolbar:(function(){})();*/', addToolbar.replace(/<\/?script>/gi, '')));
@@ -152,7 +154,7 @@ module.exports = (function () {
                 }
 
                 filterConfigs.forEach(cfn => {
-                    content = cfn.fn(file, content, merge, debug, request.url.split('?')[1]||'');
+                    content = cfn.fn(file, content, merge, debug, request);
                 });
 
                 if(debug){

@@ -28,7 +28,7 @@
         var list = document.getElementById('list');
         var toolbars = document.getElementById('toolbar');
 
-        if (window.$data.netSegment) {
+        if (window.$data.netSegment && !window.$data.publish) {
             ['远程', '推送'].forEach(function (val, index) {
                 var toolbar = document.createElement('div');
                 toolbar.innerHTML = '打开' + val + '调试';
@@ -42,8 +42,9 @@
                 };
             });
         }
-
-        /*addToolbar:(function(){})();*/
+        if(!window.$data.publish){
+            /*addToolbar:(function(){})();*/
+        }
 
         Object.keys(dirs).sort(function (a, b) { return a.toLocaleLowerCase() > b.toLocaleLowerCase() ? 1 : -1 }).forEach(function (_dir) {
             var version = dirs[_dir];
@@ -86,7 +87,7 @@
                 e.preventDefault();
             };
 
-            if (pack) {
+            if (!window.$data.publish && pack) {
                 action.title = JSON.stringify(version, null, 4);
                 action.innerHTML = '<strong>' + pack + '</strong>打包 <i>' + times(version.mtime) + '</i>';
                 action.style.background = Object.keys(version).length > 1 ? '#9f9f9f' : '';
@@ -97,7 +98,7 @@
                         dirs[_dir] = new Date();
                     });
                 };
-            } else if (Object.keys(dirs).some(function (i) { return /\[.+\]/.test(i) })) {
+            } else if (!window.$data.publish && Object.keys(dirs).some(function (i) { return /\[.+\]/.test(i) })) {
                 action.innerHTML = '不需要打包';
                 action.style.borderColor = '#f3f3f3';
                 action.style.background = '#f3f3f3';
