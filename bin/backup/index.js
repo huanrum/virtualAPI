@@ -15,15 +15,19 @@ module.exports = (function () {
      * @param {*} url 
      * @param {*} value 
      */
-    function base(url, value) {
+    function base(method, url, value) {
         var key = url.split('?').shift().replace(/https?:\/{2}((?!\/).)*/, '');
-        var file = __dirname + '/../../backup/' + key + '.json';
+        var file = __dirname + '/../../backup/' + key + '/' + (method||'ALL') + '.json';
 
         helper.mkdirs(file.replace(/\/+((?!\/).)*$/, ''));
         try {
             if (!value) {
                 console.log('\x1B[34m','use backup : ' + key);
-                return helper.readFile(file);
+                if(fs.existsSync(file)){
+                    return helper.readFile(file);
+                }else{
+                    return helper.readFile(file.replace(`${method}.json`,'ALL.json'));
+                }
             } else {
                 var data = JSON.parse(value);
                 if (data.status == 'success') {

@@ -12,7 +12,7 @@ build
 start.sh
 node_modules/
 service/
-backup/
+backup*/
 cache/
 images/
 data/

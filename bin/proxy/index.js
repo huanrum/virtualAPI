@@ -35,7 +35,7 @@ module.exports = (function () {
                                 helper.getResponse(rsp).then(responseText => {
                                     response.writeHead(rsp.statusCode, rsp.headers);
                                     response.end(responseText);
-                                    backup.base(options.path, responseText.toString());
+                                    backup.base(request.method,options.path, responseText.toString());
                                 });
                             } else {
                                 response.setHeader("Content-Type", 'text/plain;charset=utf-8');
@@ -59,7 +59,7 @@ module.exports = (function () {
                         post_req.end();
                     } else {
                         response.setHeader("Content-Type", 'text/plain;charset=utf-8');
-                        response.end(backup.base(options.path));
+                        response.end(backup.base(request.method,options.path));
                     }
                 });
             }
