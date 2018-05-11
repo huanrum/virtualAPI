@@ -17,6 +17,7 @@
 
     if (window) {
         chaceData.files = [];
+        chaceData.data.$resource = {};
         chaceData.menu = document.createElement('div');
         chaceData.content = document.createElement('div');
         chaceData.menu.className = 'ehuanrum-menu';
@@ -27,6 +28,7 @@
                 active = null,
                 history = [],
                 paths = location.hash.replace('#', '').split('/');
+
             loadFile(chaceData.files).then(function () {
                 binding(document.body, window);
                 binding(chaceData.menu, window);
@@ -117,7 +119,14 @@
                             style.onload = resolve;
                             document.head.appendChild(style);
                         } else {
-                            resolve();
+                            fetch(url).then(function(response){
+                                return response.text();
+                            }).then(function(data){
+                                chaceData.data.$resource[url] = data;
+                                resolve();
+                            }).catch(function(){
+                                resolve();
+                            });
                         }
                     });
                 }
@@ -173,7 +182,7 @@
             return;
         }
 
-        if (/\.js$/.test(field)||/\.css$/.test(field)||/^https?:\/\//.test(field)) {
+        if (/\.(js|css|html)$/.test(field)||/^https?:\/\//.test(field)) {
             chaceData.files.push(field);
             return ;
         } 
@@ -444,7 +453,7 @@
     function $value($obj, $field, $value) {
         if (!/^[0-9a-zA-Z\._$@]*$/.test($field)) {
             //计算表达式
-            return _eval($obj, $field.replace(/\s+/mg, ' '), valuer);
+            return _eval($obj, $field.replace(/\s+/mg, ' '), $value);
         } else {
             //取值
             return valuer($obj, $field, $value);
@@ -853,6 +862,7 @@
             } else {
                 _descriptorFileds(data, value, applyElement);
                 data.$eval(applyElement);
+                duplex();
             }
         }
 
@@ -914,6 +924,25 @@
             data.$eval(function () {
                 $value(element, field, $value(data, value));
             });
+            duplex();
+            Object.defineProperty(values.length ? $value(data, values.join('.')) : data, lastValue, {
+                configurable: true,
+                enumerable: descriptor.enumerable,
+                set: function (val) {
+                    $value(element, field, val);
+                    if (descriptor.set) {
+                        descriptor.set(val);
+                    } else if (descriptor.writable) {
+                        descriptor.value = val;
+                    }
+                },
+                get: function () {
+                    return _realValue((field === 'value' && element.value), (descriptor.get && descriptor.get()), descriptor.value);
+                }
+            });
+        }
+
+        function duplex(){
             if (field === 'value') {
                 element.addEventListener('keyup', function () {
                     $value(data, value, $value(element, field));
@@ -932,21 +961,6 @@
                     e.target.focus();
                 });
             }
-            Object.defineProperty(values.length ? $value(data, values.join('.')) : data, lastValue, {
-                configurable: true,
-                enumerable: descriptor.enumerable,
-                set: function (val) {
-                    $value(element, field, val);
-                    if (descriptor.set) {
-                        descriptor.set(val);
-                    } else if (descriptor.writable) {
-                        descriptor.value = val;
-                    }
-                },
-                get: function () {
-                    return _realValue((field === 'value' && element.value), (descriptor.get && descriptor.get()), descriptor.value);
-                }
-            });
         }
 
         function foreach(fields) {
@@ -1069,9 +1083,23 @@
     }
 
 
-})(this, function (_obj, _str, _valuer) {
+})(this, function (_obj, _str, _value) {
     with(_obj) {
-        return eval(_str);
+        if(_value===undefined){
+            return eval(_str);
+        }else {
+            eval(_str + '=' + getValue(_value));
+        }
+    }
+
+    function getValue(__value){
+        if(typeof __value === 'object'){
+            return JSON.stringify(__value);
+        }else if(/^\s*\d+\s*$/i.test(__value) || /^\s*(true|false|null|undefined)\s*$/i.test(__value)){
+            return __value;
+        }else {
+            return JSON.stringify(__value);
+        }
     }
 }));
 /**
