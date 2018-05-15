@@ -5,6 +5,7 @@ require('./bin')({
     kill:false,
     port:8888,
     websocket:8844 + Math.floor(Math.random()*44),
-    weinre:8800 + Math.floor(Math.random()*44)
+    weinre:8800 + Math.floor(Math.random()*44),
+    exclude:i=>/career/.test(i)
 });
 

@@ -102,7 +102,7 @@ module.exports = (function () {
 
             if (/\/views\/*$/.test(_path)) {
                 var allPath = helper.config();
-                Object.keys(allPath).forEach(function (i) {
+                Object.keys(allPath).filter(include).forEach(function (i) {
                     dirs['['+helper.packTool(allPath[i]) + ']' + i] = {};
                 });
                 menus = ['editor[打开编辑器]','pull[#更新代码]'];
@@ -114,6 +114,14 @@ module.exports = (function () {
             .replace(/<title>.*<\/title>/,`<title>${hump(_path.replace(/\/*views\/*/,''))||'Views'}<\/title>`)
             .replace('/*addToolbar:(function(){})();*/', addToolbar.replace(/<\/?script>/gi, '')));
         });
+
+        function include(w){
+            if(/^[\\d\\.]+(:\\d+)?$/.test(request.headers.host)){
+                return !options.exclude||!options.exclude(w);
+            }else{
+                return true;
+            }
+        }
 
         function exclude(d){
             return [
