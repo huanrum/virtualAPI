@@ -1,4 +1,5 @@
-require('./bin/db')({method:'PUT',url:'/db/sqlite/START_INFO',body:{name:Date.now(),info:'打开服务的时间'}});
+
+setTimeout(()=>require('./bin/db')({method:'PUT',url:'/db/sqlite/START_INFO',body:{name:Date.now(),info:'打开服务的时间'}}),2000);
 
 require('./bin')({
     debug:true,

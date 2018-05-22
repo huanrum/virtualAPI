@@ -55,7 +55,7 @@
                     var menu = paths.filter(function (i) {
                         return !!i;
                     }).join('/');
-                    go(menu ? ('/' + menu) : (defaultUrl || 'router.main'), paths.pop() || paths.pop() || 'default');
+                    go(menu ? ('/' + menu) : (defaultUrl || 'router.main'), paths.pop() || paths.pop() || 'default',chaceData.content);
                 }
                 Object.defineProperty(ehuanrum('router') || {}, 'goto', {
                     value: go
@@ -177,7 +177,7 @@
                 //如果是数组就表示要加载文件
             } else {
                 //其他的都认为是需要主动做数据双向绑定处理的，最好是DOM元素否则会报错，至于其他类型等以后再加
-                binding(field, value);
+                binding.apply(null,arguments);
             }
             return;
         }
@@ -361,7 +361,7 @@
 
             parent.addEventListener('click', function () {
                 if (location.hash !== '#' + fullHash) {
-                    go(fullHash, name);
+                    go(fullHash, name, chaceData.content);
                 }
             });
             router[fullHash] = menu;
@@ -421,7 +421,7 @@
 
             var td = data;
             fi.split('.').forEach(function (f) {
-                de(td, f.trim());
+                de(td, f.trim(),$value(td, f.trim()));
                 td = td[f] || {};
             });
         });
@@ -429,7 +429,7 @@
             fn();
         }, 500);
 
-        function de(td, tf) {
+        function de(td, tf, va) {
             var descriptor = __getOwnPropertyDescriptor(td, tf);
             Object.defineProperty(td, tf, {
                 configurable: true,
@@ -440,10 +440,12 @@
                     } else {
                         descriptor.value = val;
                     }
+                    va = val;
                     fn();
                 },
                 get: function () {
-                    return _realValue(descriptor.get && descriptor.get(), descriptor.value, $value(td.__proto__, tf));
+                    return va;
+                    //return _realValue(descriptor.get && descriptor.get(), descriptor.value, $value(td.__proto__, tf));
                 }
             });
         }
@@ -557,7 +559,7 @@
         if (typeof elements === 'string') {
             elements = createElement(elements);
             elements.forEach(function (element) {
-                (parentNode || chaceData.content).appendChild(element)
+                (parentNode || chaceData.content).appendChild(element);
             });
         }
         if (data && !(elements instanceof Array) && !(elements instanceof HTMLElement)) {
@@ -580,13 +582,14 @@
         data.$eval();
         return elements;
 
-        function _$extend(oldObject, newObject, pros) {
+        function _$extend(oldObject, newObject, pros, callback) {
             var fromPros = pros,
                 toPros = pros;
             if (!(pros instanceof Array)) {
                 fromPros = Object.keys(pros);
                 toPros = Object.values(pros);
             }
+            callback = callback || function(){};
             toPros.forEach(function (to, i) {
                 var from = fromPros[i],
                     tempData = $value(oldObject, from);
@@ -605,6 +608,7 @@
                     enumerable: true,
                     set: function (val) {
                         tempData = val;
+                        callback();
                     },
                     get: function () {
                         return tempData;
@@ -640,8 +644,8 @@
                     }
                 });
                 Object.defineProperty(data, '$extend', {
-                    value: function (newObject, pros) {
-                        return _$extend(data, newObject, pros);
+                    value: function (newObject, pros, callback) {
+                        return _$extend.apply(null,[data].concat(Array.prototype.splice.call(arguments,0)));
                     }
                 });
                 Object.defineProperty(data, '$value', {
@@ -960,7 +964,8 @@
                 $value(element, field, $value(data, value));
             } else {
                 element.addEventListener('click', function (e) {
-                    if (field !== 'value' || ['INPUT', 'SELECT', 'TEXTAREA'].indexOf(e.target.nodeName) === -1) {
+                    var regExp = /\|\s*[0-9a-zA-Z_$@]+\s*\(?\S*\)?/g;
+                    if (/^\s*[0-9a-zA-Z_$@\.\[\]]+\s*$/.test(value) && (field !== 'value' || ['INPUT', 'SELECT', 'TEXTAREA'].indexOf(e.target.nodeName) === -1)) {
                         $value(data, value, $value(element, field));
                     }
                     e.target.focus();
@@ -1054,7 +1059,7 @@
                 });
 
                 function map(obj, fn) {
-                    if (/^\d+$/.test(obj)) {
+                    if (/^\d+$/.test(obj) && typeof obj !== 'object') {
                         return Array(+obj).fill(1).map(function (v, i, list) {
                             return mapEach(i, i, i, list.length);
                         });

@@ -58,6 +58,7 @@
             list.append(item);
 
             a.innerHTML = dir;
+            a.title = '';
             a.onclick = function () {
                 window.open('http://' + window.$data.replace.replace(/\/\//g, '/') + '/' + dir);
                 fetch(location.origin + '/action/?scss=' + dir, { method: 'GET' })

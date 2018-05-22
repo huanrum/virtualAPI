@@ -126,20 +126,24 @@ module.exports = function (options) {
     console.log('\x1B[31m', '服务器启动时间 ' + new Date());
 
     if(options.kill){
-        helper.killPort(options.websocket).then(function(){
+        helper.killPort(options.port).then(function(){
             createServer(options);
         });
     }else{
         createServer(options);
     }
     
-    helper.killPort(options.websocket).then(function(){
-        websocket(options);
-    });
-
-    helper.killPort(options.weinre).then(function(){
-        weinre(options);
-    });
+    if(options.websocket){
+        helper.killPort(options.websocket).then(function(){
+            websocket(options);
+        });
+    }
+    
+    if(options.weinre){
+        helper.killPort(options.weinre).then(function(){
+            weinre(options);
+        });
+    }
 
     fs.readdirSync(__dirname + '/../service').forEach(function (item) {
         try {
