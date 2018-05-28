@@ -16,7 +16,7 @@
         var helpers = [
             '[帮助]bin/helper/index.html',
             '[自动生成数据测试]bin/random/index.html',
-            '[web视图]/views/',
+            '[web视图]<blink>/views/',
             '[命令行]/bin/action/index.html',
             '[日志]/log/'
         ];
@@ -41,9 +41,9 @@
 
         helpers.forEach(function(url){
             var tb = document.createElement('span');
-            tb.innerHTML = ' - <a class="helper">'+/\[(.*)\]/.exec(url)[1]+'</a>';
+            tb.innerHTML = ' - <a class="helper '+(/<(.*)>/.test(url)&&/<(.*)>/.exec(url)[1]) + '">'+/\[(.*)\]/.exec(url)[1]+'</a>';
             tb.onclick = function () {
-                window.open(url.replace(/\[.*\]/,''));
+                window.open(url.replace(/\[.*\]/,'').replace(/<.*>/,''));
             };
             header.appendChild(tb);;
         });

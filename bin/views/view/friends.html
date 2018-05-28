@@ -26,9 +26,9 @@
                 switch(dataMessage.action){
                     case 'login':
                         if(dataMessage.data){
-                            dataMessage.data.forEach(function(f){updateFunList[f] = addFirend(f);});
+                            dataMessage.data.forEach(function(f){updateFunList[f] = addFirend(f + '');});
                         }else if(!updateFunList[dataMessage.from]){
-                            updateFunList[dataMessage.from] = addFirend(dataMessage.from)
+                            updateFunList[dataMessage.from] = addFirend(dataMessage.from + '')
                         }else {
                             updateFunList[dataMessage.from](true);
                         }

@@ -19,30 +19,32 @@
     <div id="toolbar"></div>
     <ul id="list"></ul>
     <!--html>base.html</html-->
+    <!--html>extend.html</html-->
     <!--html>loopAction.html</html-->
     <!--html>contextmenu.html</html-->
     <!--html>friends.html</html-->
+    
     <script>
         var selectList = [], contextmenu = ['open[打开文件(夹)]'].concat(window.$data.menus);
         var dirs = window.$data.dirs;
         var list = document.getElementById('list');
         var toolbars = document.getElementById('toolbar');
 
-        if (window.$data.netSegment && !window.$data.publish) {
+        {
             ['远程', '推送'].forEach(function (val, index) {
                 var toolbar = document.createElement('div');
                 toolbar.innerHTML = '打开' + val + '调试';
                 toolbars.append(toolbar);
                 toolbar.onclick = function () {
-                    var url = 'http://' + window.$data.options.ip + ':' + window.$data.options.weinre + '/client/#anonymous';
+                    var url = 'http://' + location.hostname + ':' + window.$data.options.weinre + '/client/#anonymous';
                     if (index) {
-                        url = 'http://' + window.$data.options.ip + ':' + window.$data.options.port + '/bin/websocket/index.html?' + window.$data._path;
+                        url = 'http://' + location.hostname + ':' + window.$data.options.port + '/bin/websocket/index.html?' + window.$data._path;
                     }
                     window.open(url);
                 };
             });
         }
-        if(!window.$data.publish){
+        if(!window.$data.publish || window.$data.netSegment){
             /*addToolbar:(function(){})();*/
         }
 
@@ -88,7 +90,7 @@
                 e.preventDefault();
             };
 
-            if (!window.$data.publish && pack) {
+            if ((!window.$data.publish || window.$data.netSegment) && pack) {
                 action.title = JSON.stringify(version, null, 4);
                 action.innerHTML = '<strong>' + pack + '</strong>打包 <i>' + times(version.mtime) + '</i>';
                 action.style.background = Object.keys(version).length > 1 ? '#9f9f9f' : '';
@@ -99,7 +101,7 @@
                         dirs[_dir] = new Date();
                     });
                 };
-            } else if (!window.$data.publish && Object.keys(dirs).some(function (i) { return /\[.+\]/.test(i) })) {
+            } else if ((!window.$data.publish || window.$data.netSegment) && Object.keys(dirs).some(function (i) { return /\[.+\]/.test(i) })) {
                 action.innerHTML = '不需要打包';
                 action.style.borderColor = '#f3f3f3';
                 action.style.background = '#f3f3f3';

@@ -28,7 +28,7 @@ module.exports = {
      */
     localhost: function (request) {
         var clientIp = this.getClientIp(request).replace(/::(ffff:)?/, '');
-        return [this.netInfo().address, '127.0.0.1', '1'].indexOf(clientIp) !== -1;
+        return clientIp==='1' || /^(172|168|10)/.test(clientIp);
     },
     /**
      * 获取参数

@@ -86,12 +86,12 @@ module.exports = (function () {
         var host = request.headers.host;
         return new Promise(succ => {
             var htmlPath = helper.config(__dirname + '/../../service/' + _path.replace('/views', '') + '/views/index.html');
-            var publish = !/^[\d\\.]+(:\d+)?$/.test(request.headers.host);
+            var publish = !/^(10|127|192)\./.test(request.headers.host);
             var replace = request.headers.host + `/${_path}`;
             var addToolbar = fs.existsSync(htmlPath) ? fs.readFileSync(htmlPath).toString() : '';
             var divPath = helper.config(basePath + _path || basePath);
             var dirs = {}, menus = [], branch = helper.branch(divPath);
-            var netSegment = helper.net(request) || helper.localhost(request);
+            var netSegment = helper.getRequestParameter(request).netSegment;
 
             fs.readdirSync(divPath).forEach(function (i) {
                 if(!exclude(i)){
