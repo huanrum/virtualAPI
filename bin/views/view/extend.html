@@ -1,0 +1,14 @@
+<script>
+    (function () {
+        var _fetch = window.fetch;
+        window.fetch = function (url, option, other) {
+            option = option || {};
+            if (localStorage['[seto-views]/netSegment']) {
+                option.headers = Object.assign(option.headers || {}, {
+                    netSegment: localStorage['[seto-views]/netSegment']
+                });
+            }
+            return _fetch(url, option, other);
+        };
+    })();
+</script>

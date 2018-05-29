@@ -30,6 +30,16 @@
         var list = document.getElementById('list');
         var toolbars = document.getElementById('toolbar');
 
+        if(window.$data.preview&&window.$data.preview.length){
+            window.$data.preview = window.$data.preview.map(function(i){
+                if(/^\/.*\/$/.test(i)){
+                    return new RegExp(i.slice(1,i.lastIndexOf('/')),i.split('/').pop());
+                }else{
+                    return new RegExp('^'+i+'$','i')
+                }
+            });
+        }
+
         {
             ['远程', '推送'].forEach(function (val, index) {
                 var toolbar = document.createElement('div');
@@ -62,8 +72,12 @@
             a.innerHTML = dir;
             a.title = '';
             a.onclick = function () {
-                window.open('http://' + window.$data.replace.replace(/\/\//g, '/') + '/' + dir);
-                fetch(location.origin + '/action/?scss=' + dir, { method: 'GET' })
+                if(window.$data.preview.filter(function (i) {return i === dir.split('.').pop() || (i.test && i.test(dir));}).length){
+                    window.open('http://' + window.$data.replace.replace(/\/\//g, '/') + '/' + dir + '?preview=true');
+                }else{
+                    window.open('http://' + window.$data.replace.replace(/\/\//g, '/') + '/' + dir);
+                    fetch(location.origin + '/action/?scss=' + dir, { method: 'GET' })
+                }
             };
 
             action.oncontextmenu = function(e){

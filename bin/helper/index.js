@@ -5,12 +5,13 @@ var file = require('./file');
 var net = require('./net');
 var ftp = require('./ftp');
 var resource = require('./resource');
+var resolver = require('./resolver');
 var config = require('./config');
 var error = require('./error');
 
 function Helper(){}
 
-module.exports = Object.assign(new Helper(),file,net,ftp,resource,config,error,{
+module.exports = Object.assign(new Helper(),file,net,ftp,resource,config,error,resolver,{
     /**
      * 获取对应的依赖包，若没有就安装
      * @param {*配置} option 

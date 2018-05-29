@@ -36,7 +36,7 @@ module.exports = (function () {
     }
 
     function view(options, request, response) {
-        var onlyUrl = request.url.split('?').shift();
+        var onlyUrl = decodeURIComponent(request.url.split('?').shift());
         var type = onlyUrl.split('.').slice(1).pop() || 'html';
         var file = helper.config(basePath + onlyUrl);
         
@@ -52,8 +52,13 @@ module.exports = (function () {
                     views(options, request, response, onlyUrl).then(content => response.end(content));
                 }
             } else {
-                response.setHeader("Content-Type", helper.type(type) || 'text/plain;charset=utf-8');
-                transverter(options, request, response, file).then(content => response.end(content));
+                if(helper.getRequestParameter(request).preview){
+                    response.setHeader('Content-Type', 'text/html;charset=utf-8');
+                    transverter(options, request, response, file, true).then(content => response.end(content));
+                }else{
+                    response.setHeader("Content-Type", helper.type(type) || 'text/plain;charset=utf-8');
+                    transverter(options, request, response, file).then(content => response.end(content));
+                }
             }
         } else {
             var webBaseUrl = new RegExp('https?:\/\/'+request.headers.host.replace(/\./g,'\\.'));
@@ -92,6 +97,7 @@ module.exports = (function () {
             var divPath = helper.config(basePath + _path || basePath);
             var dirs = {}, menus = [], branch = helper.branch(divPath);
             var netSegment = helper.getRequestParameter(request).netSegment;
+            var preview = helper.resolver().map(i=>i.toString());
 
             fs.readdirSync(divPath).forEach(function (i) {
                 if(!exclude(i)){
@@ -109,7 +115,7 @@ module.exports = (function () {
             }
 
             succ(helper.repalceContent(__dirname + '/view/' ,fs.readFileSync(__dirname + '/index.html', 'utf-8').toString(),{
-                publish: publish, _path: _path, dirs: dirs, replace: replace, options: options, branch: branch, netSegment:netSegment, menus:menus
+                publish: publish, _path: _path, dirs: dirs, replace: replace, options: options, branch: branch, netSegment:netSegment, menus:menus, preview:preview
             })
             .replace(/<title>.*<\/title>/,`<title>${hump(_path.replace(/\/*views\/*/,''))||'Views'}<\/title>`)
             .replace('/*addToolbar:(function(){})();*/', addToolbar.replace(/<\/?script>/gi, '')));
@@ -137,7 +143,7 @@ module.exports = (function () {
     }
 
 
-    function transverter(options, request, response, file) {
+    function transverter(options, request, response, file, preview) {
 
         var filterConfigs = findConfig(file,cfn=>cfn.fn);
         var getParm = name => request.url.split('?').pop().split('&').filter(i=>i.split('=')[0].toLocaleLowerCase()===name.toLocaleLowerCase()).pop();
@@ -173,13 +179,17 @@ module.exports = (function () {
                 }
 
                 data = new Buffer(content.toString());
+                succ(data);
             } else if (merge && fs.existsSync(file.replace(/\.js.*/, '')) || filterConfigs.some(cfn => cfn.files.some(i => path.join(cfn.path + '/' + i).toLocaleLowerCase() === path.join(file).toLocaleLowerCase()))) {
                 data = new Buffer(helper.readAllJSContent(data.toString(), file.replace(/\.js.*/, ''),f=>filterConfigs.some(cfn=>cfn.exclude&&cfn.exclude.test(f))));
+                succ(data);
+            } else {
+                if(preview){
+                    helper.resolver(file).then(succ);
+                } else {
+                    succ(data);
+                }
             }
-
-            
-
-            succ(data);
         });
 
 
