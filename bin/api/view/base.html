@@ -98,7 +98,7 @@
                 });
             } else {
                 var formData = el_data;
-                if (Object.keys(el_data).filter(i => el_data[i] instanceof Blob).length) {
+                if (Object.keys(el_data).filter(function(i){return el_data[i] instanceof Blob;}).length) {
                     var formData = new FormData();
                     Object.keys(el_data).forEach(function (k) {
                         if (el_data[k]) {
@@ -207,7 +207,7 @@
             function match(parms, enumerable) {
                 if (parms) {
                     parms.forEach(function (key_type) {
-                        var kts = key_type.split(':').filter(i => !!i);
+                        var kts = key_type.split(':').filter(function(i){return !!i;});
                         if (/:(null|false|true|undefined|\d+)/.test(key_type)) {
                             return;
                         }

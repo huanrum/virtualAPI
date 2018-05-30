@@ -18,6 +18,7 @@
     </div>
     <div id="toolbar"></div>
     <ul id="list"></ul>
+    <!--html>/../../compatible/native.html</html-->
     <!--html>base.html</html-->
     <!--html>extend.html</html-->
     <!--html>loopAction.html</html-->
@@ -44,7 +45,7 @@
             ['远程', '推送'].forEach(function (val, index) {
                 var toolbar = document.createElement('div');
                 toolbar.innerHTML = '打开' + val + '调试';
-                toolbars.append(toolbar);
+                toolbars.appendChild(toolbar);
                 toolbar.onclick = function () {
                     var url = 'http://' + location.hostname + ':' + window.$data.options.weinre + '/client/#anonymous';
                     if (index) {
@@ -65,9 +66,9 @@
             var item = document.createElement('li');
             var action = document.createElement('div');
             var a = document.createElement('a');
-            item.append(action);
-            item.append(a);
-            list.append(item);
+            item.appendChild(action);
+            item.appendChild(a);
+            list.appendChild(item);
 
             a.innerHTML = dir;
             a.title = '';
@@ -81,13 +82,13 @@
             };
 
             action.oncontextmenu = function(e){
-                window.createContextmenu(e,contextmenu.map(i=>({
+                window.createContextmenu(e,contextmenu.map(function(i){return {
                     name:/\[(.*)\]/.test(i)?/\[(.*)\]/.exec(i)[1]:i,
-                    fn:()=>{
+                    fn:function(){
                         fetch(location.origin + '/action/?contextmenu[' + i.replace(/\[.*\]/m,'').toLocaleLowerCase() + ']=' + dir, { method: 'GET' }).then(function(i){return i.json();}).then(function(id){
 
                             if(/@/.test(i)){
-                                setTimeout(()=>window.location.reload(),500);
+                                setTimeout(function(){window.location.reload();},500);
                             }
 
                             if(/#/.test(i) && /^\d+$/.test(id)){
@@ -100,15 +101,15 @@
 
                         });
                     }
-                })));
+                };}));
                 e.preventDefault();
             };
 
             if ((!window.$data.publish || window.$data.netSegment) && pack) {
                 action.title = JSON.stringify(version, null, 4);
                 action.innerHTML = '<strong>' + pack + '</strong>打包 <i>' + times(version.mtime) + '</i>';
-                action.style.background = Object.keys(version).length > 1 ? '#9f9f9f' : '';
-                action.style.color = '#' + (new Date(10000).setDate(Array.prototype.reduce.call(pack, (acc, val) => acc + val.charCodeAt(), 999999))).toString(16).slice(-8, -2);
+                action.style.background = Object.keys(version||{}).length > 1 ? '#9f9f9f' : '';
+                action.style.color = '#' + (new Date(10000).setDate(Array.prototype.reduce.call(pack, function(acc, val){return acc + val.charCodeAt();}, 999999))).toString(16).slice(-8, -2);
 
                 action.onclick = function () {
                     runBuild('<strong>' + pack + '</strong>打包 ','<strong>' + pack + '</strong>打包 ',pack.toLocaleLowerCase() + '=' + dir,action,action,null,function () {

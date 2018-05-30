@@ -113,7 +113,12 @@ var createServer = function (options) {
     // 终端打印如下信息
     console.log('\x1B[32m', 'Server running at http://' + options.ip + ':' + options.port + '/');
 
-    //child_process.exec('start http://' + options.ip + ':' + options.port + '/');
+    //非8888端口的需要直接打开web页面;
+    setTimeout(function(){
+        if(process.argv[2]){
+            child_process.exec('start http://' + options.ip + ':' + options.port + '/');
+        }
+    },2000);
 };
 
 

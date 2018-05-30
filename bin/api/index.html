@@ -10,6 +10,7 @@
 </head>
 
 <body>
+    <!--html>/../../compatible/native.html</html-->
     <!--html>base.html</html-->
     <script>
 
@@ -57,7 +58,7 @@
         };
         var groups = {};
         window.$data.forEach(function (item) {
-            var groupKey = item.file.split(/[\/\\]/).filter(i => !!i)[1];
+            var groupKey = item.file.split(/[\/\\]/).filter(function(i){return !!i;})[1];
             groups[groupKey] = (groups[groupKey] || []).concat([item]);
         });
 
@@ -80,7 +81,7 @@
                     charCount = charCount + i.charCodeAt();
                 });
                 fieldset.className = 'config-group';
-                legend.innerHTML = item.file.split(/[\/\\]/).filter(i => !!i).pop();
+                legend.innerHTML = item.file.split(/[\/\\]/).filter(function(i){return !!i;}).pop();
                 legend.style.color = '#' + new Date(10000).setYear(charCount).toString(16).slice(-8, -2);
                 Object.keys(item.config).forEach(function (key) {
                     content.appendChild(createItem(key.match(/^\[(.*)\]/), key, item.config[key], item.file ===

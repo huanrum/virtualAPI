@@ -21,15 +21,15 @@
         }).then(function (data) {
             data = data || [];
             if (msEl) {
-                data.forEach(i => {
+                data.forEach(function(i){
                     var li = document.createElement('li');
                     li.innerHTML = /^!!/.test(i) ? '' : i;
                     msEl.appendChild(li);
                 });
             }
-            if (!data.filter(i => /^!!/.test(i)).length) {
+            if (!data.filter(function(i){return /^!!/.test(i);}).length) {
                 if(timeout>0){
-                    setTimeout(() => runMessage(id, msEl, callBack, timeout-500), 500);
+                    setTimeout(function(i){runMessage(id, msEl, callBack, timeout-500);}, 500);
                 }else{
                     setTimeout(showDialog('警告','服务器超时'),2000);
                 }

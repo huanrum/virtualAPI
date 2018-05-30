@@ -6,7 +6,7 @@
         friends.className = 'friends';
         document.body.appendChild(friends);
 
-        fetch('/websocket?ip=' + location.hostname).then(function (req) { return req.json(); }).then(req => {
+        fetch('/websocket?ip=' + location.hostname).then(function (req) { return req.json(); }).then(function(req){
             var ws = new WebSocket(req.message);
             wsSendMessage = function(to,data){
                 ws.send(JSON.stringify({
@@ -16,7 +16,7 @@
                 }));
             };
             ws.onopen = function (e) {
-                fetch('/random',{method:'POST',body:JSON.stringify({name:"[(@)1]([now])"})}).then(function (req) { return req.json(); }).then(req => {
+                fetch('/random',{method:'POST',body:JSON.stringify({name:"[(@)1]([now])"})}).then(function (req) { return req.json(); }).then(function(req){
                     friends.innerHTML = '<div class="self-name">'+req.name.replace(/\(.*\)/,'')+'</div>';
                     ws.send(JSON.stringify({ data:  req.name, action: 'login' }));
                 });

@@ -13,16 +13,16 @@
     }
 
     setting.oncontextmenu = function(e){
-        window.createContextmenu(e,['open[打开文件(夹)]','editor[打开编辑器]'].map(i=>({
+        window.createContextmenu(e,['open[打开文件(夹)]','editor[打开编辑器]'].map(function(i){return {
                 name:/\[(.*)\]/.test(i)?/\[(.*)\]/.exec(i)[1]:i,
-                fn:()=>{
+                fn:function(){
                     fetch(location.origin + '/action/?contextmenu[' + i.replace(/\[.*\]/m,'').toLocaleLowerCase() + ']=', { method: 'GET' }).then(function(i){return i.json();}).then(function(id){
                         if(/@/.test(i)){
-                            setTimeout(()=>window.location.reload(),500);
+                            setTimeout(function(){window.location.reload();},500);
                           }
                     });
                 }
-            })));
+            };}));
             e.preventDefault();
         };
 
@@ -40,7 +40,7 @@
         window.createContextmenu = function(e,menus){
             contextmenu.innerHTML = '';
             document.body.appendChild(contextmenu);
-            menus.forEach(menu=>{
+            menus.forEach(function(menu){
                 var menuitem = document.createElement('li');
                 menuitem.innerHTML = menu.name;
                 menuitem.onclick = menu.fn || menu;
