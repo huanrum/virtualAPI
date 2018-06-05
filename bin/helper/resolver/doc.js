@@ -31,6 +31,19 @@ module.exports = function (helper, file) {
             });
 
             //下载
+            contentXml = contentXml.replace(/<body((?!>).)*>/, function (str) {
+                return `
+                <head>
+                    <title>${path.basename(file)}</title>
+                </head>
+                `+ str + `
+                <div style="text-align: center;font-weight: 600;color: #00aaef;font-size: 26px;">
+                    文档解析成html有变形，请下载查看！
+                </div>
+                <script>
+
+                </script>`;
+            });
             contentXml = contentXml.replace(/<\/body>/, function (str) {
                 return `
                     <style>
