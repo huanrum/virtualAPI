@@ -7,7 +7,7 @@ module.exports = (function () {
 
     manage(/\.(doc|docx)$/, doc);
 
-    return {resolver:manage};
+    return manage;
 
     function manage(regular, resolver) {
         if(!regular){

@@ -9,6 +9,7 @@ module.exports = (function () {
     var configs = [];
     var basePath = __dirname.replace('\\bin\\views', '\/').replace('/bin/views', '\/');
 
+    //外部配置web站点的物理地址
     view.config = function (web,fn) {
         if (fn instanceof Array) {
             fn.forEach(i => view.config(web,i));
@@ -30,19 +31,21 @@ module.exports = (function () {
 
     return view;
 
+    //根据文件找到web对应的配置
     function findConfig(file,filetr){
         return configs.filter(cfn => cfn.path && filetr(cfn) && path.join(file).toLocaleLowerCase().indexOf(path.join(cfn.path).toLocaleLowerCase()) !== -1);
         
     }
 
+    //控制url对应的显示
     function view(options, request, response) {
         var onlyUrl = decodeURIComponent(request.url.split('?').shift());
         var type = onlyUrl.split('.').slice(1).pop() || 'html';
         var file = helper.config(basePath + onlyUrl);
         
-
         if (fs.existsSync(file)) {
             if (fs.statSync(file).isDirectory()) {
+                //默认主页存在就重定向否则显示列表
                 if(redirect(file)){
                     var params = request.url.split('?')[1] || '';
                     response.writeHead(302, { 'Location': onlyUrl + '/' + redirect(file) + (params ? '?' : '') + params });
@@ -87,6 +90,7 @@ module.exports = (function () {
         return '';
     }
 
+    //文件列表
     function views(options,request, response, _path) {
         var host = request.headers.host;
         return new Promise(succ => {
@@ -142,13 +146,13 @@ module.exports = (function () {
         }
     }
 
-
+    //读取文件
     function transverter(options, request, response, file, preview) {
 
         var filterConfigs = findConfig(file,cfn=>cfn.fn);
         var getParm = name => request.url.split('?').pop().split('&').filter(i=>i.split('=')[0].toLocaleLowerCase()===name.toLocaleLowerCase()).pop();
         return new Promise(succ => {
-            var merge = getParm('merge'),debug = getParm('debug') || options.debug;
+            var merge = getParm('merge'), debug = getParm('debug') || options.debug, simulator = helper.getRequestParameter(request).simulator;
             var title = path.basename(file.replace('index.html', '')).replace(/\b\w+\b/g, word=>word.substring(0,1).toUpperCase()+word.substring(1));
             var data = fs.readFileSync(file.replace(/\/\//g, '/'));
             if (/(\/|\\)(index|default)\.html/.test(file)) {
@@ -170,6 +174,12 @@ module.exports = (function () {
                 filterConfigs.forEach(cfn => {
                     content = cfn.fn(file, content, merge, debug, request);
                 });
+
+                if(simulator){
+                    content = content.replace(/<body((?!>).)*>/, function (str) {
+                        return str + helper.simulator(simulator);
+                    });
+                }
 
                 if(debug){
                     var commandHost = 'http://' + request.headers.host + '/';

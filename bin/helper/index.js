@@ -6,13 +6,17 @@ var net = require('./net');
 var http = require('./http');
 var ftp = require('./ftp');
 var resource = require('./resource');
-var resolver = require('./resolver');
 var config = require('./config');
 var error = require('./error');
+
+var resolver = require('./resolver');
+var simulator = require('./simulator');
 
 function Helper(){}
 
 module.exports = Object.assign(new Helper(),file,net,http,ftp,resource,config,error,resolver,{
+    resolver:resolver,
+    simulator:simulator,
     /**
      * 获取对应的依赖包，若没有就安装
      * @param {*配置} option 
