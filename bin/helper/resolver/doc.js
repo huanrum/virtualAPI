@@ -1,51 +1,53 @@
 var fs = require('fs');
 var path = require('path');
 
-module.exports = function (helper, file) {
-    return new Promise(succ => {
-        helper.initModule('adm-zip').then(function (AdmZip) {
-            var zip = new AdmZip(file);
-            var contentXml = zip.readAsText("word/document.xml");
+module.exports = (function () {
+    var replaces = [
+        'document->html','body->body','p->div','t->p','tbl->tabel','tr->tr','tc->td'
+    ];
+    return function (helper, file) {
+        return new Promise(succ => {
+            helper.initModule('adm-zip').then(function (AdmZip) {
+                var zip = new AdmZip(file);
+                var contentXml = zip.readAsText("word/document.xml");
 
-            
-            //标签
-            contentXml = contentXml.replace(/w:document/g, 'html');
-            contentXml = contentXml.replace(/w:body/g, 'body');
-            contentXml = contentXml.replace(/w:p/g, 'div');
-            contentXml = contentXml.replace(/w:t/g, 'p');
 
-            //图片
-            contentXml = contentXml.replace(/<wp:docPr ((?!\/).)+\/>/g, function (str) {
-                var id = /id="(\d+)"/.exec(str)[1];
-                try{
-                    return `<img src="data:image/png;base64,${Buffer(zip.readFile('word/media/image'+id+'.png')).toString('base64')}">`;
-                }catch(e){
-                    return '';
-                }
-                
-            });
+                //标签
+                replaces.forEach(function(replace){
+                    var _replace = replace.split('->');
+                    contentXml = contentXml.replace(new RegExp('w:'+_replace[0] + '((?![a-zA-Z0-9]).)+','g'), function(str){
+                        return str.replace('w:'+_replace[0],_replace[1]);
+                    });
+                });
 
-            //文本
-            contentXml = contentXml.replace(/<w:t>((?!<).)+<\/w:t>/, function (str) {
-                return str.replace(/w:t/g,'p');
-            });
 
-            //下载
-            contentXml = contentXml.replace(/<body((?!>).)*>/, function (str) {
-                return `
+                //图片
+                contentXml = contentXml.replace(/<wp:docPr ((?!\/).)+\/>/g, function (str) {
+                    var id = /id="(\d+)"/.exec(str)[1];
+                    try {
+                        return `<img src="data:image/png;base64,${Buffer(zip.readFile('word/media/image'+id+'.png')).toString('base64')}">`;
+                    } catch (e) {
+                        return '';
+                    }
+
+                });
+
+                //下载
+                contentXml = contentXml.replace(/<body((?!>).)*>/, function (str) {
+                    return `
                 <head>
                     <title>${path.basename(file)}</title>
                 </head>
-                `+ str + `
+                ` + str + `
                 <div style="text-align: center;font-weight: 600;color: #00aaef;font-size: 26px;">
                     文档解析成html有变形，请下载查看！
                 </div>
                 <script>
 
                 </script>`;
-            });
-            contentXml = contentXml.replace(/<\/body>/, function (str) {
-                return `
+                });
+                contentXml = contentXml.replace(/<\/body>/, function (str) {
+                    return `
                     <style>
                         #download {
                             position: fixed;
@@ -65,11 +67,12 @@ module.exports = function (helper, file) {
                             }
                         };
                     </script>
-                `+str;
+                ` + str;
+                });
+
+                succ(contentXml);
+
             });
-
-            succ(contentXml);
-
         });
-    });
-};
+    };
+})();

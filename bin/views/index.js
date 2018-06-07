@@ -155,7 +155,8 @@ module.exports = (function () {
             var merge = getParm('merge'), debug = getParm('debug') || options.debug, simulator = helper.getRequestParameter(request).simulator;
             var title = path.basename(file.replace('index.html', '')).replace(/\b\w+\b/g, word=>word.substring(0,1).toUpperCase()+word.substring(1));
             var data = fs.readFileSync(file.replace(/\/\//g, '/'));
-            if (/(\/|\\)(index|default)\.html/.test(file)) {
+            //启动页而非模板加载
+            if (/(\/|\\)(\S+)\.html/.test(file) && /<html>/.test(data.toString())) {
                 var weinre = options.ip + ':' + options.weinre;
                 var content = data.toString().replace(/<body((?!>).)*>/, function (str) {
                     return str + '\n\t' + (options.ip !== '127.0.0.1' && options.weinre && !helper.localhost(request)? ('<script src="http://' + weinre + '/target/target-script-min.js#anonymous"></script>') : '');
@@ -201,7 +202,6 @@ module.exports = (function () {
                 }
             }
         });
-
 
     }
 
