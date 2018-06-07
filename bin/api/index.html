@@ -15,7 +15,7 @@
     <script>
 
         var helpers = [
-            '[帮助]bin/helper/index.html',
+            '[帮助($helper)]bin/helper/index.html',
             '[自动生成数据测试]bin/random/index.html',
             '[web视图]<blink>/views/',
             '[命令行]/bin/action/index.html',
@@ -42,7 +42,8 @@
 
         helpers.forEach(function(url){
             var tb = document.createElement('span');
-            tb.innerHTML = ' - <a class="helper '+(/<(.*)>/.test(url)&&/<(.*)>/.exec(url)[1]) + '">'+/\[(.*)\]/.exec(url)[1]+'</a>';
+            tb.title = JSON.stringify(eval(/\[.*\((.*)\)\]/.exec(url) && /\[.*\((.*)\)\]/.exec(url)[1] || ''),null,4) || '';
+            tb.innerHTML = ' - <a class="helper '+(/<(.*)>/.test(url)&&/<(.*)>/.exec(url)[1]) + '">'+/\[(.*)\]/.exec(url)[1].replace(/\(.*\)/,'')+'</a>';
             tb.onclick = function () {
                 window.open(url.replace(/\[.*\]/,'').replace(/<.*>/,''));
             };

@@ -22,7 +22,9 @@ module.exports = (function () {
 
     function action(request, response) {
         var _actions = request.url.split('?')[1];
-        if (/^\d+$/.test(_actions)) {
+        if(!_actions){
+            runCMD(request).then(id => response.end(id));
+        }else if (/^\d+$/.test(_actions)) {
             response.setHeader("Content-Type", 'text/plain;charset=utf-8');
             response.end(message(_actions));
         } else {
@@ -93,6 +95,18 @@ module.exports = (function () {
             }
             messageList[id].push(ms);
         }
+    }
+
+    function runCMD(request){
+        return new Promise(function(succ){
+            helper.getBodyData(request).then(function(runData){
+                var id = Date.now() + '';
+                messageList[id] = [];
+                cmd(__dirname, ms=>messageList[id].push(ms), '', JSON.parse(runData.toString()).join(' && '));
+                succ(id);
+            });
+        });
+        
     }
 
 })();

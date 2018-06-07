@@ -124,9 +124,12 @@ module.exports = (function () {
          * 
          */
         repalceContent: function(baseDir,strContent,data){
+            var helper = {};
+            Object.keys(this).forEach(i=>helper[i]=this[i].toString().match(/(function((?!\().)*\(((?!\)).)*\))/)[1]);
             return strContent.replace(/<body((?!>).)*>/, function(str){
                 var dataStr = JSON.stringify(data, null, 4);
-                return str + '\r\n<script>\r\nwindow.$data = ' + dataStr + '\r\n</script>\r\n';
+                var helperStr = JSON.stringify(helper, null, 4);
+                return str + '\r\n<script>\r\nwindow.$helper = ' + helperStr + '\r\n</script>\r\n\r\n<script>\r\nwindow.$data = ' + dataStr + '\r\n</script>\r\n';
             })
             .replace(/<!--html>.*<\/html-->/img,function(str){
                 return fs.readFileSync(baseDir + /<!--html>(.*)<\/html-->/.exec(str)[1]).toString();
