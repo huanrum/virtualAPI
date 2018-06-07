@@ -22,7 +22,9 @@ module.exports = (function log() {
                         response.end(fs.readFileSync(baseDir + '/' + parameters.filename).toString());
                     }else{
                         response.writeHead(404, { 'Content-Type': 'text/html;charset=utf-8' });
-                        response.end(group(fs.readdirSync(baseDir),d=>`<fieldset class="group"><legend>${d}</legend>{children}</fieldset>`,f=>`<div style="text-align: center;"><a href="${f}" target="_blank">${f}</a></div>`))
+                        response.end(fs.readFileSync(__dirname + '/index.html').toString().replace(/<body((?!>).)*>/, function(str){
+                            return str + '\r\n<script>\r\nwindow.$data = ' + JSON.stringify(fs.readdirSync(baseDir),null,4) + '\r\n</script>\r\n';
+                        }));
                     }
                 }
             });
@@ -30,19 +32,6 @@ module.exports = (function log() {
             log.apply(this,arguments);
         }
     };
-
-    function group(list,groupFn,itemFn){
-        var group = {}, body = '';
-        list.forEach(function(i){
-            var day = new Date(parseInt(i)).toLocaleDateString();
-            group[day] = group[day] || [];
-            group[day].push(i);
-        });
-        Object.keys(group).forEach(function(g){
-            body += groupFn(g).replace(/{children}/gi,group[g].map(itemFn).join(''));
-        });
-        return fs.readFileSync(__dirname + '/index.html').replace();
-    }
 
     function log(){
         var size = 100 * 1024;
