@@ -49,7 +49,7 @@ module.exports = (function () {
                         response.end(JSON.stringify(res));
                     });
                 } else {
-                    bodyData = JSON.parse(JSON.stringify(bodyData).replace(/\[IP\]/gi, helper.getClientIp(request)) || '{}') || {};;
+                    bodyData = JSON.parse(JSON.stringify(bodyData).replace(/\[IP\]/gi, helper.clientIp(request)) || '{}') || {};;
                     switch (request.method) {
                         case 'GET':
                             db.sql(`select * from ${table} where ${condition}`, {}, 'all').then((res) => {

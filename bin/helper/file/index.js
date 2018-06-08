@@ -5,9 +5,6 @@ var path = require('path');
 module.exports = (function () {
 
     return {
-        webName: function(_path){
-            return _path.split('\\service\\').pop().split('\\').shift();
-        },
         /**
          * 创建路径
          */
@@ -79,61 +76,6 @@ module.exports = (function () {
                 });
             }
             return source;
-        },
-        /**
-         * multiparty/express 提交文件
-         */
-        upload: function(request,dirPath){
-            this.initModule(['multiparty','express']).then(multiparty => {
-                try{
-                    var form = new multiparty.Form();
-                    form.encoding = 'utf-8';
-                    form.uploadDir = dirPath;
-                    //设置单文件大小限制
-                    form.maxFilesSize = 2 * 1024 * 1024;
-                    
-                    form.on('error',function(e){
-                        console.log(request.url,e);
-                    });
-                    
-                    form.parse(request, function (err, fields, files) {
-                        console.log(fields);
-                    });
-                }catch(e){
-                    console.log(request.url,e);
-                }
-            });
-        },
-        /**
-         * 获取git排除条件
-         */
-        gitignore: function(filePath){
-            var gitignorePath = get(path.dirname(filePath));
-            if(!gitignorePath){
-                return false;
-            }
-            var gitignore = fs.readFileSync(gitignorePath+'/.gitignore').toString().replace(/(\\|\/)/mg,'\\\\').replace(/\./mg,'\\.').replace(/\*/mg,'\.\*').split('\r\n').filter(i=>!!i&&!/^\s*\#+/.test(i));
-            filePath = path.join(filePath)+'\\';
-            return gitignore.some(i=>new RegExp(gitignorePath.replace(/(\\|\/)/mg,'\\\\')+'\\\\'+i,'i').test(filePath));
-
-            function get(dir){
-                return fs.readdirSync(dir).some(i=>/\.gitignore/.test(i))? dir:(dir !== path.dirname(dir)&&get(path.dirname(dir)));
-            }
-        },
-        /**
-         * 
-         */
-        repalceContent: function(baseDir,strContent,data){
-            var helper = {};
-            Object.keys(this).forEach(i=>helper[i]=this[i].toString().match(/(function((?!\().)*\(((?!\)).)*\))/)[1]);
-            return strContent.replace(/<body((?!>).)*>/, function(str){
-                var dataStr = JSON.stringify(data, null, 4);
-                var helperStr = JSON.stringify(helper, null, 4);
-                return str + '\r\n<script>\r\nwindow.$helper = ' + helperStr + '\r\n</script>\r\n\r\n<script>\r\nwindow.$data = ' + dataStr + '\r\n</script>\r\n';
-            })
-            .replace(/<!--html>.*<\/html-->/img,function(str){
-                return fs.readFileSync(baseDir + /<!--html>(.*)<\/html-->/.exec(str)[1]).toString();
-            });
         }
     };
 })();

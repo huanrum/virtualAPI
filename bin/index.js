@@ -152,6 +152,7 @@ module.exports = function (options) {
 
     fs.readdirSync(__dirname + '/../service').forEach(function (item) {
         try {
+            var a = require(__dirname + '/../service/' + item);
             api.config(item,__dirname + '/../service/' + item + '/config');
             require(__dirname + '/../service/' + item)(configFn(item), helper);
         } catch (e) {

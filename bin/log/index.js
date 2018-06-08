@@ -10,11 +10,11 @@ module.exports = (function log() {
     return function (request, response, key) {
         if (request.url) {
             var keyUrl = key || 'log/:filename';
-            var parameters = helper.getParameters(keyUrl,request);
+            var parameters = helper.parameters(request,keyUrl);
             
             helper.getBodyData(request, true).then(bodyData => {
                 if(bodyData){
-                    log(new Date(), helper.getClientIp(request), request.headers['referer'], keyUrl, request.url, bodyData);
+                    log(new Date(), helper.clientIp(request), request.headers['referer'], keyUrl, request.url, bodyData);
                     response.end('{}');
                 }else{
                     if(parameters.filename){
@@ -22,9 +22,7 @@ module.exports = (function log() {
                         response.end(fs.readFileSync(baseDir + '/' + parameters.filename).toString());
                     }else{
                         response.writeHead(404, { 'Content-Type': 'text/html;charset=utf-8' });
-                        response.end(fs.readFileSync(__dirname + '/index.html').toString().replace(/<body((?!>).)*>/, function(str){
-                            return str + '\r\n<script>\r\nwindow.$data = ' + JSON.stringify(fs.readdirSync(baseDir),null,4) + '\r\n</script>\r\n';
-                        }));
+                        response.end(helper.replaceHtml(fs.readFileSync(__dirname + '/index.html').toString(),'<script>\r\nwindow.$data = ' + JSON.stringify(fs.readdirSync(baseDir),null,4) + '\r\n</script>'));
                     }
                 }
             });

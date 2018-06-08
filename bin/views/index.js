@@ -55,7 +55,7 @@ module.exports = (function () {
                     views(options, request, response, onlyUrl).then(content => response.end(content));
                 }
             } else {
-                if(helper.getRequestParameter(request).preview){
+                if(helper.parameters(request).preview){
                     response.setHeader('Content-Type', 'text/html;charset=utf-8');
                     transverter(options, request, response, file, true).then(content => response.end(content));
                 }else{
@@ -100,7 +100,7 @@ module.exports = (function () {
             var addToolbar = fs.existsSync(htmlPath) ? fs.readFileSync(htmlPath).toString() : '';
             var divPath = helper.config(basePath + _path || basePath);
             var dirs = {}, menus = [], branch = helper.branch(divPath);
-            var netSegment = helper.getRequestParameter(request).netSegment;
+            var netSegment = helper.parameters(request).netSegment;
             var preview = helper.resolver().map(i=>i.toString());
 
             fs.readdirSync(divPath).forEach(function (i) {
@@ -118,7 +118,7 @@ module.exports = (function () {
                 menus = ['editor[打开编辑器]','pull[#更新代码]'];
             }
 
-            succ(helper.repalceContent(__dirname + '/view/' ,fs.readFileSync(__dirname + '/index.html', 'utf-8').toString(),{
+            succ(helper.replaceContent(__dirname + '/view/' ,fs.readFileSync(__dirname + '/index.html', 'utf-8').toString(),{
                 publish: publish, _path: _path, dirs: dirs, replace: replace, options: options, branch: branch, netSegment:netSegment, menus:menus, preview:preview
             })
             .replace(/<title>.*<\/title>/,`<title>${hump(_path.replace(/\/*views\/*/,''))||'Views'}<\/title>`)
@@ -150,48 +150,34 @@ module.exports = (function () {
     function transverter(options, request, response, file, preview) {
 
         var filterConfigs = findConfig(file,cfn=>cfn.fn);
-        var getParm = name => request.url.split('?').pop().split('&').filter(i=>i.split('=')[0].toLocaleLowerCase()===name.toLocaleLowerCase()).pop();
         return new Promise(succ => {
-            var merge = getParm('merge'), debug = getParm('debug') || options.debug, simulator = helper.getRequestParameter(request).simulator;
-            var title = path.basename(file.replace('index.html', '')).replace(/\b\w+\b/g, word=>word.substring(0,1).toUpperCase()+word.substring(1));
+            var parameters = helper.parameters(request);
             var data = fs.readFileSync(file.replace(/\/\//g, '/'));
             //启动页而非模板加载
-            if (/(\/|\\)(\S+)\.html/.test(file) && /<html>/.test(data.toString())) {
-                var weinre = options.ip + ':' + options.weinre;
-                var content = data.toString().replace(/<body((?!>).)*>/, function (str) {
-                    return str + '\n\t' + (options.ip !== '127.0.0.1' && options.weinre && !helper.localhost(request)? ('<script src="http://' + weinre + '/target/target-script-min.js#anonymous"></script>') : '');
-                });
-
-                if(/<title>.*<\/title>/.test(content)){
-                    content = content.replace(/<title>.*<\/title>/,function(str){
-                        return '<title>' + (/<title>(.*)<\/title>/.exec(str)[1] || title) + '</title>';
-                    });
-                }else{
-                    content = content.replace(/\?\d+/g, '').replace(/<head>/, function (str) {
-                        return str + '\n\r<title>' + title + '</title>';
-                    });
+            if (/(\/|\\)(\S+)\.html/.test(file) && /<\/html>/.test(data.toString())) {
+                var content = data.toString();
+                //补充标题
+                content = helper.replaceHtml(content,path.basename(file.replace('index.html', '')).replace(/\b\w+\b/g, word=>word.substring(0,1).toUpperCase()+word.substring(1)));
+                //添加远程调试
+                if(options.ip !== '127.0.0.1' && options.weinre && !helper.localhost(request)){
+                    content = helper.replaceHtml(content,'http://' + options.ip + ':' + options.weinre + '/target/target-script-min.js#anonymous');
                 }
 
                 filterConfigs.forEach(cfn => {
-                    content = cfn.fn(file, content, merge, debug, request);
+                    content = cfn.fn(file, content, parameters.merge, parameters.debug || options.debug, request);
                 });
 
-                if(simulator){
-                    content = content.replace(/<body((?!>).)*>/, function (str) {
-                        return str + helper.simulator(simulator);
-                    });
+                if(parameters.simulator){
+                    content = helper.replaceHtml(content,helper.simulator(parameters.simulator));
                 }
 
-                if(debug){
-                    var commandHost = 'http://' + request.headers.host + '/';
-                    content = content.replace(/<\/body>/,function(src){
-                        return fs.readFileSync(__dirname + '/../debug/index.html').toString().replace('_$pack$_',helper.packTool(path.dirname(file))).replace(/\^\//mg,commandHost) + '\r\n' + src;
-                    });
+                if(parameters.debug || options.debug){
+                    content = helper.replaceHtml(content,fs.readFileSync(__dirname + '/../debug/index.html').toString().replace('_$pack$_',helper.packTool(path.dirname(file))).replace(/\^\//mg,'http://' + request.headers.host + '/'));
                 }
 
                 data = new Buffer(content.toString());
                 succ(data);
-            } else if (merge && fs.existsSync(file.replace(/\.js.*/, '')) || filterConfigs.some(cfn => cfn.files.some(i => path.join(cfn.path + '/' + i).toLocaleLowerCase() === path.join(file).toLocaleLowerCase()))) {
+            } else if (parameters.merge && fs.existsSync(file.replace(/\.js.*/, '')) || filterConfigs.some(cfn => cfn.files.some(i => path.join(cfn.path + '/' + i).toLocaleLowerCase() === path.join(file).toLocaleLowerCase()))) {
                 data = new Buffer(helper.readAllJSContent(data.toString(), file.replace(/\.js.*/, ''),f=>filterConfigs.some(cfn=>cfn.exclude&&cfn.exclude.test(f))));
                 succ(data);
             } else {

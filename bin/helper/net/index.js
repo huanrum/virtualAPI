@@ -68,27 +68,5 @@ module.exports = {
                 });
             });
         }
-    },
-    useProxy: function (request, content) {
-        if (/^[\\d\\.]+(:\\d+)?$/.test(request.headers.host)) {
-            return content;
-        } else {
-            return content.replace(/<body((?!>).)*>/, function (str) {
-                return str +
-                    `\n\t<script>
-                var XHRopen = XMLHttpRequest.prototype.open;
-                XMLHttpRequest.prototype.open = function(){
-                    if(/^https?:/.test(arguments[1]) && !(/^[\\d\\.]+(:\\d+)?$/.test(location.host))){
-                        var url =  arguments[1];
-                        arguments[1] = location.origin + '/proxy?' + (url.split('?')[1] || '');
-                        XHRopen.apply(this,arguments);
-                        this.setRequestHeader('api',url);
-                    }else{
-                        XHRopen.apply(this,arguments);
-                    }
-                };
-            </script>\n\t`;
-            });
-        }
     }
 };

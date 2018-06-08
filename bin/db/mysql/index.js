@@ -54,7 +54,7 @@ module.exports = (function () {
                         }));
                     });
                 } else {
-                    bodyData = JSON.parse(JSON.stringify(bodyData).replace(/\[IP\]/gi, helper.getClientIp(request)) || '{}') || {};;
+                    bodyData = JSON.parse(JSON.stringify(bodyData).replace(/\[IP\]/gi, helper.clientIp(request)) || '{}') || {};;
                     switch (request.method) {
                         case 'GET':
                             db.query(`select * from ${table} where ${condition}`, {}, (err, rows) => {

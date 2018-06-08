@@ -10,7 +10,7 @@ module.exports = (function () {
 
     return function (request, response) {
         var keyUrl = 'debug/:action';
-        var parameters = helper.getParameters(keyUrl, request);
+        var parameters = helper.parameters(request,keyUrl);
         helper.getBodyData(request, true).then(bodyData => {
             new Promise(function(resolve){
                 var action = Object.keys(methods).filter(i=>parameters.action&&parameters.action.toLocaleLowerCase()===i.toLocaleLowerCase()).pop();
@@ -20,7 +20,7 @@ module.exports = (function () {
                     resolve();
                 }
             }).then(function(){
-                log(new Date(), helper.getClientIp(request), request.headers['referer'], keyUrl, request.url, bodyData);
+                log(new Date(), helper.clientIp(request), request.headers['referer'], keyUrl, request.url, bodyData);
                 response.end('{}');
             });
         });

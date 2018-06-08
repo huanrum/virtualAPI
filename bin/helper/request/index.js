@@ -10,7 +10,7 @@ module.exports = {
     /**
      * 获取请求者的ip
      */
-    getClientIp: function (req) {
+    clientIp: function (req) {
         return (req.headers && req.headers['x-forwarded-for']) ||
             (req.connection && req.connection.remoteAddress) ||
             (req.socket && req.socket.remoteAddress) ||
@@ -19,38 +19,27 @@ module.exports = {
     /**
      * 客户端是否跟服务端在同一个网段
      */
-    net: function (request) {
+    network: function (request) {
         var netSegment = this.netInfo().address.split('.').slice(0, -1).join('.');
-        return this.getClientIp(request).indexOf(netSegment) !== -1;
+        return this.clientIp(request).indexOf(netSegment) !== -1;
     },
     /**
      * 是否是本机访问
      */
     localhost: function (request) {
-        var clientIp = this.getClientIp(request).replace(/::(ffff:)?/, '');
+        var clientIp = this.clientIp(request).replace(/::(ffff:)?/, '');
         return clientIp==='1' || /^(172|192|10)/.test(clientIp);
     },
     /**
-     * 获取参数
-     */
-    getRequestParameter: function (request) {
-        var parameter = {
-            clientIp: this.getClientIp(request)
-        };
-        request.url.split('?').pop().split('#').shift().split('&').forEach(kv => {
-            parameter[kv.split('=')[0]] = decodeURIComponent(kv.split('=')[1]);
-        });
-        return Object.assign(parameter, request.headers);
-    },
-    /**
      * 解析url获取参数
-     * @param {*} key 
      * @param {*} urlAndParms 
-     * @param {*} headers 
+     * @param {*} key 
      */
-    getParameters: function (key, request) {
-        var urlAndParms = request.url.split('?'), headers = request.headers;
+    parameters: function (request,key) {
+        key = key || request.url;
+        var urlAndParms = request.url.split('?'), headers = request.headers || {};
         var parameters = {
+            clientIp: this.clientIp(request),
             test: headers.test
         };
 
@@ -62,7 +51,7 @@ module.exports = {
         });
 
         if (urlAndParms[1]) {
-            urlAndParms[1].split('&').forEach(function (str) {
+            urlAndParms[1].split('#').shift().split('&').forEach(function (str) {
                 parameters[str.split('=')[0]] = decodeURIComponent(str.split('=')[1]);
             });
         }
@@ -79,7 +68,7 @@ module.exports = {
      * @param {*} replace 
      */
     getBodyData: function (request, replace) {
-        var parameters = this.getRequestParameter(request);
+        var parameters = this.parameters(request);
         return new Promise(succ => {
             var bufferHelper = new BufferHelper();
             if (!request.on) {

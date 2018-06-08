@@ -55,7 +55,7 @@ module.exports = (function () {
                     });
                 } else {
                     var collection = db.collection(table);
-                    bodyData = JSON.parse(JSON.stringify(bodyData).replace(/\[IP\]/gi, helper.getClientIp(request)) || '{}') || {};
+                    bodyData = JSON.parse(JSON.stringify(bodyData).replace(/\[IP\]/gi, helper.clientIp(request)) || '{}') || {};
                     collection.find().toArray(function (error, list) {
                         var conditionObj = {};
                         list.forEach(it => Object.keys(it).forEach(key => {

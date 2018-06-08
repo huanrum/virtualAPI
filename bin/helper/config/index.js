@@ -1,7 +1,7 @@
 var fs = require("fs");
 var path = require('path');
 
-var config = require('./../config');
+var config = require('./../../config');
 
 module.exports = (function () {
 
@@ -19,7 +19,7 @@ module.exports = (function () {
         config: function configPath(webModule) {
             var paths = config().web;
             if (webModule) {
-                var basePath = path.join(__dirname + '/../../views/');
+                var basePath = path.join(__dirname + '/../../../views/');
                 if (/https?:\/\/.*\/views\/*/.test(webModule)) {
                     webModule = webModule.replace(/https?:\/\/.*\/views\/*/i, basePath);
                 }
@@ -38,7 +38,22 @@ module.exports = (function () {
                 return paths;
             }
         },
+        /**
+         * 获取git排除条件
+         */
+        gitignore: function(filePath){
+            var gitignorePath = get(path.dirname(filePath));
+            if(!gitignorePath){
+                return false;
+            }
+            var gitignore = fs.readFileSync(gitignorePath+'/.gitignore').toString().replace(/(\\|\/)/mg,'\\\\').replace(/\./mg,'\\.').replace(/\*/mg,'\.\*').split('\r\n').filter(i=>!!i&&!/^\s*\#+/.test(i));
+            filePath = path.join(filePath)+'\\';
+            return gitignore.some(i=>new RegExp(gitignorePath.replace(/(\\|\/)/mg,'\\\\')+'\\\\'+i,'i').test(filePath));
 
+            function get(dir){
+                return fs.readdirSync(dir).some(i=>/\.gitignore/.test(i))? dir:(dir !== path.dirname(dir)&&get(path.dirname(dir)));
+            }
+        },
         /**
          * 获取相应的打包工具
          */

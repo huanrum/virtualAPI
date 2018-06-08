@@ -2,10 +2,11 @@
 var child_process = require('child_process');
 
 var file = require('./file');
+var html = require('./html');
 var net = require('./net');
 var http = require('./http');
 var ftp = require('./ftp');
-var resource = require('./resource');
+var request = require('./request');
 var config = require('./config');
 var error = require('./error');
 
@@ -14,7 +15,7 @@ var simulator = require('./simulator');
 
 function Helper(){}
 
-module.exports = Object.assign(new Helper(),file,net,http,ftp,resource,config,error,resolver,{
+module.exports = Object.assign(new Helper(),file,html,net,http,ftp,request,config,error,{
     resolver:resolver,
     simulator:simulator,
     /**

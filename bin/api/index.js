@@ -38,7 +38,7 @@ module.exports = (function () {
      */
     function api(options, request, response) {
         if (!request) {
-            return helper.repalceContent(__dirname+'/view/',fs.readFileSync(__dirname + '/index.html').toString(),Object.keys(configData).map(f => {
+            return helper.replaceContent(__dirname+'/view/',fs.readFileSync(__dirname + '/index.html').toString(),Object.keys(configData).map(f => {
                 return {
                     file: f,
                     config: configData[f]
@@ -139,7 +139,7 @@ module.exports = (function () {
 
 
     function returnResult(key, request, bodyData) {
-        var parameters = helper.getParameters(key, request);
+        var parameters = helper.parameters(request,key);
 
         return new Promise(function (resolve) {
             var apiFn = typeof returnData[key].js === 'function' ? returnData[key].js(JSON.parse(JSON.stringify(returnData[key].data || defaultReturn)), parameters, bodyData, request) : returnData[key].data;
@@ -172,7 +172,7 @@ module.exports = (function () {
             Object.keys(bodyData).forEach(function (parm) {
                 configStr = configStr.replace(new RegExp(':' + parm, 'g'), bodyData[parm]);
             });
-            log(new Date(), helper.getClientIp(request), request.headers['referer'], key, request.url, JSON.stringify(bodyData));
+            log(new Date(), helper.clientIp(request), request.headers['referer'], key, request.url, JSON.stringify(bodyData));
             try {
                 return JSON.parse(configStr);
             } catch (e) {
