@@ -34,6 +34,9 @@ module.exports = {
         };
         </script>`;
     },
+    /**
+     * 可以在dom元素上使用vue()
+     */
     useVue: function () {
         return `
         <script>
@@ -50,6 +53,9 @@ module.exports = {
         </script>
         `
     },
+    /**
+     * 可以在dom元素上使用react()
+     */
     useReact: function () {
         return `
         <script>
@@ -66,30 +72,35 @@ module.exports = {
     replaceHtml: function (content, replace) {
         if (!replace) {
             return content;
-        } else if (replace instanceof Array) {
-            replace.forEach(rep => {
-                content = this.replaceHtml(content, rep);
-            });
-            return content;
-        } else if (/\.css$/.test(replace)) {
-            return content.replace(/<\/head>/i, str => `\n<link type="text/css" rel="stylesheet" href="${replace}">\n${str}`);
-        } else if (/\.js$/.test(replace)) {
-            return content.replace(/<body((?!>).)*>/i, str => `${str}\n\r<script src="${replace}"></script>\n`);
-        } else if (/<script>/.test(replace)) {
-            return content.replace(/<\/body>/i, str => `${replace}\n${str}`);
-        } else if (/<style>/.test(replace)) {
-            return content.replace(/<\/head>/i, str => `${replace}\n${str}`);
-        } else if (/<.+>/.test(replace)) {
-            return content.replace(/<\/body>/i, str => `${replace}\n${str}`);
         } else {
-            if (/<title>.*<\/title>/.test(content)) {
-                return content = content.replace(/<title>.*<\/title>/, function (str) {
-                    return '<title>' + (/<title>(.*)<\/title>/.exec(str)[1] || replace) + '</title>';
+            if(typeof replace === 'string'){
+                replace = replace();
+            }
+            if (replace instanceof Array) {
+                replace.forEach(rep => {
+                    content = this.replaceHtml(content, rep);
                 });
+                return content;
+            } else if (/\.css$/.test(replace)) {
+                return content.replace(/<\/head>/i, str => `\n<link type="text/css" rel="stylesheet" href="${replace}">\n${str}`);
+            } else if (/\.js$/.test(replace)) {
+                return content.replace(/<body((?!>).)*>/i, str => `${str}\n\r<script src="${replace}"></script>\n`);
+            } else if (/<script>/.test(replace)) {
+                return content.replace(/<\/body>/i, str => `${replace}\n${str}`);
+            } else if (/<style>/.test(replace)) {
+                return content.replace(/<\/head>/i, str => `${replace}\n${str}`);
+            } else if (/<.+>/.test(replace)) {
+                return content.replace(/<\/body>/i, str => `${replace}\n${str}`);
             } else {
-                return content = content.replace(/\?\d+/g, '').replace(/<head>/, function (str) {
-                    return str + '\n\r<title>' + replace + '</title>';
-                });
+                if (/<title>.*<\/title>/.test(content)) {
+                    return content = content.replace(/<title>.*<\/title>/, function (str) {
+                        return '<title>' + (/<title>(.*)<\/title>/.exec(str)[1] || replace) + '</title>';
+                    });
+                } else {
+                    return content = content.replace(/\?\d+/g, '').replace(/<head>/, function (str) {
+                        return str + '\n\r<title>' + replace + '</title>';
+                    });
+                }
             }
         }
     }
