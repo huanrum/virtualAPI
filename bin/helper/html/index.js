@@ -73,7 +73,7 @@ module.exports = {
         if (!replace) {
             return content;
         } else {
-            if(typeof replace === 'string'){
+            if(typeof replace === 'function'){
                 replace = replace();
             }
             if (replace instanceof Array) {
