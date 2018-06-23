@@ -65,6 +65,7 @@ module.exports = (function(){
         if(fs.existsSync(file)){
             return JSON.parse(fs.readFileSync(file).toString());
         }else{
+            fs.writeFileSync(file,'{}');
             return defaultValue!==undefined?defaultValue:{};
         }
     }
