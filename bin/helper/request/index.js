@@ -28,7 +28,7 @@ module.exports = {
      */
     localhost: function (request) {
         var clientIp = this.clientIp(request).replace(/::(ffff:)?/, '');
-        return clientIp==='1' || /^(172|192|10)/.test(clientIp);
+        return clientIp==='1' || /^(127|172|192|10)/.test(clientIp);
     },
     /**
      * 解析url获取参数
