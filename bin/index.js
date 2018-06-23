@@ -150,6 +150,7 @@ module.exports = function (options) {
         });
     }
 
+    helper.mkdirs(__dirname + '/../service');
     fs.readdirSync(__dirname + '/../service').forEach(function (item) {
         try {
             var a = require(__dirname + '/../service/' + item);
