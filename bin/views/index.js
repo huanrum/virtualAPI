@@ -8,7 +8,7 @@ var helper = require('./../helper');
 module.exports = (function () {
     var configs = [];
     var basePath = __dirname.replace('\\bin\\views', '\/').replace('/bin/views', '\/');
-
+    
     //外部配置web站点的物理地址
     view.config = function (web,fn) {
         if (fn instanceof Array) {
@@ -29,6 +29,7 @@ module.exports = (function () {
         }
     };
 
+    helper.mkdirs(basePath + '/views');
     return view;
 
     //根据文件找到web对应的配置
