@@ -1,0 +1,42 @@
+<style>
+    .can-drop.dragenter {
+        border: 5px dashed #00C0EF;
+    }
+</style>
+<script>
+    window.addEventListener('load', function () {
+        document.addEventListener("drop", function (e) {  //拖离   
+            e.preventDefault();
+        })
+        document.addEventListener("dragleave", function (e) {  //拖后放   
+            e.preventDefault();
+        })
+        document.addEventListener("dragenter", function (e) {  //拖进  
+            e.preventDefault();
+        })
+        document.addEventListener("dragover", function (e) {  //拖来拖去    
+            e.preventDefault();
+        })
+    });
+
+    function canDrop(element, callback) {
+        element.className += ' can-drop ';
+        element.addEventListener("dragenter", function (e) {  //拖来拖去    
+            element.className += ' dragenter ';
+        });
+        element.addEventListener("drop", function (e) {
+            element.className = element.className.replace(/\s+dragenter\s+/g, ' ');
+            var fileList = e.dataTransfer.files; //获取文件对象    
+            //检测是否是拖拽文件到页面的操作            
+            if (fileList.length == 0) {
+                return false;
+            }
+            r = new FileReader();  //本地预览
+            r.onload = function () {
+                callback(fileList[0],r.result);
+            }
+            r.readAsDataURL(fileList[0]);    //Base64
+        }, false);
+
+    }
+</script>

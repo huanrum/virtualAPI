@@ -4,6 +4,12 @@ var child_process = require('child_process');
 
 module.exports = {
     /**
+     * 会被正式的websocket替换
+     */
+    websocket:function(data){
+
+    },
+    /**
      * 提取域名或者IP
      */
     getDomain: function (url) {

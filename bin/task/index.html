@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <!--html>/view/style.html</html-->
+</head>
+
+<body>
+    <!--html>/view/helper.html</html-->
+    <!--html>/../compatible/native.html</html-->
+    <!--html>/view/drop.html</html-->
+    <!--html>/view/base.html</html-->
+    <!--html>/view/websocket.html</html-->
+    <script>
+        var statusList = '未开始,开发中,测试中,测试失败,完成,取消'.split(',');
+        var panel = document.createElement('div');
+        var addPanel = document.createElement('div');
+        var addbutton = document.createElement('a');
+        panel.className = 'panel';
+        addPanel.className = 'add';
+
+        addPanel.appendChild(addbutton);
+        document.body.appendChild(addPanel);
+        document.body.appendChild(panel);
+
+        addbutton.innerHTML = '添加' + (/task\/*$/.test(location.href) ? '项目' : 'Task');
+        addbutton.onclick = function () {
+            showDialog('新增', '<input>', ['确定'], function (index, content) {
+                http({ description: content.children[0].value }).then(function (item) {
+                    if (panel.children.length) {
+                        panel.insertBefore(createGroup(item), panel.children[0]);
+                    } else {
+                        panel.appendChild(createGroup(item));
+                    }
+                });
+            });
+        }
+        window.$data.forEach(function (project) {
+            panel.appendChild(createGroup(project));
+        });
+
+        window.autorefsh(function (item) {
+            var olditem = window.$data.filter(function (i) { return i.id == item.id; }).pop();
+            if (!olditem) {
+                window.$data.unshift(item);
+                if (panel.children.length) {
+                    panel.insertBefore(createGroup(item), panel.children[0]);
+                } else {
+                    panel.appendChild(createGroup(item));
+                }
+            } else {
+                Object.assign(olditem,item);
+                olditem.refsh();
+            }
+        });
+
+        function createGroup(item) {
+            var fieldset = document.createElement('fieldset');
+            var legend = document.createElement('legend');
+            var content = document.createElement('div');
+
+            var labelPanel = document.createElement('span');
+            var label = document.createElement('label');
+            var iel = document.createElement('i');
+            var goto = document.createElement('a');
+
+            var refsh = createItem(content, item);
+
+            content.className = 'content';
+            label.innerHTML = item.description;
+            iel.innerHTML = statusList[item.status - 1];
+            goto.innerHTML = 'Task->';
+
+            labelPanel.appendChild(label);
+            labelPanel.appendChild(iel);
+            legend.appendChild(labelPanel);
+            if (/task\/*$/.test(location.href)) {
+                legend.appendChild(goto);
+            }
+            fieldset.appendChild(legend);
+            fieldset.appendChild(content);
+            content.style.display = 'none';
+            fieldset.className = 'status-' + item.status;
+
+            label.onclick = function () {
+                refsh();
+                content.style.display = content.style.display === 'none' ? 'block' : 'none';
+            };
+            goto.onclick = function () {
+                window.open(location.href + '/' + item.id);
+            };
+            iel.onclick = function () {
+                var status = statusList.map(function (v, i) {
+                    return '<option value="$value" $selected>$title</option>'.replace('$value', i + 1).replace('$title', v).replace('$selected', item.status == v ? 'selected' : '');
+                }).join('');
+                showDialog('修改状态', '<select>' + status + '</select>', ['确定'], function (index, content) {
+                    http(Object.assign(item, { status: content.children[0].value })).then(function () {
+                        fieldset.className = 'status-' + item.status;
+                        iel.innerHTML = statusList[item.status - 1];
+                    });
+                });
+            }
+
+            item.refsh = function(){
+                fieldset.className = 'status-' + item.status;
+                iel.innerHTML = statusList[item.status - 1];
+                refsh(true);
+            };
+
+            return fieldset;
+        }
+
+        function createItem(content, item) {
+            var div = document.createElement('div');
+            var textarea = document.createElement('textarea');
+            content.appendChild(div);
+            content.appendChild(textarea);
+            textarea.style.display = 'none';
+
+            setTimeout(function () {
+                textarea.style.height = Math.max(div.clientHeight, 60) + 'px';
+            }, 1000);
+            textarea.value = item.value;
+            content.ondblclick = function () {
+                div.style.display = 'none';
+                textarea.style.display = 'block';
+                textarea.focus();
+            };
+            textarea.onblur = function () {
+                textarea.style.display = 'none';
+                div.style.display = 'block';
+                if (item.value != textarea.value) {
+                    item.value = textarea.value;
+                    div.innerHTML = formatter(item.value);
+                    textarea.style.height = Math.max(div.clientHeight, 60) + 'px';
+                    http(item);
+                }
+            };
+
+            canDrop(content, function () {
+                upload.apply(null, arguments).then(function (file) {
+                    textarea.value += ' [file:' + file.name + ',' + file.id + '] ';
+                    textarea.onblur();
+                });
+            });
+
+            return function(mandatory){
+                if(mandatory || !div.innerHTML){
+                    textarea.value = item.value;
+                    div.innerHTML = formatter(item.value);
+                    textarea.style.height = Math.max(div.clientHeight, 60) + 'px';
+                }
+            }
+        }
+
+        /**
+         * url自动转换成链接
+         * [img:123]转为图片链接
+         * 
+        */
+        function formatter(str) {
+            str = str
+                .replace(/(\S*)\<(((?!\>).)*)\>/g, function (str) {
+                    var macths = /(\S*)\<(((?!\>).)*)\>/.exec(str);
+                    return '<i style="$1">$2</i>'.replace(/\$2/g, macths[2]).replace(/\$1/g, style(macths[1]));
+                })
+                .replace(/(https?:\/\/((?![\s\r\n]).)*)/ig, '<a target="_blank" href="$1">$1</a>')
+                .replace(/\[file:(((?!\]).)+),(((?!\]).)+)\]/g, function (str) {
+                    var macths = /\[file:(\S+),(\S+)\]/.exec(str);
+                    if (/\.(jpge|jpg|png|ico|gif)$/i.test(macths[1])) {
+                        return '<img title="$1" src="location\\files\\$2\\$1">'.replace('location', location.href).replace(/\$1/g, macths[1]).replace(/\$2/g, macths[2]);
+                    } else {
+                        return '<a target="_blank" href="location\\files\\$2\\$1">$1</a>'.replace('location', location.href).replace(/\$1/g, macths[1]).replace(/\$2/g, macths[2]);
+                    }
+                })
+                .replace(/(\S*)\[(((?!\]).)*)\]/g, function (str) {
+                    var macths = /(\S*)\[(((?!\]).)*)\]/.exec(str);
+                    return '<span style="$1">$2</span>'.replace(/\$2/g, macths[2]).replace(/\$1/g, style(macths[1]));
+                })
+                .replace(/(\S*)\{(((?!\}).)*)\}/g, function (str) {
+                    var macths = /(\S*)\{(((?!\}).)*)\}/.exec(str);
+                    return '<strong style="$1">$2</strong>'.replace(/\$2/g, macths[2]).replace(/\$1/g, style(macths[1]));
+                })
+                .replace(/[\r\n]/g, '<br>');
+
+            return replaceSp(str);
+
+            function style(styleStr) {
+                return styleStr.split(',').map(function (i) {
+                    if (/^\d+$/.test(i)) {
+                        return 'font-size:' + i + 'px';
+                    } else if (/^#[0-9a-f]{3}$/.test(i)) {
+                        return 'color:' + i;
+                    } else if (/^#[0-9a-f]{6}$/.test(i)) {
+                        return 'background:' + i;
+                    }
+                }).join(';');
+            }
+
+            function replaceSp(strSp) {
+                var temps = [];
+                strSp = strSp.replace(/<((?!>).)+>/g, function (str) {
+                    temps.push(str);
+                    return '$' + temps.length;
+                })
+                    .replace(/\s/g, '&nbsp;');
+                for (var i = 0; i < temps.length; i++) {
+                    strSp = strSp.replace('$' + (i + 1), temps[i]);
+                }
+                return strSp;
+            }
+        }
+
+
+    </script>
+
+    <script>
+        function http(entity) {
+            return fetch(location.href, { method: 'POST', body: JSON.stringify(entity) }).then(function (i) { return i.json(); });
+        }
+        function upload(file, content) {
+            return fetch(location.href, { method: 'PUT', body: JSON.stringify({ name: file.name, content: content }) }).then(function (i) { return i.json(); });
+        }
+    </script>
+</body>
+
+</html>

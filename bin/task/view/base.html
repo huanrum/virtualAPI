@@ -1,0 +1,191 @@
+<style>
+    .dialogBack {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+    }
+
+    .dialog {
+        position: absolute;
+        margin-left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        padding: 2px;
+        border-radius: 10px;
+        background: #f3f3f3;
+    }
+
+    .dialog .header {
+        height: 1.2em;
+        background: #666699;
+        padding: 0.5em;
+    }
+
+    .dialog .header a {
+        font-size: 2rem;
+        float: right;
+        line-height: 1.2rem;
+        color: #ff3333;
+        cursor: pointer;
+    }
+
+    .dialog .header a:hover {
+        color: #d3d3d3;
+    }
+
+    .dialog .content {
+        max-height: 33em;
+        min-width: 12em;
+        padding: 1rem;
+        overflow: auto;
+    }
+
+    .dialog .content input,
+    .dialog .content select {
+        padding: 4px 8px;
+    }
+    .dialog .content select {
+        width: 100%;
+    }
+
+    .dialog .footer {
+        border-top: 1px solid #d3d3d3;
+        text-align: center;
+        padding: 8px;
+    }
+
+    .dialog .footer a {
+        border: 1px solid #666699;
+        margin: 2px 1rem;
+        padding: 1px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .content-self div {
+        display: inline-block;
+        cursor: pointer;
+        margin: 0.5rem 1rem;
+        border: 1px solid #c55388;
+        padding: 5px;
+    }
+
+    .content-self div.active {
+        background: #666699;
+    }
+
+    .content-self select {
+        width: 100%;
+        padding: 0.2rem;
+        margin: 0.2rem;
+    }
+
+    .context-menu {
+        cursor: pointer;
+        position: fixed;
+        width: 125px;
+        list-style: none;
+        padding: 8px;
+        background: #d3d3d3;
+        border-radius: 8px;
+    }
+
+    .context-menu li+li {
+        padding-top: 8px;
+    }
+
+    .context-menu li:hover {
+        color: #00AAEF;
+        text-decoration: underline;
+    }
+
+    .dialog .content .message {
+        /* width:30em; */
+        height: 20em;
+    }
+
+    .message-content {
+        height: 75%;
+        overflow: auto;
+        color: #333333;
+    }
+
+    .message-content .self {
+        text-align: right;
+        color: #696969;
+    }
+
+    .message-input {
+        width: 100%;
+        height: 18%;
+        border-top: 1px solid #696969;
+        overflow: auto;
+    }
+
+    .message-button {
+        height: 8%;
+        background: rgb(12, 112, 53);
+        text-align: center;
+    }
+</style>
+
+<script>
+
+    function showDialog(title, message, btns, callback) {
+        btns = btns || [];
+        callback = callback || function () { };
+
+        var dialogBack = document.createElement('div');
+        var dialog = document.createElement('div');
+        var header = document.createElement('div');
+        var content = document.createElement('div');
+        var footer = document.createElement('div');
+
+        var clossBtn = document.createElement('a');
+
+        dialogBack.className = 'dialogBack';
+        dialog.className = 'dialog';
+        header.className = 'header';
+        content.className = 'content';
+        footer.className = 'footer';
+
+        dialog.appendChild(header);
+        dialog.appendChild(content);
+        dialog.appendChild(footer);
+        dialogBack.appendChild(dialog);
+        document.body.appendChild(dialogBack);
+
+        header.innerHTML = title;
+        clossBtn.innerHTML = '&times;';
+        header.appendChild(clossBtn);
+        if (typeof message === 'string') {
+            content.innerHTML = message;
+        } else {
+            content.appendChild(message);
+        }
+
+        clossBtn.onclick = function () {
+            document.body.removeChild(dialogBack);
+        };
+
+        (btns || ['取消']).forEach(function (btn, index) {
+            var button = document.createElement('a');
+            button.innerHTML = btn;
+            footer.appendChild(button);
+            button.onclick = function () {
+                if (!btns || callback(index, content) !== false) {
+                    document.body.removeChild(dialogBack);
+                }
+            };
+        });
+
+        return function () {
+            if (dialogBack.parentNode) {
+                dialogBack.parentNode.removeChild(dialogBack);
+            }
+        };
+    }
+</script>

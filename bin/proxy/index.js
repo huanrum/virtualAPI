@@ -20,11 +20,11 @@ module.exports = (function () {
             if (!promises.length) {
                 var api = path.join(request.headers.api).replace(':\\', '://').replace(/\\/g, '/');
                 var options = {
-                    headers: request.headers,
+                    headers: request.headers.headers?Object.assign(JSON.parse(request.headers.headers),{"Context-Length":bodyData.length}):request.headers,
                     method: request.method,
                     host: api.split('//')[1].split(/(:|\/)/).shift(),
                     port: parseInt(api.split(':')[2] || 80),
-                    path: api + (/\?/.test(api) ? '&' : '?') + (request.url.split('?')[1] || '')
+                    path: api + (/\?/.test(api) ? '&' : (/\?/.test(request.url)?'?':'')) + (request.url.split('?')[1] || '')
                 };
 
                 backup.ping(options.path).then(function (ping) {

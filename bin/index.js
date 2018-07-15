@@ -20,7 +20,7 @@ var framework = require('./framework');
 var debugFn = require("./debug");
 var log = require('./log');
 var jsonp = require('./jsonp');
-
+var task = require('./task');
 
 var createServer = function (options) {
 
@@ -71,6 +71,9 @@ var createServer = function (options) {
                     //用于处理数据库相关数据
                     else if (/^\/*db\/*/i.test(request.url)) {
                         db(request, response);
+                    }//用于处理数据库相关数据
+                    else if (/^\/*task\/*/i.test(request.url)) {
+                        task(request, response);
                     }
                     //用于处理其他域名下的API请求
                     else if (/^\/*proxy\/*/i.test(request.url)) {

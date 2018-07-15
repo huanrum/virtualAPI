@@ -18,6 +18,16 @@ module.exports = function (options) {
             }
         };
 
+        helper.websocket = function(data){
+            Object.keys(wList).forEach(function (w) {
+                send(w, {
+                    action: 'push',
+                    from: 'service',
+                    data: data
+                });
+            });
+        };
+
         wss.on('connection', function (client) {
             client.on('message', function (message) {
                 var messageData = JSON.parse(message);

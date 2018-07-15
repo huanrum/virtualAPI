@@ -1,0 +1,39 @@
+<script>
+    window.autorefsh = (function () {
+
+        var fnList = [];
+
+        fetch(location.origin + '/websocket?ip=' + location.hostname).then(res => res.json()).then(req => {
+            var handle = Date.now();
+            window.ws = new WebSocket(req.message);
+            ws.onopen = function (e) {
+                console.log('Connection to server opened');
+                ws.send(JSON.stringify({
+                    data: handle,
+                    action: 'login'
+                }));
+            }
+            ws.onmessage = function (e) {
+                var req = JSON.parse(e.data);
+                if(req.action==='push' && req.data.type === 'task'){
+                    fnList.forEach(function(fn){
+                        fn(req.data.data);
+                    });
+                }
+            };
+
+            window.onbeforeunload = function () {
+                ws.send(JSON.stringify({
+                    action: 'logout'
+                }));
+            };
+
+        });
+
+        return function(action){
+            fnList.push(action);
+        }
+
+    })();
+
+</script>
