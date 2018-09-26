@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var dbHelper = require('./db');
-
+var sql = require('./sql');
 var helper = require('./../helper');
 
 var imgspath = path.join(__dirname + '/../../files/task/');

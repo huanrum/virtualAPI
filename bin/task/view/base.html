@@ -46,6 +46,7 @@
     .dialog .content input,
     .dialog .content select {
         padding: 4px 8px;
+        border: 1px solid #d3d3d3;
     }
     .dialog .content select {
         width: 100%;
@@ -182,9 +183,15 @@
             };
         });
 
-        return function () {
-            if (dialogBack.parentNode) {
-                dialogBack.parentNode.removeChild(dialogBack);
+        return function (show) {
+            if(show){
+                if (!dialogBack.parentNode) {
+                    document.body.appendChild(dialogBack);
+                }
+            }else {
+                if (dialogBack.parentNode) {
+                    dialogBack.parentNode.removeChild(dialogBack);
+                }
             }
         };
     }

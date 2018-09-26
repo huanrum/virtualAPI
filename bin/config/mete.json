@@ -406,5 +406,6 @@
     "z": "application/x-compress",
     "zac": "application/x-zaurus-zac",
     "zip": "application/zip",
-    "flv": "application/octet-stream"
+    "flv": "application/octet-stream",
+    "ogg": "audio/ogg"
 }

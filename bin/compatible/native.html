@@ -16,7 +16,7 @@
                 xhr = new window.ActiveXObject('Microsoft.XMLHTTP');
             }
             xhr.onreadystatechange = onreadystatechange;
-            xhr.open(option.method, url, true);
+            xhr.open(option.method||'GET', url, true);
             xhr.send(option.body);
 
             return {

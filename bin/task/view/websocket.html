@@ -1,8 +1,53 @@
+<style>
+    .message-list {
+        border: 1px solid #d3d3d3;
+        margin-bottom: 15px;
+        padding: 5px 10px;
+        max-height: calc(30em - 100px);
+        overflow: auto;
+    }
+
+    .message-list-item{
+        margin-bottom: 5px;
+        padding: 2px;
+    }
+    .message-list-item div{
+        display: inline-block;
+    }
+    .message-list-item div+div{
+        margin-left: 20px;
+        border: 1px dotted #d3d3d3;
+    }
+
+    .message-list strong {
+        color: #999999;
+    }
+
+    .message-input {
+        width: 800px;
+        min-height: 100px;
+    }
+</style>
 <script>
     window.autorefsh = (function () {
+        var fnList = [], messages = [];
+        var messageContent = document.createElement('div');
+        messageContent.innerHTML = '<div class="message-list"></div><textarea class="message-input"></textarea>';
+        var showMessage = showDialog('发送消息', messageContent, ['确定'], function (index, content) {
+            var data = content.children[0].children[1].value;
+            content.children[0].children[1].value = '';
+            messageContent.children[0].appendChild(createMessage({data:{data:data}}));
+            window.ws.send(JSON.stringify({
+                action: 'message',
+                data: {
+                    type: 'task',
+                    data: data
+                }
+            }));
+            return false;
+        });
 
-        var fnList = [];
-
+        showMessage();
         fetch(location.origin + '/websocket?ip=' + location.hostname).then(res => res.json()).then(req => {
             var handle = Date.now();
             window.ws = new WebSocket(req.message);
@@ -15,10 +60,15 @@
             }
             ws.onmessage = function (e) {
                 var req = JSON.parse(e.data);
-                if(req.action==='push' && req.data.type === 'task'){
-                    fnList.forEach(function(fn){
-                        fn(req.data.data);
-                    });
+                if (req.data && req.data.type === 'task') {
+                    if (req.action === 'push') {
+                        fnList.forEach(function (fn) {
+                            fn(req.data.data);
+                        });
+                    } else if (req.action === 'message') {
+                        messageContent.children[0].appendChild(createMessage(req));
+                        showMessage(true);
+                    }
                 }
             };
 
@@ -30,7 +80,25 @@
 
         });
 
-        return function(action){
+        window.document.addEventListener('keydown', function (e) {
+            if (e.altKey && e.shiftKey && e.ctrlKey) {
+                switch (e.key) {
+                    case 'S':
+                        showMessage(true);
+                        break;
+                }
+
+            }
+        });
+
+        function createMessage(item) {
+            var div = document.createElement('div');
+            div.className = 'message-list-item';
+            div.innerHTML = '<div><strong>' + (item.from || 'Me') + '</strong></div><div>' + item.data.data.replace(/\n/g,'<br>') + '</div>'
+            return div;
+        }
+
+        return function (action) {
             fnList.push(action);
         }
 

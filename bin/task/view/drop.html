@@ -24,6 +24,9 @@
         element.addEventListener("dragenter", function (e) {  //拖来拖去    
             element.className += ' dragenter ';
         });
+        element.addEventListener("dragleave", function (e) {  //拖来拖去    
+            element.className = element.className.replace(/\s+dragenter\s+/g, ' ');
+        });
         element.addEventListener("drop", function (e) {
             element.className = element.className.replace(/\s+dragenter\s+/g, ' ');
             var fileList = e.dataTransfer.files; //获取文件对象    

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Task</title>
     <!--html>/view/style.html</html-->
 </head>
 
@@ -30,13 +30,7 @@
         addbutton.innerHTML = '添加' + (/task\/*$/.test(location.href) ? '项目' : 'Task');
         addbutton.onclick = function () {
             showDialog('新增', '<input>', ['确定'], function (index, content) {
-                http({ description: content.children[0].value }).then(function (item) {
-                    if (panel.children.length) {
-                        panel.insertBefore(createGroup(item), panel.children[0]);
-                    } else {
-                        panel.appendChild(createGroup(item));
-                    }
-                });
+                http({ description: content.children[0].value });
             });
         }
         window.$data.forEach(function (project) {
@@ -68,7 +62,7 @@
             var iel = document.createElement('i');
             var goto = document.createElement('a');
 
-            var refsh = createItem(content, item);
+            
 
             content.className = 'content';
             label.innerHTML = item.description;
@@ -86,6 +80,8 @@
             content.style.display = 'none';
             fieldset.className = 'status-' + item.status;
 
+            var refsh = createItem(content, item);
+
             label.onclick = function () {
                 refsh();
                 content.style.display = content.style.display === 'none' ? 'block' : 'none';
@@ -95,7 +91,7 @@
             };
             iel.onclick = function () {
                 var status = statusList.map(function (v, i) {
-                    return '<option value="$value" $selected>$title</option>'.replace('$value', i + 1).replace('$title', v).replace('$selected', item.status == v ? 'selected' : '');
+                    return '<option value="$value" $selected>$title</option>'.replace('$value', i + 1).replace('$title', v).replace('$selected', item.status == (i+1) ? 'selected' : '');
                 }).join('');
                 showDialog('修改状态', '<select>' + status + '</select>', ['确定'], function (index, content) {
                     http(Object.assign(item, { status: content.children[0].value })).then(function () {
@@ -126,6 +122,7 @@
             }, 1000);
             textarea.value = item.value;
             content.ondblclick = function () {
+                textarea.style.height = Math.max(div.clientHeight, 60) + 'px';
                 div.style.display = 'none';
                 textarea.style.display = 'block';
                 textarea.focus();
