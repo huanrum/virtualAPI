@@ -1,0 +1,90 @@
+{
+    "xinyu/user/login": {
+        "msg":"登录成功！",
+        "code":1000
+    },
+    "xinyu/user/changpassword": {
+        "msg":"修改成功",
+        "code":1000
+    },
+    "xinyu/statistical/msgTotal": {
+        "code": "1000",
+        "msg": "查询成功",
+        "data": [{
+            "name": "今日头条",
+            "count": 303
+        }, {
+            "name": "大江网",
+            "count": 1046
+        }, {
+            "name": "天涯社区",
+            "count": 643
+        }, {
+            "name": "新余发布",
+            "count": 861
+        }, {
+            "name": "百度贴吧",
+            "count": 60
+        }, {
+            "name": "有效消息数",
+            "count": 89
+        }]
+    }
+    ,
+    "xinyu/statistical/organ":{
+        "code": "1000",
+        "data": [{
+            "cata_one": "1",
+            "name": "生态环境和资源保护",
+            "count": 2180
+        }, {
+            "cata_one": "2",
+            "name": "食品药品安全",
+            "count": 823
+        }, {
+            "cata_one": "3",
+            "name": "国有财产保护领域",
+            "count": 308
+        }, {
+            "cata_one": "4",
+            "name": "国有土地使用权出让领域",
+            "count": 52
+        }, {
+            "cata_one": "5",
+            "name": "英烈权益保护",
+            "count": 206
+        }]
+    },
+    "xinyu/statistical/organ2":"[../data/organ2.json]",
+    "xinyu/summary/latestData": "[../data/latestData.json]",
+    "xinyu/summary/organList": "[../data/latestData.json]",
+    "xinyu/summary/updatetag":{
+        "msg":"操作成功",
+        "code":1000
+    },
+    "xinyu/summary/detail":{
+        "code": "100",
+        "data": {
+            "subInfo": {
+                "data_rksj_update": 1568455263000,
+                "summary": "女性的工作往往集中在文职类和服务业等,而对交通运输业、建筑业、采矿业等行业则甚少涉足.但这样的职业性别隔离,并非取决于...",
+                "src_url": "http://weixin.sogou.com/api/share?timestamp=1567088682&signature=qIbwY*nI6KU9tBso4VCd8lYSesxOYgLcHX5tlbqlMR-uOq5t6owLz4V40d1kRkT71ALUFzqlp8UNqkhj6*Al-dapgA-qU8opt*kpzKU39MiAEfbxh*R2e2YYd6Ft-be5zIxMCJ2KvlWS5Rg9oAGOSuPVgiFgnYv-BH5GK1tD6GC-BFUzyn4DDUimZeroz0lhG0CYrqBzJfbum-YHSUxL84nsQnwfd-9jlD5btrt3qJeJOW22TuARvborN8KNgEX3B2SKAwEDiRH99LltNHPD*p4S2CMVwZSpFaULtLpNAv5BzBX62fIsTeD-0Nk34uxzWFkUdK55odzg-R6bg6glXZE0Wlsd3stqnD7gwkEWzMo=",
+                "thumbnail": "thumbnail.jpg",
+                "cata_one": "1",
+                "pub_time": "2013-12-02",
+                "id": "bfStOFhv",
+                "title": "董小姐的一生",
+                "src_name": "天涯社区",
+                "authors": null,
+                "data_rksj_create": 1568469537000
+            },
+            "lightKeywords": "",
+            "originalData": {
+                "mainContent":"缩略内容",
+                "summary":"全部内容",
+                "title":"标题"
+            }
+        }
+    }
+
+}

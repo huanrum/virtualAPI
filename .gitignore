@@ -11,7 +11,6 @@ build
 
 start.sh
 node_modules/
-service/
 backup*/
 cache/
 images/
