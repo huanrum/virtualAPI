@@ -14,6 +14,11 @@
                         background: #333333;
                         color:#ffffff;
                     }
+                    #button{
+                        position: fixed;
+                        left:calc(50% - 1em);
+                        top:50%;
+                    }
                     #message{
                         position: fixed;
                         left:50%;
@@ -27,6 +32,7 @@
             </head>
             <body>
                 <textarea id="textarea"></textarea>
+                <button id="button">运行</button>
                 <div id="message"></div>
                 <script>
                     var textarea = document.getElementById('textarea'),message = document.getElementById('message');
@@ -40,7 +46,15 @@
                             }
                         }
                     };
-
+                    
+                    if(/(Android|iPhone|SymbianOS|Windows Phone|iPad|iPod)/.test(navigator.userAgent)){
+                        document.getElementById('button').onclick = function(){
+                            runAction(textarea,message).then(runMessage);
+                        };
+                    }else{
+                        document.getElementById('button').style.display = 'none';
+                    }
+                    
                     function runAction(input){
                         return fetch(location.origin + '/action/',{method:'POST',body:JSON.stringify(input.value.split(/[\r\n]/))}).then(function(i){return i.json();})
                     };
