@@ -1,0 +1,112 @@
+{
+	"msg": "查询成功",
+	"code": 1000,
+	"data": {
+		"total": {
+			"average": 2.0428,
+			"total": 3569,
+			"peakData": 9,
+			"increase": 3569,
+			"peakDate": "2019-07-26"
+		},
+		"table": [{
+			"count": 2180,
+			"cata_one": "1",
+			"items": [{
+				"count": 213,
+				"src_name": "今日头条"
+			}, {
+				"count": 755,
+				"src_name": "大江网"
+			}, {
+				"count": 402,
+				"src_name": "天涯社区"
+			}, {
+				"count": 773,
+				"src_name": "新余发布"
+			}, {
+				"count": 37,
+				"src_name": "百度贴吧"
+			}],
+			"typename": "生态环境和资源保护"
+		}, {
+			"count": 823,
+			"cata_one": "2",
+			"items": [{
+				"count": 110,
+				"src_name": "今日头条"
+			}, {
+				"count": 280,
+				"src_name": "大江网"
+			}, {
+				"count": 236,
+				"src_name": "天涯社区"
+			}, {
+				"count": 173,
+				"src_name": "新余发布"
+			}, {
+				"count": 24,
+				"src_name": "百度贴吧"
+			}],
+			"typename": "食品药品安全"
+		}, {
+			"count": 308,
+			"cata_one": "3",
+			"items": [{
+				"count": 20,
+				"src_name": "今日头条"
+			}, {
+				"count": 139,
+				"src_name": "大江网"
+			}, {
+				"count": 82,
+				"src_name": "天涯社区"
+			}, {
+				"count": 66,
+				"src_name": "新余发布"
+			}, {
+				"count": 1,
+				"src_name": "百度贴吧"
+			}],
+			"typename": "国有财产保护领域"
+		}, {
+			"count": 52,
+			"cata_one": "4",
+			"items": [{
+				"count": 2,
+				"src_name": "今日头条"
+			}, {
+				"count": 27,
+				"src_name": "大江网"
+			}, {
+				"count": 7,
+				"src_name": "天涯社区"
+			}, {
+				"count": 15,
+				"src_name": "新余发布"
+			}, {
+				"count": 1,
+				"src_name": "百度贴吧"
+			}],
+			"typename": "国有土地使用权出让领域"
+		}, {
+			"count": 206,
+			"cata_one": "5",
+			"items": [{
+				"count": 22,
+				"src_name": "今日头条"
+			}, {
+				"count": 79,
+				"src_name": "大江网"
+			}, {
+				"count": 27,
+				"src_name": "天涯社区"
+			}, {
+				"count": 78,
+				"src_name": "新余发布"
+			}],
+			"typename": "英烈权益保护"
+		}]
+	}
+}
+

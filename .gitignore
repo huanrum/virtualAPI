@@ -14,7 +14,6 @@ node_modules/
 backup*/
 cache/
 images/
-data/
 files/
 bin/config/web.json
 bin/config/edit.json
