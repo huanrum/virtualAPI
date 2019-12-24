@@ -1,0 +1,92 @@
+<script>
+    (function () {
+        window.Promise = window.Promise || $Promise;
+        window.fetch = window.fetch || $fetch;
+
+        function $fetch(url, option) {
+            var xhr = null,
+                callBack = [],
+                errorBack = [];
+            if (window.XMLHttpRequest) {
+                xhr = new window.XMLHttpRequest();
+                if (xhr.overrideMimeType) {
+                    xhr.overrideMimeType('text/xml');
+                }
+            } else {
+                xhr = new window.ActiveXObject('Microsoft.XMLHTTP');
+            }
+            xhr.onreadystatechange = onreadystatechange;
+            xhr.open(option.method||'GET', url, true);
+            xhr.send(option.body);
+
+            return {
+                then: then,
+                error: error
+            };
+
+            function onreadystatechange() {
+                var data = {
+                    status: 200,
+                    headers: {
+                        get: function (name) {
+                            return xhr.getResponseHeader(name);
+                        }
+                    },
+                    text: function () {
+                        return xhr.responseText;
+                    },
+                    json: function () {
+                        return JSON.parse(xhr.responseText);
+                    }
+                };
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    callBack.forEach(function (fn) {
+                        data = fn(data) || data;
+                    });
+                } else if (xhr.readyState === 3 && xhr.status !== 200) {
+                    errorBack.forEach(function (fn) {
+                        data = fn(data) || data;
+                    });
+                }
+            }
+
+            function then(fn) {
+                callBack.push(fn);
+                return this;
+            }
+
+            function error(fn) {
+                errorBack.push(fn);
+                return this;
+            }
+        }
+
+
+
+        function $Promise(init) {
+            var resloveList = [],
+                rejectList = [];
+            this.then = function (reslove, reject) {
+                resloveList.push(reslove);
+                rejectList.push(reject);
+            };
+            this.reslove = function (req) {
+                setTimeout(function () {
+                    resloveList.forEach(function (reslove) {
+                        reslove && reslove(req);
+                    });
+                }, 10);
+            }
+            this.reject = function (err) {
+                setTimeout(function () {
+                    resloveList.forEach(function (reject) {
+                        reject && reject(err);
+                    });
+                }, 10);
+            }
+
+            init(this.reslove, this.reject);
+        }
+
+    })();
+</script>

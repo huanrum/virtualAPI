@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Log</title>
+    <style>
+        div>fieldset>div{
+            display: none;
+            text-align: center;
+        }
+        div>fieldset>legend{
+            color:#00AAEF;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+
+<body>
+    <script>
+        var groupList = {} ,content = document.createElement('div');
+
+        document.body.appendChild(content);
+        window.$data.forEach(function(item){
+            var day = new Date(parseInt(item)).toLocaleDateString();
+            if(!groupList[day]){
+                groupList[day] = createGroup(day);
+            }
+            groupList[day].appendChild(createItem(item));
+        });
+
+        function createGroup(day){
+            var fieldset = document.createElement('fieldset');
+                var legend = document.createElement('legend');
+                var group = document.createElement('div');
+                fieldset.appendChild(legend);
+                fieldset.appendChild(group);
+                content.appendChild(fieldset);
+
+                legend.innerHTML = day;
+                legend.onclick = function(){
+                    if(group.style.display !== 'block'){
+                        group.style.display = 'block'
+                    }else{
+                        group.style.display = 'none'
+                    }
+                };
+                return group;
+        }
+
+        function createItem(item){
+            var element = document.createElement('div');
+            var elementA = document.createElement('a');
+            element.appendChild(elementA);
+            elementA.href = item;
+            elementA.innerHTML = item;
+            elementA.target = "_blank";
+            return element;
+        }
+
+    </script>
+</body>
+
+</html>

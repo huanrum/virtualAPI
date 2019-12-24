@@ -1,0 +1,2 @@
+# virtualAPI
+模拟的WebService，可以添加API用于后端API还没有开发好的时候使用，运行于nodeJS，需要自己动手配置config文件夹里面的json文件。

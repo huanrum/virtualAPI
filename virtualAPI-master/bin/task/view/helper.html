@@ -1,0 +1,38 @@
+
+<style>
+    #helper a{
+        cursor: pointer;
+    }
+    #helper a:hover{
+        color:#00aaef;
+    }
+    #helper ul{
+        list-style: none;
+        background:#d3d3d3;
+        padding: 0.5em;
+    }
+</style>
+<div id="helper" style="display: none;">
+    <a>?帮助?</a>
+    <ul style="display: none;">
+        <li><strong>{}</strong>表示加粗字体 / <strong>[]</strong>正常字体 / <strong><></strong>斜体 例如<i>[这里是内容]</i></li>
+        <li>上面三种字体前面可以使用<strong>数字</strong>(表示字体),<strong>#aaa</strong>这样(表示字体颜色),<strong>#dddddd</strong>这样(表示背景色)</li>
+        <li>所有文件仅仅支持拖拽上传,标识为<strong>[file:name,id]</strong>,图片暂时只识别<strong>jpge|jpg|png|ico|gif</strong>,其他的都算文件(文件点击可以下载)</li>
+        <li><strong>http://</strong> 或 <strong>https://</strong> 会自动识别为链接</li>
+        <li>支持回车和空格</li>
+        <li>组合键ctrl+alt+shift+S可以打开聊天窗体，跟所有在task页面下的用户聊天</li>
+    </ul>
+</div>
+<script>
+    var helper = document.getElementById('helper');
+    if (!/task\/*$/.test(location.href)) {
+        document.body.removeChild(helper);
+    }else{
+        var helperButton = helper.children[0];
+        var helperPanel = helper.children[1];
+        helper.style.display = 'block';
+        helperButton.onclick = function(){
+            helperPanel.style.display = helperPanel.style.display === 'none'?'block':'none';
+        }
+    }
+</script>

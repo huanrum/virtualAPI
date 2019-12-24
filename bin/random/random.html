@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Random</title>
+    <style>
+        body{
+            display: -webkit-flex;
+            display: flex;
+            position: relative;
+            align-items: center;
+            justify-content: center;
+        }
+        textarea{
+            width:45%;
+            height:600px;
+        }
+        button{
+            margin: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <textarea id="input"></textarea>
+    <button id="button">生成</button>
+    <textarea id="output" readonly></textarea>
+    <script>
+        var input = document.getElementById('input');
+        var button = document.getElementById('button');
+        var output = document.getElementById('output');
+
+        input.style.height = document.body.scrollHeight - 50 + 'px';
+        output.style.height = document.body.scrollHeight - 50 + 'px';
+
+        button.onclick = function(){
+            return fetch('/random', {
+                                method: 'post',
+                                body: input.value
+                            }).then(function(req){return req.json();}).then(function(data){
+                output.value = JSON.stringify(data, null, 4);;
+            });
+        };
+    </script>
+</body>
+</html>

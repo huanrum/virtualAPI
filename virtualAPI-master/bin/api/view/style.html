@@ -1,0 +1,214 @@
+<style>
+    body {
+        position: relative;
+    }
+
+    .text-align-center {
+        text-align: center;
+    }
+
+    .download {
+        cursor: pointer;
+        margin: 0.5em;
+        padding: 0.5em;
+        background: #d9d9d9;
+    }
+
+    .helper {
+        color: #ac5600;
+        cursor: pointer;
+        font-weight: 700;
+    }
+
+    .helper:hover {
+        opacity: 0.6;
+    }
+
+    .module-group {
+        margin: 1em 0.2em;
+    }
+
+    .config-group {
+        margin: 1em;
+    }
+
+    .config-group legend:hover {
+        cursor: pointer;
+        color: #99ff99;
+    }
+
+    .config-item {
+        margin: 1em;
+    }
+
+    .config-item .config-url>* {
+        display: inline-block;
+        min-width: 6em;
+        font-weight: bold;
+    }
+
+    .config-item .config-url:hover {
+        cursor: pointer;
+        opacity: 0.6;
+    }
+
+    .config-item .config-return {
+        margin: 0.5em 0 0 6em;
+        min-height: 6em;
+        width: calc(100% - 8em);
+        background: #d3d3d3;
+    }
+
+    /*dialog*/
+
+    .common-dialog-back {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(123, 123, 123, 0.6);
+    }
+
+    .common-dialog-Message {
+        position: absolute;
+        margin-left: 80%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        padding: 2px;
+        border-radius: 10px;
+        background: #669966;
+    }
+
+    .common-dialog-back .common-dialog {
+        position: absolute;
+        margin-left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        padding: 2px;
+        border-radius: 10px;
+        background: #f3f3f3;
+    }
+
+    .common-dialog-back .common-dialog.max-window {
+        width: 96%;
+        height: 96%;
+        left: 2% !important;
+        top: 2% !important;
+        margin-left: 0;
+        transform: none;
+    }
+
+    .common-dialog-back .common-dialog .common-dialog-header {
+        position: relative;
+        height: 2em;
+        background: #666699;
+        padding: 0.5em;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+
+    .common-dialog-back .common-dialog .common-dialog-header label {
+        color: #ffffff;
+    }
+
+    .common-dialog-back .common-dialog .common-dialog-header label sup {
+        color: rgba(168, 168, 168, 0.4);
+    }
+
+    .common-dialog-back .common-dialog .common-dialog-header a {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        right: 0;
+        top: 16px;
+        cursor: pointer;
+    }
+
+    .common-dialog-back .common-dialog .common-dialog-header a:hover:before,
+    .common-dialog-back .common-dialog .common-dialog-header a:hover:after {
+        border-bottom: 2px solid red;
+    }
+
+    .common-dialog-back .common-dialog .common-dialog-header a:before,
+    .common-dialog-back .common-dialog .common-dialog-header a:after {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 20px;
+        height: 0;
+        content: '';
+        border-bottom: 2px solid #333333;
+    }
+
+    .common-dialog-back .common-dialog .common-dialog-header a:before {
+        transform: rotate(45deg);
+    }
+
+    .common-dialog-back .common-dialog .common-dialog-header a:after {
+        transform: rotate(-45deg);
+    }
+
+    .common-dialog-back .common-dialog .common-dialog-content {
+        position: relative;
+        max-height: 33em;
+        min-width: 12em;
+    }
+
+    .common-dialog-back .common-dialog .common-dialog-content>* {
+        margin: 0.3em;
+    }
+
+    .common-dialog-back .common-dialog .common-dialog-content div div {
+        display: inline-block;
+        width: 12em;
+    }
+
+    .common-dialog-back .common-dialog .common-dialog-content div input {
+        background: #f3f3f3;
+        border: none;
+        border-bottom: 1px solid #666699;
+    }
+
+    .common-dialog-back .common-dialog .common-dialog-message {
+        position: relative;
+        width: calc(100% - 1rem);
+        height: 100%;
+        background: #d3d3d3;
+        margin: 0.5em;
+        max-height: 33em;
+        min-height: 10em;
+        overflow: auto;
+    }
+
+    .common-dialog-back .common-dialog .common-dialog-footer {
+        position: relative;
+        border-top: 1px solid #d3d3d3;
+        text-align: center;
+        padding: 2px;
+    }
+
+    .common-dialog-back .common-dialog .common-dialog-footer a {
+        border: 1px solid #666699;
+        margin: 2px 1em;
+        padding: 1px;
+        cursor: pointer;
+    }
+
+    .common-dialog-back .common-dialog .common-dialog-footer a:hover {
+        opacity: 0.8;
+        color: #f3f3f3;
+    }
+</style>
+<style>
+    @keyframes change {  
+            0%{ text-shadow: 0 0 4px #f00}  
+            50%{ text-shadow: 0 0 40px #f00}  
+            100%{ text-shadow: 0 0 4px #f00}  
+        }  
+
+    .blink {
+        animation: change 3000ms infinite;
+        -webkit-animation: change 3000ms infinite;
+    }
+</style>

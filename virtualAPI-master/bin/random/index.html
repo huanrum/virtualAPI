@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Random</title>
+    <style>
+        body{
+            display: -webkit-flex;
+            display: flex;
+            position: relative;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
+            position: fixed;
+        }
+        textarea{
+            width:45%;
+            height:600px;
+        }
+        button{
+            margin: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <textarea id="input"></textarea>
+    <button id="button">生成</button>
+    <textarea id="output" readonly></textarea>
+    <script>
+        var input = document.getElementById('input');
+        var button = document.getElementById('button');
+        var output = document.getElementById('output');
+
+        input.style.height = document.body.scrollHeight - 50 + 'px';
+        output.style.height = document.body.scrollHeight - 50 + 'px';
+
+        input.onblur = getRandom;
+        button.onclick = getRandom;
+
+        input.value = [
+            ':clientIP',
+            '[ip]',
+            '[DATE]',
+            '[device]',
+            '[10-100]',
+            '[()4]',
+            '[aaa,bbb,100-200]',
+            '[(@)4]',
+            '[service\\tng-mobile\\data\\proxy.json]'
+        ].join('\n\n');
+        
+        function getRandom(){
+            return fetch('/random?test=true', {
+                method: 'post',
+                body: JSON.stringify({data:input.value})
+                }).then(function(req){return req.json();}).then(function(req){
+                output.value = req.data;
+            });
+        };
+    </script>
+</body>
+</html>
