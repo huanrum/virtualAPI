@@ -7,11 +7,16 @@ build
 
 .idea/
 .vscode/
+.vs/
 
 start.sh
 node_modules/
 service/
-backup/
+backup*/
 cache/
-images
+images/
+data/
+files/
 bin/config/web.json
+bin/config/edit.json
+bin/config/software.json
