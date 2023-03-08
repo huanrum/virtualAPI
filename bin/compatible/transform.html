@@ -1,0 +1,1087 @@
+<style class="transform-style">
+  @keyframes example {
+    0% {
+      opacity: 1;
+      margin-left: 0;
+    }
+
+    25% {
+      opacity: 0.75;
+      margin-left: 5px;
+    }
+
+    50% {
+      opacity: 0.5;
+      margin-left: 10px;
+    }
+
+    75% {
+      opacity: 0.75;
+      margin-left: 5px;
+    }
+
+    100% {
+      opacity: 1;
+      margin-left: 0;
+    }
+  }
+
+  @keyframes glow {
+    0%{
+      border-color: #393;
+      box-shadow: 0 0 5px rgba(0, 255, 0, .2), inset 0 0 5px rgba(0, 255, 255, .1), 0 1px 0 #393;
+    }
+
+    100%{
+      border-color: #6f6;
+      box-shadow: 0 0 20px rgba(0, 255, 0, .6), inset 0 0 10px rgba(0, 255, 255, .4), 0 1px 0 #6f6;
+    }
+  }
+
+  /* the element to apply the animation to */
+
+  a[auto] {
+    color: red;
+    animation: exmple 2s infinite;
+  }
+
+  .text-menu {
+    position: fixed;
+    padding: 1em;
+    background: rgba(0,0,0,0.8);
+  }
+
+  .url {
+    cursor: pointer;
+    text-decoration: underline;
+    margin:5px;
+    color: rgb(17, 173, 235);
+  }
+
+  .action {
+    cursor: pointer;
+    margin: 0 8px;
+    color: rgb(60, 102, 11);
+  }
+
+  .cmd {
+    cursor: pointer;
+    margin: 0 8px;
+    color: #ff3333;
+    border-bottom: 1px dotted #ff3333;
+  }
+
+  .anchor {
+    cursor: grab;
+    margin: 0 8px;
+    color: rgb(183, 250, 27);
+    text-decoration: underline;
+  }
+
+  .pre.transform {
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
+
+  .panel-switch .fold {
+    background: rgba(200, 200, 200, 0.5);
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  .table {
+    padding: 10px;
+    color: #ffffff;
+  }
+
+  .table tr:hover,
+  .table .row:hover {
+    background: #333333;
+    color: #ffffff;
+  }
+
+  .table td:hover,
+  .table .cell:hover {
+    background: #00aaef;
+    color: #ffffff;
+  }
+
+  .table tr+tr td {
+    padding: 6px;
+    border-top: 1px solid #ffffff;
+  }
+
+  .table .row+.row {
+    border-top: 1px solid #ffffff;
+  }
+
+  .table .row .cell {
+    display: inline-block;
+    min-width: 160px;
+    height: 36px;
+    padding: 2px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .table tr td {
+    min-width: 160px;
+    height: 36px;
+  }
+
+  .table tr td:first-child {
+    min-width: 60px;
+    color: #999999;
+  }
+
+  .list {
+    margin: 8px;
+  }
+
+  .list li:hover {
+    opacity: 0.6;
+  }
+
+  .code {
+    display: block!important;
+    width: 96%;
+    min-height: 60px;
+    border-radius: 8px;
+    padding: 20px 10px;
+    background: rgba(0,0,0,0.2);
+    color: #ffffff;
+  }
+
+  .panel-switch{
+    position: relative;
+    display: block!important;
+  }
+
+
+
+  .panel-switch.switch-min *:not(a) * {
+    background: none;
+    border: none;
+  }
+
+  .panel-switch>a {
+    position: absolute;
+    cursor: pointer;
+    top: 1px;
+    left: 1px;
+
+    display: flex;
+    align-items: center;
+  }
+
+  .panel-switch>div{
+    margin: 0;
+    padding: 0;
+  }
+  .panel-switch.swith-min>div{
+    display: none;
+  }
+
+  .panel-switch>a>i {
+    display: inline-block!important;
+    width: 12px;
+    height: 12px;
+    border: 1px solid #636363;
+    border-radius: 50%;
+
+    outline: 1px solid;
+    outline-offset: -8px;
+  }
+
+  .panel-switch>a>span {
+    display: inline-block!important;
+    margin-left: 5px;
+    font-weight: bold;
+  }
+
+  .panel-switch.swith-min>i {
+    outline: 3px solid #333333;
+    outline-offset: -10px;;
+  }
+
+  .action-form>div {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .action-form>div>* {
+    margin: 6px;
+  }
+
+  .action-form input{
+    border: none;
+    border-bottom: 1px solid #00aaef;
+    background: none;
+    text-align: center;
+  }
+</style>
+<script class="transform-action">
+  var running = false;
+
+  var isDisabled = function(e){
+    var styleAttribute = e.target.getAttributeNode('style');
+    return /cursor\s*:\s*not\-allowed/.test(styleAttribute && styleAttribute.value);
+  }
+
+  function replaceDialogStr(e, str) {
+    return new Promise(function(resolve){
+      var mathes = str.match(/\?([0-9a-z]+\?)?/ig);
+      if (mathes && mathes.length) {
+        showDialog(e.target.innerText, '<form class="action-form">' + mathes.map(function(m){
+          var ms = m.split('?');
+          return '<div><label>' + ms[1] + '<label><input name="' + ms[1] + '" placeholder="' + ms[2] + '"></div>';
+        }).join('') + '</form>', ['Ok'], function(i, content){
+          var form = content.firstElementChild;
+          mathes.forEach(function(m){
+            str = str.replace(m, form[m.split('?')[1]].value || m.split('?')[2]);
+          });
+          resolve(str);
+        })
+      } else {
+        resolve(str);
+      }
+    });
+  }
+
+  window.stringToObject = function(str){
+    var obj = {};
+    str.replace(/^\s*\?/, '').split('&').forEach(function(item){
+      if(item) {
+        obj[item.split('=')[0]] = parse(item.split('=')[1])
+      }
+    });
+    return obj;
+
+    function parse(value){
+      if(/^\d+$/.test(value)) {
+        return parseFloat(value);
+      }
+      if(/^(true|false)$/.test(value)){
+        return value === 'true';
+      }
+      return value;
+    }
+  };
+
+  window.webTitle = function(url){
+    return new Promise(function(resolve){
+      fetch(location.origin + '/proxy', {
+        method: 'GET',
+        headers: Object.assign(window.stringToObject(location.search), { api: url })
+      }).then(function(i){
+        return i.text();
+      }).then(function(content){
+        var exec = /<title>(.*)<\/title>/.exec(content)
+        if(exec) {
+          resolve(exec && exec[1]);
+        }
+      })
+    });
+  };
+
+  window.action = function(e, runStr){
+    if (isDisabled(e)) {
+      return;
+    }
+    return new Promise(function(succ){
+      replaceDialogStr(e, runStr.replace(/\?{2}:/, '').replace(/\?(((?!:)[\s\S])+):/, window.$data.userdir + '\\$1\\')).then(function(run){
+        var dir = run.split('\\').slice(0, -1).join('\\');
+        var file = run.split('\\').pop();
+        if (/^\{[\s\S]+|\}/.test(run)) {
+          dir = run.replace(/[\{\}]/g, '').split('<br>').map(function(i){return i.trim();}).filter(function(i){return !!i;});
+          file = 'CMD';
+        }
+        if(runing){
+          succ();
+        } else if(!/\.((?!\.)+)/.test(file)) {
+          submit(run, dir).then(succ);
+        } else {
+          showDialog('执行文件', '确定执行下列文件(命令)吗<br><br><strong>' + decodeURIComponent(file) + '</strong>', ['确定'], function(){
+            setTimeout(function(){
+              runing = true;
+            }, 1000);
+            runing = false;
+            submit(dir).then(succ);
+          });
+        }
+      });
+    });
+
+    function submit(run, dir){
+      var cmds = [];
+      if (/^[A-Z]:/.test(dir)) {
+        cmds.push('cd ' + dir);
+      }
+      return fetch(location.origin + '/action/', {
+        method: 'POST',
+        headers: widow.stringToObject(location.search),
+        body: JSON.stringify((dir instanceof Array) ? dir : cmds.concat([
+          'start "" "' + run + '"'
+        ]))
+      }).then(function(i){
+        return i.json();
+      }).then(function(id){
+        if(dir instanceof Array) {
+          var mslist = create(dir.map(function(d){return create('<div><strong>' + d + '</strong></div> => </i><span></span></div>')}));
+          var dialogClose = showDialog('Action', mslist);
+          rubMessage(id, mslist.find('span'), function(){
+            setTimeout(function(){
+              dialogClose();
+            }, 5000)
+          });
+        }
+      })
+    }
+
+    function runMessage(id, mslist, callback, timeout) {
+      timeout = timeout || 60 * 1000 + 1;
+      fetch(location.origin + '/action/' + id, {
+        method: 'GET'
+      }).then(function(i){
+        return i.json();
+      }).then(function(data){
+        data = data || [];
+        if (mslist){
+          data.forEach(function(d){
+            JSON.parse(d.replace(/^!!/,'')).forEach(function(v, i){
+              mslist[i].innerHTML = v;
+            });
+          });
+        }
+        if(!data.filter(function(i){
+          return /^!!/.test(i);
+        }).length) {
+          if (timeout > 500) {
+            setTimeout(function(){
+              runMessage(id, mslist, callback, timeout - 500);
+            }, 500);
+          } else {
+            setTimeout(showDialog('警告','服务器超时'), 2000);
+          }
+        } else {
+          callback(data.filter(function(i){ return /^!!/.test(i);}));
+        }
+      });
+    }
+  };
+
+  window.anchor = function(){
+    if (isDisabled(e)) {
+      return;
+    }
+    (function to(points, level){
+      try{
+        var element = document.getElementById(points.slice(0, level+1).join('-').toLocaleLowerCase());
+        if (element.onclick){
+          element.onclick(true);
+        }else{
+          element.click();
+        }
+        setTimeout(function(){
+          if (points.length > level) {
+            to(points, level+1);
+          } else {
+            element.parentNode.style.background = '#f3f3f3';
+            element.scrollIntoView({block: 'center'});
+            setTimeout(function(){
+              element.parentNode.style.background = '';
+            }, 5000);
+          }
+        }, 50);
+      }catch(e){
+        showDialog(points, e.message);
+      }
+    })();
+  };
+
+  window.newtab = function(){
+    if (isDisabled(e)) {
+      return;
+    }
+    var urls = [];
+    var stopAnimation = (function(){
+      var count = 0;
+      var opacity = e.target.style.opacity;
+      var interval = setInterval(function(){
+        if (e.target) {
+          e.target.style.opacity = (10 - count % 10) / 10;
+        }
+        count += 1;
+      }, 100);
+      return function(){
+        if(e.target) {
+          e.target.style.opacity = opacity;
+        }
+        clearInterval(interval);
+      };
+    })();
+    replaceDialogStr(e, runStr).then(function(str){
+      str = str.replace(/\((((?!\))[\s\S])+)\)/, function($0, $1){
+        urls.push($1);
+        return '($' + (urls.length-1) + ')';
+      });
+
+      Promise.all(urls.map(function(url, index){
+        return new Promise(function(succ){
+          fetch(location.origin + '/proxy', {
+            method: 'GET',
+            headers: {
+              api: url
+            }
+          }).then(function(i){
+            return i.json();
+          }).then(function(rep){
+            var canReplace = false;
+
+            str = str.replace(new RegExp('\\(\\$' + index + '\\)((\\.\\w+)*)'), function($0, $1){
+              return canReplace = eval('rep' + $1) || canReplace;
+            });
+
+            if(canReplace) {
+              window.open(url);
+            }
+            succ();
+          });
+        });
+      })).then(function(){
+        stopAnimation();
+        if(/^\+/.test(str) && !(e.ctrlKey+e.shiftKey+e.altKey)) {
+          var sizeBtn = document.createElement('a');
+          var iframe = document.createElement('iframe');
+          var sizeChange = function(){
+            var self = this;
+            iframe.width = '';
+            iframe.height = '';
+            setTimeout(function(){
+              iframe.width = self.clientWidth;
+              iframe.height = self.clientHeight;
+            }, 100);
+          };
+          showDialog(str.replace(/^\+/, ''), iframe);
+          document.body.style.overflow = '';
+          sizeBtn.innerHTML = '-';
+          sizeBtn.onclick = function(){
+            if(sizeBtn.innerHTML === '-') {
+              iframe.parentNode.parentNode.$className = /(max-dialog)/.exec(iframe.parentNode.parentNode.className);
+              iframe.parentNode.parentNode.className = iframe.parentNode.parentNode.className.replace(/max-dialog/, '');
+              iframe.parentNode.style.display = 'none';
+              sizeBtn.innerHTML = '+';
+            } else {
+              sizeBtn.innerHTML = '-';
+              iframe.parentNode.style.display = '';
+              iframe.parentNode.parentNode.className = iframe.parentNode.parentNode.$className && iframe.parentNode.parentNode.$className[1];
+            }
+
+          };
+          iframe.onload = function(){
+            console.log('iframe onload');
+          };
+          iframe.src = str.replace(/^\+/, '');
+          setTimeout(function(){
+            iframe.parentNode.parentNode.parentNode.style.position = 'unset';
+            iframe.parentNode.parentNode.style.position = 'fixed';
+            iframe.parentNode.addEventListener('sizechange', sizeChange);
+            iframe.parentNode.style.padding = '0';
+            iframe.parentNode.parentNode.querySelector('.header a').after(sizeBtn);
+            sizeChange.apply(iframe.parentNode);
+          });
+        } else{
+          windopw.open(str.replace(/^\+/, ''));
+        }
+      });
+    })
+  };
+
+  window.editors = (function(){
+    return function(element){
+
+    };
+  })();
+
+  window.keyReplace = (function(){
+    var baseReplaces = {
+      9: '  '
+    };
+    var complements = {
+      '(': ')',
+      '[': ']',
+      '{': '\n\n}',
+      '##': '\n\n!##',
+      '#{': '\n\n}#'
+    };
+    function insterValue(target, value, keep){
+      var index = target.selectionStart + (keep ? 0 : value.length);
+      target.value = target.value.slice(0, target.selectionStart) + value + target.value.slice(target.selectionEnd);
+      setTimeout(function(){
+        target.setSelectionRange(index, index);
+      });
+    }
+    return function (element, replaces) {
+      var autoComplement = true;
+      var repalceObject = Object.assign({}, baseReplaces, replaces ||{});
+      if (element.nodeName === 'DIV') {
+        element.setAttribute('contenteditable', true);
+      }
+      if (element.nodeName === 'TEXTAREA' || element.nodeName === 'DIV'){
+        element.onkeydown = function(e){
+          if(repalceObject[e.keyCode]) {
+            e.preventDefault();
+            e.stopPropagation();
+            insterValue(e.target, repalceObject[e.keyCode]);
+          }
+          autoComplement = !/\S{2}/.test(e.key);
+        };
+        element.onkeyup = function(){
+          var activeCharts = /([^\s]*)$/m.exec(e,target.value.slice(0, e.target.selectionStart).split(/[\r\n]/).pop());
+          var replace = activeCharts && complements[activeCharts[1]] || complements[e,target.value[e.target.selectionStart - 1]];
+          if (autoComplement && replace) {
+            insterValue(e.target, replace, true);
+          }
+          setTimeout(function(){ autoComplement = false; });
+        };
+
+        element.onpaste = function(){
+          if (e.clipboardData.files.length === 1) {
+            var file = e.clipboardData.files[0];
+            var reader = new FileReader();
+            reader.onload = function(){
+              var src = '/io/' + Date.now() + '^' + file.name;
+              fetch(src, {method: 'POST', body: this.result}).then(function(){
+                insterValue(e.target, '\r\n[?HTTP:' + src.replace(/\s/g, '%20') + ']\r\n');
+              });
+            };
+            reader.readAsDataURL(file);
+          }
+
+          var htmlDTI = Array.prototype.filter.call(e.clipboardData.item, dti => /html/.test(dtio.type)).pop();
+          if (htmlDTI && confirm('使用带格式的文本')) {
+            e.preventDefault();
+            e.stopPropagation();
+            htmlDTI.getAsString(function(res){
+              var src = '/io/' + Date.now() + '^post.html';
+              fetch(src, {method: 'POST', body:res}).then(function(){
+                insterValue(e.target, '\r\n[?HTTP:' + src.replace(/\s/g, '%20') + ']\r\n');
+              });
+            })
+          }
+        };
+      }
+
+      return element;
+    };
+  })();
+
+  /**
+   * @public 绘制曲线图
+   * size 绘制svg的大小: [width, height, padding] 每个都是数字
+   * items 绘制需要的数据(数组): [[x1,y1,data1], [x2,y2,data2],...]
+   */
+  window.chartRender = function(size, items, showText){
+    var min = [Math.min.apply(Math, item.map(function(i){ return +i[0];})), Math.min.apply(Math, item.map(function(i){ return +i[1];}))];
+    var max = [Math.max.apply(Math, item.map(function(i){ return +i[0];})), Math.max.apply(Math, item.map(function(i){ return +i[1];}))];
+    var points = items.map(function(i){
+      return {
+        data: i,
+        x: Math.floor(size[2] + (size[0] - size[2]*2) * (i[0]-min[0]) / (max[0] - min[0])),
+        y: Math.floor(size[1] - size[2] - (size[1] - size[2]*2) * (i[1]-min[1]) / (max[1] - min[1]))
+      };
+    });
+    return '<svg style="width:' + (size[0]) + 'px;height:' + (size[1]) + 'px"><g><path style="fill:transparent;stroke:#000;stroke-width:2" d="' + points.map(function(item, i){
+      return (i ? 'L' : 'M') + item.x + ',' + item.y;
+    }).join(' ') + ' " /></g><g>' + points.map(function(item){
+      return '<g style="cursor:pointer;">' + [
+        '<circle r="2" cx="' + item.x + '" cy="' + item.y + '" stroke="black" stroke-width="2" fill="#339933" />',
+        showText ? ('<text x="' + (item.x - size[2]) + '" y="' + (item.y -3) + '" fill="red">' + (item.data[item.data.length - 1]) + '</text>') : '',
+        '<title>' + (item.data.join('\n')) + '</title>'
+      ].join('') + '</g>';
+    }).join(' ') + '</g>+</svg>';
+  };
+
+</script>
+
+<script class="transform-function">
+  /*
+  * 把一个数{num}拆分成[bit]位数组, 按2进制然后倍数
+  */
+  Math.tobits = function(num, bit){
+    var result = [];
+    var zoom = 1;
+    var value = num;
+    bit = bit || 4;
+
+    for(var i = Math.pow(2, bit) - 1; i > 0; i--) {
+      if(num % i === 0) {
+        value = i;
+        zoom = num / i;
+        break;
+      }
+    }
+
+    for (var i = 0; i < bit; i++) {
+      result.push(!!(value & Math.pow(2, i)));
+    }
+    return result.map(function(i){
+      return i * zoom;
+    });
+  };
+
+  String.prototype.style = (function(){
+    var styles = {};
+    setTimeout(function(){
+      'glow'.style({
+        animation: 'glow 800ms ease-out infinite alternate'
+      }),
+      'naselect'.style({
+        userSelect: 'none'
+      })
+    });
+    return function(style){
+      if(!style) {
+        style = styles[this] || {};
+        return Object.keys(style).map(function(k){
+          return k.replace(/[A-Z]/g, function($0){return '-' + $0.toLocaleLowerCase() + ':' + styles[k] + ';'});
+        }).join('');
+      } else {
+        styles[this] = Object.assign(styles[this] || {}, style);
+      }
+    };
+  })();
+
+  String.prototype.transform = (function(){
+    var transformFn = [table, list, code, fold, script, chart], baseTransform = {};
+    String.transform = function() {
+      Array.prototype.push(transformFn, arguments);
+    }
+
+    function transformDone() {
+      Array.prototype.forEach.call(document.getElementsByClassName('code'), function(el){
+        clearTimeout(el.$timeout);
+        el.style.height = '';
+        el.$timeout = setTimeout(function(){
+          el.style.height = el.scrollHeight - 16 + 'px';
+        });
+      });
+    }
+
+    function addSwitch(close, label, str) {
+      window.onswitch = window.onswitch || function(e){
+        var parent = el.target.parentNode;
+        while (parent && !/panel\-switch/.test(parent.className)) {
+          parent = parent.parentNode
+        }
+        if (/swithc-min/.test(parent.className)) {
+          parent.className = parent.className.replace(/swithc-min/g, '');
+        } else {
+          parent.className = parent.className =  + ' switch-min';
+        }
+      }
+      return [
+        '<div class="panel-switch ' + (close ? 'switch-min' : '') + '"><div>' + str + '</div><a tabindex="0" onclick="onswitch(event)"><i></i><span>' + label + '</span></a></div>'
+      ].join('');
+    }
+
+    return function(fn) {
+      var replaces = [], self = this;
+      if (fn instanceof Array) {
+        replaces = fn;
+        fn = '';
+      }
+      transformFn.forEach(function(fn){
+        if (typeof fn === 'string') {
+          fn = baseTransform[fn] || function(i){return i;};
+        }
+        self = fn(self, replaces);
+      });
+
+      setTimeout(transformDone, 50);
+
+      return self
+        .replace(/<([^[\s>]+)((?!>)[\s\S])*\/>/g, function($0,$1){console.log($0,$1);return $0.replace('/>', '></' + $1 + '>');})
+        .replace(fn || /^^$$/, function(s){
+          replaces.push(s);
+          return '@@' + (replaces.length-1) + '@@';
+        })
+        // 操作
+        .replace(/\{(((?![\{\}])[\s\S])+)\}/g, function(s, $1){
+          replaces.push(s.replace(/\\/g, '\\\\'));
+          return '@@' + (replaces.length-1) + '@@';
+        })
+        // 链接
+        .replace(/\\\[((?!\\\[)[\s\S])*\\\]/g, function(s){
+          replaces.push(s);
+          return '@@' + (replaces.length-1) + '@@';
+        })
+        .replace(/\?HTTP:/ig, location.origin)
+        .replace(/(\S*)\[(https?:((?!\])[\s\S])*)\]\s/mg, function(s){return img(s, replaces);})
+        .replace(/(\s|^)((\S*)\[(((?!\])[\s\S])*)\])?(\{((?![\{\}])[\s\S])+\})/mg, trim(action))
+        .replace(/(\s|^)((\S*)\[(((?!\])[\s\S])*)\])?(\+?(https?|chrome|file):\/\/((?![\s\r\n\t])[\s\S])*)/g, trim(url))
+        .replace(/(\s|^)((\S*)\[(((?!\])[\s\S])*)\])?(([A-Z]|\?((?!:)[\s\S])+):\\((?![\s\r\n\t])[\s\S])*)/g, trim(file))
+        .replace(/(\s|^)((\S*)\[(((?!\])[\s\S])*)\])(#((?![\s\r\n\t])[\s\S])*)/g, trim(anchor))
+        .replace(/(\s|^)((\S*)\[(((?!\])[\s\S])*)\])\((((?![\s\r\n\t])[\s\S])*)\)/g, trim(event))
+        // 字体样式
+        .replace(/(\S*)\[(((?!\])[\s\S])+)\]/g, function(str, $1, $2){
+          return '<span style="$1">$2</span>'
+          .replace($1, style($1)).replace('$2', $2.transform())
+        })
+        .replace(/@@[0-9]+@@/g, function(s){
+          return replaces[s.replace(/@/g, '')].replace(/\\\[/,'[').replace(/\\\]/,']');
+        })
+        .replace(/<\!\-\-((?!.)[\s\S])+\-\->/g, element)
+        .replace(/(\r\n)/g, '<br>').replace(/(\r|\n)/g, '<br>')
+        .replace(/@@![0-9]+@@/g, function(s){
+          return replaces[s.replace(/[@!]/g, '')].replace(/\\\[/,'[').replace(/\\\]/,']');
+        });
+    };
+
+    function trim(fn){
+      return function(str){
+        var ss = /^(\s*)/.exec(str);
+        return (ss?ss[0]:'') + fn.apply(this, arguments);
+      }
+    }
+
+    function replaceSpace(str) {
+      return str.replace(/\\\\s/g, ' ');
+    }
+
+    function img(str, replaces) {
+      var matchs = /(\S*)\[(https?((?!\])[\s\S])*)\]\s+/mg.exec(str);
+      var node = (!/\.[^\/]+$/.test(matchs[2]) || /\.html/.test(matchs[2])) ? 'iframe' : 'img'
+      var id = 'i-' + matchs[2].split('/').pop().replace(/([^\w]|\.)/gi, '');
+      replaces.push(matchs[2]);
+      if (node === 'iframe') {
+        setTimeout(function(){
+          var dom = document.querySelector('#' + id);
+          dom.style.width = document.contentDocument.body.scrollWidth + 'px';
+          dom.style.height = document.contentDocument.body.scrollHeight + 'px';
+        }, 1000);
+      }
+      return '<' + node + ' id="' + id + '" src="@@"' + (replaces.length - 1) + '@@ style="' + style(matchs[1]) + '" onclick="newtab(event,\'+' + (replaces.length - 1) + '@@\')">';
+    }
+
+    function url(str) {
+      var matchs = /(\S*)\[(((?!\])[\s\S])*)\]/.exec(str);
+      var matchUrls = /(\+?(https?|chrome|file):\/\/((?![\s\r\n\t])[\s\S])*)/.exec(str);
+      var title = matchs && matchs[2].replace(/\$[+\-]?[0-9]+\s*:/, '');
+      var auto = /\$([+\-]?[0-9]+)\s*:/.exec(matchs ? matchs[2] : '');
+      return '<a tabindex="0" class="url" onclick="newtab(event,\'$1\')" style="$3" title="$1" $4>$2</a>'
+        .replace('$1', replaceSpace(matchUrls[1]))
+        .replace('$2', replaceSpace(title.transform() || matchUrls[1]).trim())
+        .replace('$3', maths ? style(maths[1]) : '')
+        .replace('$4', (auto ? ('auto="' + auto[1] + '"') : '') + (title ? '' : ' $title="title"'));
+    }
+
+    function file(str) {
+      var matchs = /(\S*)\[(((?!\])[\s\S])*)\]/.exec(str);
+      var matchUrls = /(([A-Z]|\?((?!:)[\s\S])+):\\((?![\s\r\n\t])[\s\S])*)/.exec(str);
+      var auto = /\$([+\-]?[0-9]+)\s*:/.exec(matchs ? matchs[2] : '');
+      return '<a tabindex="0" class="action" onclick="action(event,\'$1\')" style="$3" title="$1" $4>$2</a>'
+        .replace('$1', replaceSpace(matchUrls[1].replace(/\\/g, '\\\\')))
+        .replace('$2', replaceSpace((matchs ? match[2].replace(/\$[+\-]?[0-9]+\s*:/, '').transform() : (matchUrls[0].split('\\').pop())).trim() || (matchUrls[0].split('\\').pop())))
+        .replace('$3', maths ? style(maths[1]) : '')
+        .replace('$4', (auto ? ('auto="' + auto[1] + '"') : ''));
+    }
+
+    function anchor(str) {
+      var matchs = /(\S*)\[(((?!\])[\s\S])*)\]/.exec(str);
+      var matchUrls = /(#((?![0-9a-fA-F])[\s\S])((?![\s\r\n\t])[\s\S])*)/.exec(str);
+      var auto = /\$([+\-]?[0-9]+)\s*:/.exec(matchs ? matchs[2] : '');
+      return '<a tabindex="0" class="anchor" onclick="anchor(event,\'$1\')" style="$3" title="$1" $4>$2</a>'
+        .replace('$1', replaceSpace(matchUrls[0].replace(/#/g, '').replace('\+', ' -> ')))
+        .replace('$2', replaceSpace((matchs ? match[2].replace(/\$[+\-]?[0-9]+\s*:/, '').transform() : (matchUrls[0].split('\\').pop()))
+            .trim() || (matchUrls[0].split('\\').pop())))
+        .replace('$3', maths ? style(maths[1]) : '')
+        .replace('$4', (auto ? ('auto="' + auto[1] + '"') : ''));
+    }
+
+    function action(str) {
+      var natchs = /((\S*)\[(((?!\])[\s\S])*)\])?(\{((?![\{\}])[\s\S])+\})/.exec(str);
+      '<a tabindex="0" class="cmd" onclick="action(event,\'$1\')" style="$3" title="$1" $4>$2</a>'
+        .replace('$1', replaceSpace(matchs[6]))
+        .replace('$4', replaceSpace(matchs[6].replace(/@@/, '@@!')))
+        .replace('$2', replaceSpace(matchs[3] || 'Action').transform())
+        .replace('$3',style(maths[1] || ''));
+    }
+
+    function event(str) {
+      var natchs = /((\S*)\[(((?!\])[\s\S])*)\])\((((?![\s\r\n\t])[\s\S])*)\)/.exec(str);
+      '<a tabindex="0" class="url" onclick="action(event,\'$1\')" style="$3">$2</a>'
+        .replace('$1', replaceSpace(matchs[5]))
+        .replace('$2', replaceSpace(matchs[3] || 'Event').transform())
+        .replace('$3',style(maths[1] || ''));
+    }
+
+    function element(str) {
+      var strs = /<\!\-\-((?!.)[\s\S])+\-\->/.exec(str)[1].split(':');
+      var elString = getElString(strs[0]);
+      var values = (strs[1] || 'solid+#333').split('+');
+      return elString
+          .replace(/\(\$(\d+)\|([^)]+)\)/g, function($0, $1, $2){
+            return values[$1] || $2 || '1';
+          })
+          .replace(/\$(\d+)/g, function($0, $1){
+            return values[$1] || '1';
+          });
+
+      function getElString(type) {
+        switch(type) {
+          case 'line':
+            return '<pre style="display:block;margin:0;border-bottom:$1px $0 ($2|#333)"></pre>';
+          case 'icon':
+            return '<pre class="icon $0" style="display:block;margin:0;zoom:$1"></pre>';
+          default:
+            return str;
+        }
+      }
+    }
+
+    function style(str) {
+      str = (str || '').toString();
+      function toFourValue(i, unit){
+        unit = unit || 'px';
+        return Math.tobits(parseFloat(i)).join(unit + ' ') + unit;
+      }
+      //5
+      //#000000颜色
+      //#fff背景
+      //bold字体粗细
+      //5dotted#000边框
+      return str.split(',').map(function(i){
+        if (/(pointer|help|move|progress|wait)/.test(i)) {
+          return 'cursor: ' + i + ';';
+        } else if (/(disabled|readonly)/.test(i)) {
+          return 'cursor:not-allowed;opacity:0.6;text-decoration:line-through;';
+        } else if(/^[0-9]+$/.test(i)) {
+          return 'font-size:' + i + 'px';
+        } else if(/^[0-9]+\.[0-9]+$/.test(i)) {
+          return 'zoom:' + i;
+        } else if(/^o[0-9]+\.[0-9]+$/i.test(i)) {
+          return 'opacity:' + i.replace(/o/i, '');
+        } else if(/^p[0-9]+$/i.test(i)) {
+          return 'padding:' + toFourValue(i.replace(/p/i, ''));
+        } else if(/^m[0-9]+$/i.test(i)) {
+          return 'margin:' + toFourValue(i.replace(/m/i, ''));
+        } else if(/^#[0-9a-f]{6}$/i.test(i)) {
+          return 'color: ' + i + ' ';
+        } else if(/^#[0-9a-f]{3}$/i.test(i)) {
+          return 'background: ' + i + ' ';
+        } else if(/^(bold|lighter|normal)$/i) {
+          return 'fontweight:' + i + ' ';
+        } else if(/^(left|right|center)$/.test(i)) {
+          return 'display: block;text-align:' + i + '';
+        } else if(/^[0-9]+(dotted|dashed|solid|double|groove|ridge|inset|outset)?(#[0-9a-f]{3})?$/.test(i)) {
+          return 'border-width:$0;border-style:$1border-color:$2;'
+              .replace('$0', toFourValue(i))
+              .replace('$1', i.split('#').shift().replace(/[0-9]/g,'') || 'solid')
+              .replace('$2', i.split('#')[1] || '000');
+        } else if(/^(overline|line-through|underline|blink)/.test(i)) {
+          return 'text-decoration: $0'.replace('$0', i)
+        } else if(/^_/.test(i) && window.$style) {
+          return window.$style(i);
+        } else {
+          return i.style();
+        }
+      }).filter(function(i){return i;}).join(';');
+    }
+
+    function needGetData(replaces, contentFn) {
+      function $fetch() {
+        return fetch.apply(window, arguments).then(function(i){
+          return i.text();
+        }).then(function(res){
+          try{ return JSON.parse(res)} catch(e){}
+          return res;
+        })
+      }
+      return function ($0, $1, $2, $3, $4) {
+        var urls = /(\[(((?!\])[\s\S])+)\])?https?:\/\//.exec($2);
+        if (urls) {
+          var $$2 = ($2.split('+').op() || '').replace(/\?HTTP:/ig, location.origin);
+          var id = Date.now();
+          var url = $$2.replace(urls[2],'').replace(/\?{2}:/, '').replace(/=\?(((?!:)[\s\S])+):/, '=' + window.$data.userdir + '\\$1\\');
+          $fetch(url).then(function(data){
+            var dataStr = data;
+            if(data instanceof Array){
+              var fields = {};
+              data.forEach(function(i){Object.keys(i).forEach(function(f){fields[f] = true;})});
+              dataStr = Object.keys(fields).join(' ') + '\n' + data.map(function(item){
+                return Object.keys(fields).map(function(f){
+                  return (item[f] || '').toString().replace(/\s/g, '<br>');
+                }).join(' ');
+              }).join('\n');
+            } else if(typeof data === 'object'){
+              dataStr = Object.keys(data).map(function(i){
+                return '[' + i + ']' + urls[2] + encodeURI(i);
+              }).join('\n');
+            }
+            var dom = document.getElementById(id);
+            dom.innerHTML = contentFn($0, $1, /#/.test($2) ? $2.split('+')[0] : '', '', dataStr).transform(replaces);
+            document.replaceWith(dom.children[0]);
+          });
+          return '<div id="' + id + '"></div>';
+        } else {
+          return contentFn($0, $1, $2, $3, $4.replace(/(\/\/.*$)|(\/\*(.|\s)*?\*\/)/, '').replace(/ /g, '&nbsp;'));
+        }
+      };
+    }
+
+    /**
+     * 折叠
+    */
+    function fold(content, replaces) {
+      return content.replace(/\s##fold(#+(((?!\n)[\s\S])*))?(((?!\n!##\n)[\s\S])*)\n!##/gim, needGetData(replaces, function($0, $1, $2, $3, $4){
+        return addSwitch(/^##/.test($1), $2.transform() || 'Fold', '<div readonly="true" class="fold">' + ($4.replace(/(&nbsp;)+/g,' ')) + '</div>');
+      }));
+    }
+
+    /**
+     * 脚本执行
+     */
+    function script(content, replaces){
+      return content.replace(/\s##+\n(((\n!##\n)[\s\S])*)\n!##/.gim, function($0, $1, $2, $3, $4){
+        var id = 'script-' + Date.now();
+        setTimeout(function(){
+          eval('function(output){' + $1 + '}')(function(){
+            var showEl = document.querySelector('#' + id);
+            if(!showEl) {return;}
+            if(text){
+              showEl.innerHTML += '<br>' + text.toString().transform(replaces);
+            } else {
+              showEl.innerHTML = '';
+            }
+          })
+        }, 10);
+        return '<div readonly="true" class="script" id="' + id + '"></div>';
+      })
+    }
+
+    /**
+     * ##code# 是默认打开 ##code##是默认关闭
+     */
+    function code(content, replaces){
+      return content.replace(/\s##code(#+(((?!\n)[\s\S])*))?(((?!\n!##\n)[\s\S])*)\n!##/gim, needGetData(replaces, function($0, $1, $2, $3, $4){
+        replaces.push($4.format('js'));
+        return addSwitch(/^##/.test($1), $2.transform() || 'Fold', '<div readonly="true" class="fold">@@!' + (replaces.length -1) + '@@</div>');
+      }));
+    }
+
+    function list(content, replaces){
+      var index = 'list-' + Date.now();
+      return content.replace(/\s##list(#+(((?!\n)[\s\S])*))?(((?!\n!##\n)[\s\S])*)\n!##/gim, needGetData(replaces, function($0, $1, $2, $3, $4){
+        var styles = [];
+        var olist = $4.split('\n').map(function(row){
+          if(/^\s*$/.test(row)){
+            return '';
+          }
+          var styleStr = /#(\S+{[\S ]+})#/.exec(row);
+          if(styleStr) {
+            styleStr.push('.' + index + ' ' + styleStr[1].replace('&nbsp;', ' ').replace(/{([\S ]+)}/, function($0,$1){return '{' + style($1) + '}'}))
+            return '';
+          }
+          replaces.push(row.replace('&nbsp;', ' ').transform());
+          return '<li> @@!' + (replaces.length -1) + '@@</li>';
+        }).join('');
+        if(styles.length) {
+          replaces.push('<style>@content@</style>'.replace('@content@', styles.join('\n')));
+        }
+
+        return addSwitch(/^##/.test($1), $2.transform() || 'List', (styles.length ? ( '@@!' + (replaces.length -1) + '@@') : '') + '<br><ol class="list ' + index + '">' + olist + '</ol>');
+      }));
+    }
+
+    function table(content) {
+      return content.replace(/\s##table(#+(((?!\n)[\s\S])*))?(((?!\n!##\n)[\s\S])*)\n!##/gim, needGetData([], function($0, $1, $2, $3, $4){
+        var rowCount = 0;
+        var styleExec = $2.replace(/\{([^\n]+)\}/, '').trim().transform();
+        var title = $2.replace(/\{([^\n]+)\}/, '').trim().transform();
+        return addSwitch(/^##/.test($1), title || 'Table', '<table class="table" cellpadding="2" cellspecing="0"' + style(styleExec && styleExec[1]) + '">' + $4.split('\n').map(function(row){
+          if(/^\s*$/.test(row)) {
+            return '';
+          }
+          var replaces = [];
+          var rowReplace = row.replace(/\[((?!\])[\s\S])+\]/g, function($0){
+            replaces.push($0);
+            return '$$' + (replaces.length - 1);
+          });
+          rowCount++;
+          return '<tr><td>' + rowCount + '</td>' + rowReplace.replace(/(&nbsp;)/+g, '').split(/\s+/g).map(function(cell){
+            if(cell) {
+              return '<td> ' + (' ' + cell + ' ').replace(/\$\$([0-9]+)/, function($0,$1){return replaces[$1];}).transform() + '</td>';
+            } else {
+              return '';
+            }
+          }).join('') + '</tr>';
+        })).join('') + '</table>';
+      }));
+    }
+
+    /**
+     * 图表
+     */
+    function chart(content, replaces) {
+      return content.replace(/\s###?chart[^#]*(#+(((?!\n)[\s\S])*))?(((?!\n!##\n)[\s\S])*)\n!##/gim, needGetData(replaces, function($0, $1, $2, $3, $4){
+        var id = 'chart-' + Date.now();
+        setTimeout(function(){
+          var cExec = /\s###?chart\(([^#]*)\)/.exec($0);
+          var panel = document.querySelector('#' + id);
+          var react = panel;
+          while(!(react.getBoundingClientRect().width + react.getBoundingClientRect().height)) {
+            react = react.parentNode;
+          }
+          panel.innerHTML = render(react.getBoundingClientRect(), cExec?cExec[1]:'', $4, /^\\s*###/.test($0));
+        });
+        return  addSwitch(/^##/.test($1), $2.transform() || 'Chart', '<div readonly="true" class="chart" id="' + id + '"></div>');
+      }));
+
+      function render(clientRect, conversionStr, content, showText){
+        var splitRegex = /[.:|]/;
+        var list = content.split(/\n/).filter(function(i){return i.trim();})
+        var size = [Math.max(600, clientRect.width), Math.max(400, clientRect.height), 60];
+        var items = [];
+        list.forEach(function(i){
+          return items.push(conversion(conversionStr.toLocaleUpperCase().split(splitRegex, i.split(splitRegex), items[items.length-1]).concat([i])))
+        });
+        return window.chartRender(size, items, showText);
+      }
+
+      function conversion(types, list, prelist){
+        var cFns = {D:data,W:weight};
+        return list.map(function(item, index){
+          if(cFns[types[index]]){
+            return cFns[types[index]](item, prelist?prelist[index]:[]);
+          }else {
+            if(/^[+-]\d+$/.test(item)){
+              return + item + prelist[item];
+            }else{
+              return item;
+            }
+          }
+
+        });
+
+        function date(item, preitem){
+          if(/^[+-]\d+$/.test(item)){
+            var predate = new Date(+preitem);
+            return +new Date(predate.getFullYear(), predate.getMonth(), predate.getDate());
+          }
+          var dates = /(\d{4})?(\d{2})(\d{2})/.exec(item);
+          dates[1] = dates[1] || (new Date().getFullYear() - (dates[2]>new Date().getMonth()?1:0))
+          return +new Date(+dates[1], +dates[2], +dates[3]);
+        }
+
+        function weight(item, preitem){
+          if(/^[+-]\d+$/.test(item)){
+            return + item + prelist[item];
+          }
+          return +(item<8000?(item*2):item);
+        }
+      }
+    }
+  })();
+</script>

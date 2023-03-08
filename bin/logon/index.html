@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Logon List</title>
+  <style>
+    div>fieldset>div{
+      display: none;
+    }
+    div>fieldset>legend{
+      color:#00AAEF;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    div fieldset+fieldset{
+      margin-top: 20px;
+    }
+    div>fieldset fieldset{
+      display: inline-block;
+    }
+    #showPanel>div {
+      margin: 10px;
+    }
+    #showPanel a {
+      margin: 2px 10px;
+      padding: 4px;
+      background:#00aaef;
+      border-radius: 8px;
+      color: #ffffff;
+    }
+    .logon-content>div {
+      margin: 20px 25px;
+    }
+    .logon-content input {
+      width: 96%;
+      border: none;
+      background: none;
+    }
+    </style>
+    <!--html>/../compatible/native.html</html-->
+    <!--html>/../compatible/dialog.html</html-->
+  </head>
+    
+  <body>
+    <div id="showPanel">... Waitting develop</div>
+    <script>
+      var showPanel = document.querySelector('#showPanel');
+      window.$data.logins.forEach(function(item){
+        var row = document.createElement('div');
+        var action = document.createElement('a');
+        var title = document.createElement('span');
+        action.innerHTML ='Logout';
+        title.innerHTML = item.username ?(item.username  + '(' + item.ip + ')') : item.ip;
+        row.appendChild(action);
+        row.appendChild(title);
+        showPanel.appendChild(row);
+        action.onclick = function(){
+          fetch('?ip=' + item.ip).then(function(){
+            showPanel.removeChild(row);
+          });
+        };
+      });
+          
+      var redirectFn = function(){
+        var redirect = location.search.split('&').filter(function(i){return /redirect=/.test(i);}).pop();
+          var redirectUrl = redirect.split('=')[1];
+          if(redirectUrl){
+            location.href = atob(redirectUrl);
+          }
+        };
+        
+        if(window.$data.ip){
+          var content = document.createElement('div');
+          var answer = document.createElement('div');
+          var username = document.createElement('div');
+          var message = document.createElement('div');
+          var answerInput = document.createElement('input');
+          var usernameInput = document.createElement('input');
+          answerInput.placeholder = '服务器ip或者机器名';
+          usernameInput.placeholder = '用户名, 可为空';
+          answer.appendChild(answerInput);
+          username.appendChild(usernameInput);
+          content.appendChild(answer);
+          content.appendChild(username);
+          content.appendChild(message);
+          content.className = 'logon-content';
+          showDialog('设置的登陆信息', content, ['登陆'], function(){
+            if(answerInput.value){
+              return fetch('?answer=' + answerInput.value + '&username=' + usernameInput.value).then(function(res){
+                if(res.status >= 400){
+                  res.json().then(function(error){message.innerHTML = error.message;});
+                  return false;
+                }
+                redirectFn();
+              });
+            }else{
+              return false;
+            }
+          });
+        } else {
+          redirectFn();
+        }
+ 
+  </script>
+</body>
+
+</html>

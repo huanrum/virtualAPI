@@ -1,0 +1,39 @@
+<script>
+  var extendFn = function(fn){return !/\d+$/.test(location.href) ? fn:function(){}};
+
+  window.getRelease = function (str){
+    var date = new Date(str || new Date());
+    return date.getYear() * 4 + Math.floor((date.getMonth() + 1) / 3)- 419
+  };
+  
+  window.$style = function (str){
+    var current = str.replace(/_hd/i,'');
+    var release = (getRelease()- 49) + '' + (new Date().getMonth()- 1) % 3;
+    if(current > release){
+      return 'color:#ffffff';
+    } else if(current < release){
+      return 'color:#1b9b1b';
+    }
+  };
+  
+  window.save = extendFn(function save(item, data){
+    var note = location.pathname.split(/[\\\/]/).filter(Boolean).shift();
+    fetch(location.origin + '/' + note + '/' + item, { 
+      method: 'POST',
+      headers: window.stringToObject(location.search),
+      body: JSON.stringify(data)
+    });
+  });
+  
+  window.update = extendFn(function update(data,from,to){
+    var note = location.pathname.split(/[\\\/]/).filter(Boolean).shift();
+    fetch(location.origin + '/' + note,{
+      method: 'POST',
+      headers: window.stringToObject(location.search),
+      body: JSON.stringify({ 
+        data: data, from: from, to: to
+      })
+    });
+  });
+
+</script>

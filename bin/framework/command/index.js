@@ -14,7 +14,7 @@
     Object.keys(cacheData).forEach(function(i){keys[i.toLocaleUpperCase()] = i;});
 
     return new Proxy(keys,{set:function(target, name, value){
-        //console.log(target, name, value);
+        //helper.console(target, name, value);
         return new Promise(function (resolve) {
             var method = target[name];
             if(!(value instanceof Array)){

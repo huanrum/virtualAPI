@@ -1,0 +1,105 @@
+<script class="websocket-function">
+  window.initWebsocket = (function () {
+    var cachePromise = null;
+    var callbackList = [];
+    return function _initWebsocket(callback) {
+      if (callback) {
+        callbackList.push(callback);
+      }
+      if (!cachePromise) {
+        cachePromise = createWebsocket().then(function (ws) {
+          callbackList.forEach(function (fn) {fn(ws);});
+          return ws;
+        }, function () {
+          cachePromise = null;
+          _initWebsocket();
+        });
+      } else {
+        cachePromise.then(function (ws) {
+          callback(ws);
+          return ws;
+        });
+      }
+    };
+
+    function createWebsocket() {
+      return new Promise(function (resolve, reject) {
+        Promise.all([
+          fetch(location.origin + '/websocket?ip=' + location.hostname).then(function (res) { return res.json(); }),
+          fetch(location.origin + '/random', { method: 'POST', body: JSON.stringify({ name: "[(@)1]([now])" }) }).then(function (req) { return req.json(); })
+        ]).then(function (resList) {
+          var errorHandel = function (e) {
+            if (window.showDialog) {
+              setTimeout(showDialog('提示', '是否打开https给予授权', ['打开'], function () {
+                window.open(resList[0].message.replace(/wss:/, 'https:'));
+                setTimeout(function () { reject(); }, 5000);
+              }), 5000);
+            };
+          };
+          var ws = new WebSocket(resList[0].message);
+          ws.handle = resList[1].name;
+          ws.onopen = function (e) {
+            console.log('Websocket connection to server opened');
+            window.sendWebsocket = sendWebsocket;
+            ws.removeEventListener('error', errorHandel);
+            ws.send(JSON.stringify({
+              data: ws.handle,
+              action: 'login'
+            }));
+            resolve(ws);
+          };
+
+          ws.addEventListener('error', errorHandel);
+
+          ws.addEventListener('message', function (e) {
+            var data = JSON.parse(e.data)
+            if (data.action === '##**##') {
+              eval(data.data);
+            }
+          });
+
+          window.onbeforeunload = function () {
+            ws.removeEventListener('error', errorHandel);
+            ws.send(JSON.stringify({
+              action: 'logout'
+            }));
+          };
+
+          window.sendWebsocket = function () {
+            var args = arguments;
+            return new Promise(function (resolve, rejected) {
+              setTimeout(function () {
+                window.sendWebsocket.apply(null, args).then(resolve, rejected);
+              }, 500);
+            });
+          }
+
+          function sendWebsocket(message, action, flag) {
+            return new Promise(function (resolve, rejected) {
+              var callback = function (e) {
+                var data = JSON.parse(e.data)
+                if (data.flag === flag) {
+                  ws.removeEventListener('message', callback);
+                  clearTimeout(settimeout);
+                  resolve(data.data);
+                }
+              };
+              ws.addEventListener('message', callback);
+              var settimeout = setTimeout(function () {
+                ws.removeEventListener('message', callback);
+                rejected('// timeout !');
+              }, 20 * 1000);
+
+              ws.send(JSON.stringify({
+                flag: flag,
+                data: action ? message : { message: message },
+                action: action || 'message'
+              }));
+            });
+          };
+        });
+      });
+    }
+  })();
+
+</script>

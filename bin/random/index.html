@@ -19,17 +19,24 @@
         textarea{
             width:45%;
             height:600px;
+            background: transparent;
         }
         button{
             margin: 1rem;
         }
     </style>
+    <!--html>/../compatible/native.html</html-->
 </head>
 <body>
+    <div class="background-fixed background-02"></div>
     <textarea id="input"></textarea>
     <button id="button">生成</button>
     <textarea id="output" readonly></textarea>
     <script>
+        window.get = function(temp){
+            return fetch('/random?test=true', {method:'POST',body:JSON.stringify(temp)}).then(function(req){return req.json();});
+        };
+
         var input = document.getElementById('input');
         var button = document.getElementById('button');
         var output = document.getElementById('output');
@@ -42,21 +49,18 @@
 
         input.value = [
             ':clientIP',
+            '[hostname]',
             '[ip]',
             '[DATE]',
             '[device]',
             '[10-100]',
             '[()4]',
             '[aaa,bbb,100-200]',
-            '[(@)4]',
-            '[service\\tng-mobile\\data\\proxy.json]'
+            '[(@)4]'
         ].join('\n\n');
         
         function getRandom(){
-            return fetch('/random?test=true', {
-                method: 'post',
-                body: JSON.stringify({data:input.value})
-                }).then(function(req){return req.json();}).then(function(req){
+            return window.get({data:input.value}).then(function(req){
                 output.value = req.data;
             });
         };

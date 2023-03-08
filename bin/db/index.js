@@ -5,22 +5,28 @@ var helper = require('./../helper');
 module.exports = (function () {
     
     var getArguments = function (request) {
-        var [table, condition = ''] = request.url.replace(/.*\/db\/+((?![\/\?]).)+\/*/, '').split('?').map(i=>decodeURIComponent(i));
+        var data = request.url.replace(/.*\/db\/+((?![\/\?]).)+\/*/, '').split('?').map(i=>decodeURIComponent(i));
+        var table = data[0], condition = data[1] || '';
+        //var [table, condition = ''] = request.url.replace(/.*\/db\/+((?![\/\?]).)+\/*/, '').split('?').map(i=>decodeURIComponent(i));
         return [table, condition?condition.split('&').map(i=>i.split('=')[0] + '=\''+i.split('=')[1]+'\'').join(' and ') : '1=1',condition.split('&').map(i=>i.split('='))];
     };
 
-    return function (request, response = {}) {
+    return function (request, response = {}, database) {
         response.end = response.end || function(){};
 
         if(response.setHeader){
             response.setHeader("Content-Type", 'text/plain;charset=utf-8');
         }
 
+        if(typeof request === 'string'){
+            request = {method:'GET',url:'/db/' + request};
+        }
+
         helper.getBodyData(request).then(bodyData => {
             var sqlType = /.*\/db\/+(((?![\/\?]).)+)/.exec(request.url);
            
             if(sqlType && sqlType[1].toLocaleLowerCase()){
-                var dbFun = getDbFun(sqlType[1])();
+                var dbFun = getDbFun(sqlType[1])(database);
                 if(dbFun){
                     dbFun(getArguments, request, response, JSON.parse(bodyData.toString()||'{}'));
                 }else{
@@ -40,7 +46,7 @@ module.exports = (function () {
         if(item){
             return require('./' + item);
         }else{
-            return null;
+            return () => null;
         }
     }
 

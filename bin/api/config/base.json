@@ -1,17 +1,27 @@
 {
     "websocket": {
         "returnCode": "0",
-        "message": "ws://:ip:[WEBSOCKET]"
+        "message": ":protocol://:ip:[(:portadd + [WEBSOCKET])]"
+    },
+    "weinre":{
+        "returnCode": "0",
+        "data": "http://[hostname]:[weinre]/client/#anonymous",
+        "message": "http://[hostname]:[weinre]/target/target-script-min.js#anonymous"
     },
     "device":{
         "returnCode": "0",
         "message": "[device]/[IP]"  
     },
-    "login": {
+    "hostname":{
         "returnCode": "0",
-        "message": ":user,login succeed!!!"
+        "message": "[hostname]/[IP]"  
     },
     "favicon.ico":"[../../favicon.ico]",
+    "media/:id:type": "",
+    "(username*=admin,password*:password=123456,location:map)login?location=GZ": {
+        "returnCode": "0",
+        "message": "user,login succeed!!!"
+    },
     "[GET]login/user/location": {
         "returnCode": "0",
         "message": "GET login/user/location!"

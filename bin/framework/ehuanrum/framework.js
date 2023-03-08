@@ -196,6 +196,12 @@
 
         //如果有两个参数，就是存数据
         if (value) {
+            if(/^\+/.test(field)) {
+                field = field.replace(/^\+/, '');
+                setTimeout(function(){
+                    ehuanrum(field);
+                })
+            }
             //如果以.结束的field是为了把value在包裹一下
             if (/\.$/.test(field)) {
                 var $value = value;
@@ -370,7 +376,7 @@
     }
 
     function __getOwnPropertyDescriptor(obj, field) {
-        if (field in obj) {
+        if (obj && typeof obj === 'object' && field in obj) {
             while (obj) {
                 if (Object.getOwnPropertyDescriptor(obj, field)) {
                     return Object.getOwnPropertyDescriptor(obj, field);
@@ -910,7 +916,7 @@
                 element.addEventListener(field.replace('on', '').trim(), function (e) {
                     var fn = getFn(e);
                     if (/^[0-9a-zA-Z\._$@]*$/.test(value) && fn) {
-                        fn.apply(data, e.data || arguments);
+                        fn.apply(data, e.data ? [e.data] : arguments);
                         data.$eval();
                     }
                 });
@@ -929,7 +935,10 @@
         function property() {
             var values = value.split('.'),
                 lastValue = values.pop();
-            var descriptor = __getOwnPropertyDescriptor(values.length ? $value(data, values.join('.')) : data, lastValue);
+            var $obj = values.length ? $value(data, values.join('.')) : data;
+            if(typeof $obj !== 'object') return;
+
+            var descriptor = __getOwnPropertyDescriptor($obj, lastValue);
             data.$eval(function () {
                 $value(element, field, $value(data, value));
             });
@@ -1095,7 +1104,7 @@
 
 })(this, function (_obj, _str, _value) {
     with(_obj) {
-        if(_value===undefined || !/^[0-9a-zA-Z\._$@]*$/.test(_str)){
+        if(_value===undefined || !/^[0-9a-zA-Z\._$@]+(\[[0-9a-zA-Z\._$@]+\])?$/.test(_str)){
             return eval(_str);
         }else {
             eval(_str + '=' + getValue(_value));

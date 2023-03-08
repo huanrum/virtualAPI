@@ -4,6 +4,7 @@ setTimeout(()=>require('./bin/db')({method:'PUT',url:'/db/sqlite/START_INFO',bod
 require('./bin')({
     debug:true,
     kill:false,
+    backup:true,
     port:process.argv[2] || 8888,
     websocket:8844 + Math.floor(Math.random()*44),
     weinre:8800 + Math.floor(Math.random()*44),

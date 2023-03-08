@@ -19,17 +19,23 @@
     <div id="toolbar"></div>
     <ul id="list"></ul>
     <!--html>/../../compatible/native.html</html-->
+    <!--html>/../../compatible/dialog.html</html-->
+    <!--html>/../../compatible/drag.html</html-->
+    <!--html>/../../compatible/websocket.html</html-->
     <!--html>base.html</html-->
     <!--html>extend.html</html-->
     <!--html>loopAction.html</html-->
     <!--html>contextmenu.html</html-->
     <!--html>friends.html</html-->
-    
     <script>
         var selectList = [], contextmenu = ['open[打开文件(夹)]'].concat(window.$data.menus);
         var dirs = window.$data.dirs;
         var list = document.getElementById('list');
         var toolbars = document.getElementById('toolbar');
+
+        if(/\/views\/*$/.test(window.$data._path)){
+            list.className = 'flex';
+        }
 
         if(window.$data.preview&&window.$data.preview.length){
             window.$data.preview = window.$data.preview.map(function(i){
@@ -55,12 +61,13 @@
                 };
             });
         }
-        if(!window.$data.publish || window.$data.netSegment){
+        if(!window.$data.publish || window.$data.netsegment){
             /*addToolbar:(function(){})();*/
         }
 
-        Object.keys(dirs).sort(function (a, b) { return a.toLocaleLowerCase() > b.toLocaleLowerCase() ? 1 : -1 }).forEach(function (_dir) {
-            var version = dirs[_dir];
+        var toLocaleLowerCase = function(s){return s.replace(/\[.*\]/,'').toLocaleLowerCase();};
+        Object.keys(dirs).sort(function (a, b) { return toLocaleLowerCase(a) > toLocaleLowerCase(b) ? 1 : -1 }).forEach(function (_dir) {
+            var version = dirs[_dir] || {};
             var pack = /\[(.*)\]/.exec(_dir)[1];
             var dir = _dir.replace(/\[(.*)\]/g, '');
             var item = document.createElement('li');
@@ -70,6 +77,7 @@
             item.appendChild(a);
             list.appendChild(item);
 
+            item.title = dir;
             a.innerHTML = dir;
             a.title = '';
             a.onclick = function () {
@@ -81,55 +89,126 @@
                 }
             };
 
-            action.oncontextmenu = function(e){
-                window.createContextmenu(e,contextmenu.map(function(i){return {
-                    name:/\[(.*)\]/.test(i)?/\[(.*)\]/.exec(i)[1]:i,
+            action.onclick = a.onclick;
+            action.onrightmenu = contextmenu.concat(version.menus||[]).map(function(i){return {
+                    name: contextMenuName(/\[(.*)\]/.test(i)?/\[(.*)\]/.exec(i)[1]:i),
                     fn:function(){
-                        fetch(location.origin + '/action/?contextmenu[' + i.replace(/\[.*\]/m,'').toLocaleLowerCase() + ']=' + dir, { method: 'GET' }).then(function(i){return i.json();}).then(function(id){
-
-                            if(/@/.test(i)){
-                                setTimeout(function(){window.location.reload();},500);
+                        if(i.split('>').length === 1){
+                            manageContextmenu(i, dir);
+                        }else{
+                            var addlist = function(clickFn){
+                                i.split('>').pop().split(',').forEach(function(m){
+                                    var li = document.createElement('li');
+                                    ul.appendChild(li);
+                                    li.innerHTML = m;
+                                    li.onclick = function(){
+                                        clickFn(li, m);
+                                    }
+                                });
                             }
 
-                            if(/#/.test(i) && /^\d+$/.test(id)){
-                                var message = document.createElement('div');
-                                var closeDialog = showDialog(dir + /\[(.*)\]/.test(i)?/\[(.*)\]/.exec(i)[1]:i, message);
-                                runMessage(id, message, function(){
+                            var ul = document.createElement('ul');
+                            ul.className = 'context-menu menu-children';
+
+                            if(/>>/.test(i)){
+                                var div = document.createElement('div');
+                                var search = document.createElement('div');
+                                var input = document.createElement('input');
+                                var button = document.createElement('button');
+                                var closeDialog = showDialog(dir + '-' + (/\[(.*)\]/.test(i)?/\[(.*)\]/.exec(i)[1]:i), div, />>/.test(i)?['确定']:'', function(index, content){
+                                    var selected = Array.prototype.filter.call(ul.children, function(i){return /selected/.test(i.className);}).map(function(i){return i.innerText;});
+                                    manageContextmenu(i.split('>').shift() + ' ' + selected, dir);
+                                });
+
+                                button.innerHTML ='Select All';
+                                search.className ='search-select-panel';
+                                search.appendChild(input)
+                                search.appendChild(button);;
+                                div.appendChild(search);
+                                div.appendChild(ul);
+                                addlist(function(li,m){
+                                    if(/selected/.test(li.className)){
+                                        li.className ='';
+                                    }else{
+                                        li.className ='selected';
+                                    }
+                                });
+                                input.onkeyup = function(){ 
+                                    var regexp = input.value.toLocaleLowerCase();
+                                    Array.prototype.forEach.call(ul.children,function(li){ 
+                                        if(li.innerText.toLocaleLowerCase().indexOf(regexp) !== -1){
+                                            li.style.display ='';
+                                        }else{
+                                            li.style.display ='none';
+                                            li.className ='';
+                                        }
+                                    });
+                                };
+                                button.onclick = function(){
+                                    var className = Array.prototype.filter.call(ul.children,function(i){return /selected/.test(i.className);}).length?'':'selected';
+                                    Array.prototype.forEach.call(ul.children,function(li){
+                                        if(!li.style.display){
+                                            li.className = className;
+                                        }
+                                    });
+                                };
+                            }else{
+                                var closeDialog = showDialog(dir + ' - ' + (/\[(.*)\]/.test(i)?/\[(.*)\]/.exec(i)[1]:i),ul);
+                                addlist(function(li,m){
                                     closeDialog();
-                                })
+                                    manageContextmenu(i.split('>').shift() + '' + m,dir);
+                                });
                             }
-
-                        });
+                        }
                     }
-                };}));
-                e.preventDefault();
-            };
+                };});
 
-            if ((!window.$data.publish || window.$data.netSegment) && pack) {
+            if ((!window.$data.publish || window.$data.netsegment) && pack) {
                 action.title = JSON.stringify(version, null, 4);
-                action.innerHTML = '<strong>' + pack + '</strong>打包 <i>' + times(version.mtime) + '</i>';
+                action.innerHTML = '<strong title="打包">' + pack + '</strong> <i>' + times(version.mtime) + '</i>';
                 action.style.background = Object.keys(version||{}).length > 1 ? '#9f9f9f' : '';
                 action.style.color = '#' + (new Date(10000).setDate(Array.prototype.reduce.call(pack, function(acc, val){return acc + val.charCodeAt();}, 999999))).toString(16).slice(-8, -2);
 
                 action.onclick = function () {
-                    runBuild('<strong>' + pack + '</strong>打包 ','<strong>' + pack + '</strong>打包 ',pack.toLocaleLowerCase() + '=' + dir,action,action,null,function () {
+                    runBuild('<strong>' + pack + '</strong>打包 ','<strong title="打包">' + pack + '</strong> ',pack.toLocaleLowerCase() + '=' + dir,action,action,null,function () {
                         dirs[_dir] = new Date();
                     });
                 };
-            } else if ((!window.$data.publish || window.$data.netSegment) && Object.keys(dirs).some(function (i) { return /\[.+\]/.test(i) })) {
-                action.innerHTML = '不需要打包';
+            } else if ((!window.$data.publish || window.$data.netsegment) && Object.keys(dirs).some(function (i) { return /\[.+\]/.test(i) })) {
+                action.innerHTML = '&nbsp;';
                 action.style.borderColor = '#f3f3f3';
                 action.style.background = '#f3f3f3';
                 action.style.color = '#d3d3d3';
             } else {
                 action.innerHTML = '&nbsp;';
-                action.style.width = '30px';
+                action.style.width = '80px';
                 if (/\.(png|jpg|jpeg|svg)$/.test(dir)) {
                     action.style.background = 'url(http://' + window.$data.replace.replace(/\/\//g, '/') + '/' + dir + ')';
                     action.style.backgroundSize = '32px 23px';
                 } else {
                     action.style.background = 'rgb(218, 232, 161)';
                 }
+            }
+
+            if(version.package && version.package.version){
+                action.innerHTML += ' v'+ version.package.version;
+                action.title = JSON.stringify(version.package, null, 4);
+                a.title = version.package.version;
+            }
+
+            if(typeof version === 'string'){
+                action.style.background ='#f3f3f3';
+                a.style.color = '#00aaef';
+                action.innerHTML = 'link';
+                action.onrightmenu =[{
+                    name: '克隆代码',
+                    fn:function(){
+                        manageContextmenu('[#克隆代码]clone',version);
+                    }
+                }];
+                action.onclick = a.onclick = function(){
+                    window.open(version);
+                };
             }
 
         });

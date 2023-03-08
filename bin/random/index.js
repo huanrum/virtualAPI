@@ -15,6 +15,7 @@ module.exports = (function (emnuData, getValue) {
     //      [aaa,bbb,100-200]表示冲三个字符串中随机一个,里面的100-200会被替换成100-200之前的一个数字
     //      [1+1]表示从1开始步长1递增,数字1是可以省略的
     //      [@]表示拼音
+    //      [[a?1000+b:b]]表示计算表达式
     return function (someValue) {
         var _path = '';
         if(typeof someValue === 'object'){
@@ -27,32 +28,47 @@ module.exports = (function (emnuData, getValue) {
         var replaceValue = getValue(_someValue);
         return random;
 
-
-        function random(str, length, tempData) {
+        /**
+         * 
+         * @param {*} str 
+         * @param {*} length 
+         * @param {*} tempData 
+         * @param {*} level :迭代调用的深度 
+         */
+        function random(str, length, tempData, level) {
             tempData = (typeof tempData === 'function') ? tempData : tempDataFn();
+            if(level > 10){
+                return;
+            }
             if (length) {
                 return initLength('' + length, function (len) {
                     var list = [];
                     tempData(str);
                     for (var i = 0; i < len; i++) {
-                        list.push(random(str, null, tempData));
+                        list.push(random(str, null, tempData, level+1));
                     }
                     return list;
                 });
             }
 
             if (typeof str === 'string') {
-                return getRealValue(str,tempData);
+                return getRealValue(str,tempData, d=>random((function(){
+                    try{
+                        return JSON.parse(d);
+                    }catch(e){
+                        return d;
+                    }
+                })(),null,tempData,level+1));
             } else if (str instanceof Array) {
                 return str.map(function (item) {
-                    return random(item, null, tempData);
+                    return random(item, null, tempData, level+1);
                 });
             } else if (str && typeof str === 'object') {
                 var obj = {};
                 Object.keys(str).forEach(function (key) {
                     var len = key.match(/:.*/);
                     tempData([key, str[key]]);
-                    obj[random(key.replace(len && len[0], ''), null, tempData)] = random(str[key], len && len[0].replace(':', '').trim(), tempData);
+                    obj[random(key.replace(len && len[0], ''), null, tempData, level+1)] = random(str[key], len && len[0].replace(':', '').trim(), tempData, level+1);
                 });
                 return obj;
             } else {
@@ -60,7 +76,7 @@ module.exports = (function (emnuData, getValue) {
             }
         }
 
-        function getRealValue(str,tempData) {
+        function getRealValue(str,tempData, fileFn) {
             var raelValue = {
                 true: true,
                 false: false,
@@ -68,7 +84,7 @@ module.exports = (function (emnuData, getValue) {
             };
             
             if(/^\s*\[((?!(\[|\])).)*\]\s*$/i.test(str)){
-                str = replace(str,i=>JSON.parse(i));
+                str = replace(str,fileFn);
             }else{
                 str = str.replace(/\[(((?!(\[|\])).)*)\]/mg,function(strChild){
                     return replace(strChild,i=>i);
@@ -162,6 +178,16 @@ module.exports = (function (emnuData, getValue) {
                                 return result;
                             });
                         }).join());
+                    }
+                });
+            }
+
+            if(/\[\((.*)\)\]/.test(regex)){
+                return regex.replace(/\[\((((?!\)).)*)\)\]/g, function($0,$1){
+                    try{
+                        return eval($1);
+                    }catch(e){
+                        return $0;
                     }
                 });
             }

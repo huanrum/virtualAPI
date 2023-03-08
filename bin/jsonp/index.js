@@ -14,7 +14,7 @@ module.exports = (function () {
             http.get(api,rsp =>{
                 if (!/^4/.test('' + rsp.statusCode)) {
                     helper.getResponse(rsp).then(responseText => {
-                        response.writeHead(rsp.statusCode, rsp.headers);
+                        response.writeHead(rsp.statusCode, Object.assign(response.getHeaders(), rsp.headers));
                         response.end(callback + '(' + responseText.toString() + ')');
                     });
                 } else {

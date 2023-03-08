@@ -3,7 +3,7 @@ var path = require('path');
 
 module.exports = (function () {
 
-    return function(helper,request, response){
+    return function(request, response, helper){
         var framework = request.url.replace(/^\/*framework\/+/,'').split('.').shift();
         var type = request.url.split('.').pop();
 

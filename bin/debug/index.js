@@ -20,7 +20,7 @@ module.exports = (function () {
                     resolve();
                 }
             }).then(function(){
-                log(new Date(), helper.clientIp(request), request.headers['referer'], keyUrl, request.url, bodyData);
+                log(new Date(), helper.clientIp(request), request.headers['referer'], request.headers['user-agent'], keyUrl, request.url, bodyData);
                 response.end('{}');
             });
         });
@@ -29,7 +29,7 @@ module.exports = (function () {
     function SendKeys(bodyData){
         return new Promise(function(resolve){
             bodyData.forEach(item => {
-                console.log(item);
+                helper.console(item);
             });
             resolve();
         });

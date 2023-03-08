@@ -1,0 +1,20 @@
+<style>
+  .run-command textarea{
+    width: 400px;
+    height: 400px;
+    background: #666666;
+    color: #ffffff;
+  }
+</style>
+<script>
+
+  window.createCommand = function(path){
+    var content = document.createElement('div');
+
+    content.className = 'run-command'
+    content.innerHTML = '<textarea />';
+
+    return content;
+  };
+
+</script>

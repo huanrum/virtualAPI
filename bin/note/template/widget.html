@@ -1,0 +1,42 @@
+<style>
+  .three-character {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .three-character>*{
+    cursor: pointer;
+    margin: 5px;
+  }
+  
+  .three-character a:hover {
+    color: white;
+    background: #000;
+  }
+  </style>
+  <script>
+    var _openCSV = function(columns = ''){
+      return function(name = '三字经'){
+        var content = document.createElement('div');
+        content.className = 'three-character';
+        content.innerHTML = 'Loading...';
+        fetch(location.origin + '/data/' + name +'.csv',{method:'GET', headers:{'Content-Type':'charset=utf-8'}}).then(function(i){return i.text();}).then(function(res){
+          var columnList =(columns || res.split(/\n/g).filter(Boolean).shift() || '').split(',');
+          content.innerHTML = ParseCSV(columns + '\n'+ res).map(function(i){
+            return '<div><a title="'+ toJsonString(i) + '" onclick="execCopy(\''+ i[columnList[1]]+'\')">' + i[columnList[0]] + '</a></div>'
+          }).join('');
+        })
+        showDialog(name + '(单击可复制详情)', content);
+        function toJsonString(item){
+          return Object.keys(item).map(function(key){
+            return key + ' = ' + item[key];
+          }).join('\n');
+        }
+      };
+    }
+
+    window.openCSV = _openCSV('id, message');
+    window.threeCharacter = function(){
+      return _openCSV('')('三字经');
+    };
+
+</script>

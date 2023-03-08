@@ -6,9 +6,9 @@ module.exports = (function () {
 
     return function (request, response) {
         var url = decodeURIComponent(request.url.replace(/^\/cache\//i, ''));
-        
+        var clienip = helper.clientIp(request).replace(/::(ffff:)?/, '');
         helper.getBodyData(request).then(value => {
-            var key = url.split('?').shift();
+            var key = url.split('?').shift() + (helper.isSelf(clienip)?'':`/${clienip}`);
             var type = url.split('?').pop();
             var file = __dirname + '/../../cache/' + key + '.json';
 

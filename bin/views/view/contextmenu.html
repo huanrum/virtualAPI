@@ -1,55 +1,45 @@
 <script>
+    var contextMenuName = function (text) {
+        if (/#/.test(text)) { return '<span style="color:#ffff00">' + text.replace(/#/g, '') + '</span>' }
+        return text;
+    };
+</script>
+
+<script>
     var setting = document.getElementById('setting');
     setting.onclick = function () {
-        window.open('http://' + window.$data.options.ip + ':' + window.$data.options.port + '/bin/config/index.html');
+        window.open('http://' + location.host + '/bin/config/index.html');
     };
     var callback = document.getElementById('callback');
     callback.onclick = function () {
         window.close();
     };
 
-    if(window.$data.publish){
+    if (window.$data.publish) {
         setting.parentNode.removeChild(setting);
     }
 
-    setting.oncontextmenu = function(e){
-        window.createContextmenu(e,['open[打开文件(夹)]','editor[打开编辑器]'].map(function(i){return {
-                name:/\[(.*)\]/.test(i)?/\[(.*)\]/.exec(i)[1]:i,
-                fn:function(){
-                    fetch(location.origin + '/action/?contextmenu[' + i.replace(/\[.*\]/m,'').toLocaleLowerCase() + ']=', { method: 'GET' }).then(function(i){return i.json();}).then(function(id){
-                        if(/@/.test(i)){
-                            setTimeout(function(){window.location.reload();},500);
-                          }
-                    });
-                }
-            };}));
-            e.preventDefault();
-        };
-
-</script>
-<script>
-    (function(){
-        var contextmenu = document.createElement('ul');
-        contextmenu.className = 'context-menu';
-        window.onclick=function(e){
-            if(contextmenu && contextmenu.parentNode){
-                contextmenu.parentNode.removeChild(contextmenu);
+    setting.onrightmenu = ['open[打开文件(夹)]', 'editor[打开编辑器]',,'clone[#拉取仓库]'].map(function (i) {
+        return {
+            name: contextMenuName(/\[(.*)\]/.test(i) ? /\[(.*)\]/.exec(i)[1] : i),
+            fn: function () {
+                return new Promise(function (resolve) {
+                    if (!/#/.test(i)) {
+                        resolve('');
+                    } else {
+                        showDialog(/\[(.*)\]/.test(i) ? /\[(.*)\]/.exec(i)[1] : i, '<textarea style="width:400px;height:100px;padding:5px;" placeholder="请输入" />', ['开始'], function (index, content) {
+                            if (content.firstChild.value) {
+                                resolve(content.firstChild.value);
+                            } else {
+                                return false;
+                            }
+                        });
+                    }
+                }).then(function (dir) {
+                    manageContextmenu(i, dir);
+                });
             }
         };
 
-        window.createContextmenu = function(e,menus){
-            contextmenu.innerHTML = '';
-            document.body.appendChild(contextmenu);
-            menus.forEach(function(menu){
-                var menuitem = document.createElement('li');
-                menuitem.innerHTML = menu.name;
-                menuitem.onclick = menu.fn || menu;
-                contextmenu.appendChild(menuitem);
-            });
-
-            //根据事件对象中鼠标点击的位置，进行定位
-            contextmenu.style.left=e.clientX+'px';
-            contextmenu.style.top=e.clientY+'px';
-        };
-    })();
+    });
 </script>

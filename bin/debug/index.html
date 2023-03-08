@@ -1,82 +1,341 @@
-<script src="^/framework/command/index.js"></script>
-<script>
+<!--script src="^/framework/command/index.js"></script-->
+<!--html>/../compatible/dialog.html</html-->
+<!--html>/../compatible/websocket.html</html-->
+<style class="debug-style">
+    .web-socket-dialog>div:first-child{
+        /* width: 600px; */
+        height:360px;
+        background:#d3d3d3;
+        padding: 6px 0;
+        overflow: auto;
+    }
+
+    .web-socket-dialog>div:last-child{
+        position: relative;
+    }
+
+    .web-socket-dialog>div strong{
+        margin: 0 10px;
+        font-size: 11px;
+        opacity: 0.6;
+    }
+
+    .web-socket-dialog>div .login{
+        text-align: center;
+        color:#3aa8ed;
+    }
+
+    .web-socket-dialog>div .logout{
+        text-align: center;
+        color:#aaaaaa;
+    }
+
+    .web-socket-dialog>div .parent{
+        text-align: left;
+        color:#333333;
+    }
+
+    .web-socket-dialog>div .self{
+        text-align: right;
+        color:#339933;
+    }
+
+    .web-socket-dialog textarea{
+        width: 546px;
+        height:120px;
+    }
+
+    .web-socket-dialog button{
+        float: right;
+        width: 60px;
+        height: 126px;
+        text-align: center;
+        padding: 0;
+    }
+
+    .loading-spinner{
+        font-size: 20px;
+        width: 1em;
+        height: 1em;
+        border-radius: 50%;
+        box-shadow: inset 0 0 0 .1em rgba(58, 168, 237, .2);
+    }
+
+    .loading-spinner i{
+        position: absolute;
+        clip: rect(0, 1em, 1em, .5em);
+        width: 1em;
+        height: 1em;
+        animation: spinner-circle-clipper 1s ease-in-out infinite;
+    }
+
+    @keyframes spinner-circle-clipper {
+        0%{
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(180deg);
+        }
+    }
+
+    .loading-spinner i:after{
+        position: absolute;
+        clip: rect(0, 1em, 1em, .5em);
+        width: 1em;
+        height: 1em;
+        content: '';
+        animation: spinner-circle 1s ease-in-out infinite;
+        border-radius: 50%;
+        box-shadow: inset 0 0 0 .1em #3aa8ed;
+    }
+
+    @keyframes spinner-circle {
+        0%{
+            transform: rotate(-180deg);
+        }
+        100% {
+            transform: rotate(180deg);
+        }
+    }
+</style>
+<script class="debug-function">
+    window.waiting = function waiting(jeut){
+        return new Promise(function(succ){
+            loop(succ,0);
+        });
+
+        function loop(succ, count){
+            setTimeout(function(){
+                if(!jeut || jeut(count)) {
+                    setTimeout(function(){
+                        succ();
+                    }, 500);
+                } else {
+                    loop(succ, count+1);
+                }
+            }, 50);
+        }
+    };
+
     (function (pack) {
+        var keyDownList = {value:''};
+        var _keydownFnList = [];
+        var openWebsocket = websocket();
+
+        window.onkeydowns = function(key, fn){
+            if (typeof fn === 'function'){
+                _keydownFnList.push({key:key,fn:fn});
+            }else{
+                _keydownFnList.forEach(function(kv){
+                    var condition = kv.key;
+                    if(condition === key || (condition.test && condition.test(key)) || (typeof condition === 'function' && condition(key))){
+                        kv.fn(key,fn);
+                    }
+                });
+            }
+        };
+
         window.document.addEventListener('keydown', function (e) {
             if (e.altKey && e.shiftKey && e.ctrlKey) {
                 switch (e.key) {
                     case 'B':
                         if (pack) {
-                            build(pack);
+                            http(location.origin + '/action/?' + pack.toLocaleLowerCase() + '=', 'Build');
                         }
+                        break;
+                    case 'E':
+                        fetch(location.origin + '/action/?contextmenu[editor]=');
                         break;
                     case 'O':
                         fetch(location.origin + '/action/?contextmenu[open]=');
                         break;
+                    case 'U':
+                        http(location.origin + '/action/?contextmenu[pull]=', 'Pull');
+                        break;
+                    case 'W':
+                        openWebsocket();
+                        break;
+                }
+            }
+
+            if(e.key.length === 1){
+                clearTimeout(keyDownList.timeout);
+                if(keyDownList.activeElement !== document.activeElement.nodeName){
+                    keyDownList.activeElement = document.activeElement.nodeName;
+                    keyDownList.value = '';
                 }
 
+                keyDownList.value += e.key.toLocaleUpperCase();
+                keyDownList.timeout = setTimeout(function(){
+                    if(keyDownList.value.length > 1){
+                        if(['INPUT','TEXTAREA'].indexOf(document.activeElement.nodeName)===-1){
+                            var words = document.createElement('div');
+                            words.innerHTML ='<div class="dialogBack"><div class="dialog dialog-words">'+ keyDownList.value + '</div></div>';
+                            document.body.appendChild(words);
+                            (function(key){
+                                setTimeout(function(){
+                                    document. body.removeChild(words);
+                                    window.onkeydowns(key);
+                                }, 2000);
+                            })(keyDownList.value);
+                        }
+                    }
+                    keyDownList.activeElement = null;
+                    keyDownList.value = '';
+                }, 500);
             }
         });
 
-        function loading(message) {
-            var loading = document.createElement('div');
-            document.body.appendChild(loading);
-            loading.style.position = 'fixed';
-            loading.style.zIndex = 9999;
-            loading.style.width = '100%';
-            loading.style.height = '100%';
-            loading.style.top = 0;
-            loading.style.left = 0;
-            loading.style.background = 'rgba(128,128,128,0.9)';
-            loading.style.textAlign = 'center';
-            loading.style.padding = '4em auto';
-            loading.style.color = '#ffffff';
-            loading.style.fontWeight = '600';
-            loading.style.overflow = 'auto';
-            loading.innerHTML = message || '';
+        function loading(id,title) {
+            var loadingPanel = document.createElement('div');
+            var loadingContent = document.createElement('div');
+            loadingPanel.appendChild(loadingContent);
+            document.body.appendChild(loadingPanel);
+            loadingPanel.style.position = 'fixed';
+            loadingPanel.style.zIndex = 9999;
+            loadingPanel.style.width = '100%';
+            loadingPanel.style.height = '100%';
+            loadingPanel.style.top = 0;
+            loadingPanel.style.left = 0;
+            loadingPanel.style.background = 'rgba(128,128,128,0.9)';
+            loadingPanel.style.textAlign = 'center';
+            loadingPanel.style.padding = '4em auto';
+            loadingPanel.style.color = '#ffffff';
+            loadingPanel.style.fontWeight = '600';
+            loadingPanel.style.overflow = 'auto';
 
-            return loading;
+            loadingContent.style.position = 'absolute';
+            loadingContent.style.marginLeft = '50%';
+            loadingContent.style.top = '50%';
+            loadingContent.style.transform = 'translate(-50%,-50%)';
+            loadingContent.style.padding = '2px';
+            
+            var loadingTitle = document.createElement('div');
+            var loadingMessage = document.createElement('div');
+            loadingContent.appendChild(loadingTitle);
+            loadingContent.appendChild(loadingMessage);
+
+            loadingMessage.style.borderRadius = '50%';
+            loadingMessage.style.background = 'rgba(200,200,200,0.6)';
+            loadingMessage.style.width = '160px';
+            loadingMessage.style.height = '160px';
+            loadingMessage.style.color = '#f5f50b';
+            loadingMessage.style.display = 'flex';
+            loadingMessage.style.alignItems = 'center';
+            loadingMessage.style.justifyContent = 'center';
+            loadingMessage.style.marginTop = '20px';
+
+            loadingTitle.innerHTML = title + '<br><i style="color:#999999">[' + id + ']</i>';
+
+            return function(count, message){
+                loadingMessage.innerHTML = count + ' => ' + (message||'Doing');
+            };
         }
 
-        function build(pack) {
-            var dir = location.pathname.split('/').filter(function (i) {
-                return !!i;
-            }).slice(-2).shift();
-
-            if (build.doing) {
+        function http(url, title) {
+            if(http.doing){
                 return;
-            } else {
-                build.doing = true;
+            }else{
+                http.doing = true;
             }
-            fetch(location.origin + '/action/?' + pack.toLocaleLowerCase() + '=' + dir, {
-                method: 'GET'
-            }).then(function (r) {
-                return r.text()
+            fetch(url).then(function (i) {
+                if(/^[23]/.test(i.status)){
+                    return i.text();
+                }else{
+                    i.text().then(function(err){
+                        setTimeout(showDialog('API请求', err),2000);
+                    });
+                    return null;
+                }
             }).then(function (id) {
-                runMessage(id, loading('build'), 0, () => {
-                    setTimeout(() => {
-                        build.doing = false;
-                        location.reload();
-                    }, 5000);
-
-                });
+                if(/^[0-9]+$/.test(id)){
+                    runMessage(id, loading(id,title), 0, function() {
+                        setTimeout(function() {
+                            http.doing = false;
+                            window.onbeforeunload = null;
+                            location.reload();
+                        }, 5000);
+                    });
+                }
+                
             });
         }
 
-        function runMessage(id, loading, count, callBack) {
+        function runMessage(id, loadingFn, count, callBack) {
             fetch(location.origin + '/action/?' + id, {
                 method: 'GET'
             }).then(function (r) {
                 return r.json()
             }).then(function (data) {
                 data = data || [];
-                loading.innerHTML += '<br>' + id + ' ==> ' + count + '<br>' + data.join('<br>');
-                loading.scrollTop = loading.scrollHeight;
-                if (!data.filter(i => /^!!/.test(i)).length) {
-                    setTimeout(() => runMessage(id, loading, count + 1, callBack), 500);
+                loadingFn(count, data.join('<br>'));
+                if (!data.filter(function(i){return /^!!/.test(i);}).length) {
+                    setTimeout(function(){
+                        runMessage(id, loadingFn, count + 1, callBack);
+                    }, 500);
                 } else {
                     callBack(data);
                 }
             });
         }
+
+        function websocket(){
+            var contentElement = document.createElement('div');
+            contentElement.className = 'web-socket-dialog';
+            window.initWebsocket(function(ws){
+                var messagelist = document.createElement('div');
+                var inputContent = document.createElement('div'); 
+                var textarea = document.createElement('textarea');
+                var sendbutton = document.createElement('button');
+                contentElement.appendChild(messagelist);
+                contentElement.appendChild(inputContent);
+                inputContent.appendChild(textarea);
+                inputContent.appendChild(sendbutton);
+
+                sendbutton.innerHTML = '发送';
+                contentElement.title = ws.handle;
+                
+                var addMessage = function(message,className){
+                    var inputMessage = document.createElement('div');
+                    messagelist.appendChild(inputMessage);
+                    inputMessage.className = className;
+                    inputMessage.innerHTML = message;
+                };
+
+                sendbutton.onclick = function(e){
+                    addMessage(textarea.value + '<strong>[我]</strong>','self');
+                    ws.send(JSON.stringify({
+                        data:{message: textarea.value},
+                        action:'message'
+                    }));
+                    textarea.value = '';
+                };
+
+                ws.onmessage = function (e){ 
+                    var data = JSON.parse(e.data);
+                    if(data.from){
+                        switch(data.action){
+                            case 'login':
+                                addMessage(data.from +'上线','login');
+                                break;
+                            case 'logout':
+                                addMessage(data.from +'下线','logout');
+                                break;
+                            case 'message':
+                                addMessage('<strong>['+ data.from +']</strong>'+ data.data.message,'friend');
+                                break;
+                            case 'keydowns':
+                                window.onkeydowns((''+ data.data).toLocaleUpperCase());
+                                break;
+                        };
+                    }
+                };
+            });
+            return function(){
+                return showDialog('聊天'+ contentElement.title, contentElement);
+            };
+        }
+
+        
     })('_$pack$_');
 </script>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ModifyFile.html</title>
+</head>
+<body>
+    <!--html>/../../compatible/dialog.html</html-->
+    <!--html>/../../debug/index.html</html-->
+    <style>
+      #TEXTAREA{
+          width: 100%;
+          height: 100%;
+          border: 1px solid #00aaef;
+      }
+
+      #TEXTAREA[readonly]{
+        border: none;
+      }
+    </style>
+    <textarea id="TEXTAREA" readonly>${content}</textarea>
+    <script>
+      var textarea = document.getElementById('TEXTAREA');
+      var oldContent = textarea.value;
+      textarea.ondblclick = function (){
+        textarea.readOnly = false;
+        textarea.blur();
+        setTimeout(function(){
+          textarea.focus();
+          textarea.selectionEnd = textarea.selectionStart;
+        });
+      };
+      textarea.onkeydown = function (e){
+        if(e.keyCode === 9){
+          var replaceStr ='';
+          var self = this,
+              selectionStart = self.selectionStart,
+              selectionEnd = self.selectionEnd;
+          self.value = self.value.slice(0, selectionStart)+ replaceStr + self.value.slice(selectionEnd);
+          setTimeout(function (){
+            self.selectionStart = selectionStart + replaceStr.length;
+            self.selectionEnd = selectionStart + replaceStr.length;
+          })
+          return false;
+        } else if (e.ctrlKey && e.keyCode === 83) {
+          saveFile();
+          textarea.readOnly = true;
+          e.preventDefault();
+        }
+      };
+      
+      function saveFile() {
+        if(oldContent !== textarea.value){
+          window.fetch(location.href, {
+            method:'POST',
+            body: textarea.value 
+          }).then(function (){
+            oldContent = textarea.value;
+            sendWebsocket({ url: location.href },'modify-file');
+            setTimeout(showDialog('提示','内容保存成功'), 2000);
+          });
+        }else {
+          setTimeout(showDialog('提示','文件没有被修改'), 2000);
+        }
+      }
+    </script>
+</body>
+</html>

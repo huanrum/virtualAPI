@@ -1,0 +1,45 @@
+<script>
+
+  (function(){
+    Object.keys = Object.keys || function(data){
+      var keys = [];
+      for(var p in data){
+        keys.push(p);
+      }
+      return keys;
+    };
+
+    // 补充
+    function extend(prototype, data){
+      for(var p in data){
+        prototype[p] = prototype[p] || data[p];
+      }
+    }
+
+    extend(Array.prototype, {
+      forEach: function(fn){
+        for(var i=0;i<this.length;i++){
+          fn(this[i],i,this);
+        }
+      },
+      map: function(fn){
+        var list = [];
+        for(var i=0;i<this.length;i++){
+          list.push(fn(this[i],i,this));
+        }
+        return list;
+      },
+      filter: function(fn){
+        var list = [];
+        for(var i=0;i<this.length;i++){
+          if(fn(this[i],i,this)){
+            list.push(this[i]);
+          }
+        }
+        return list;
+      }
+    })
+
+  })();
+
+</script>

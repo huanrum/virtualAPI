@@ -1,13 +1,15 @@
 var fs = require("fs");
 var child_process = require('child_process');
 
-var  helper = require('./../helper');
+var helper = require('./../helper');
+var dir = require('./dir');
 
 module.exports = (function () {
 
     return {
         base: base,
-        ping: ping
+        ping: ping,
+        dir: dir
     };
 
     /**
@@ -22,7 +24,7 @@ module.exports = (function () {
         helper.mkdirs(file.replace(/\/+((?!\/).)*$/, ''));
         try {
             if (!value) {
-                console.log('\x1B[34m','use backup : ' + key);
+                helper.console('blue','use backup : ' + key);
                 if(fs.existsSync(file)){
                     return helper.readFile(file);
                 }else{
@@ -35,7 +37,7 @@ module.exports = (function () {
                 }
             }
         } catch (e) {
-            console.log('fs error');
+            helper.console('fs error');
         }
     }
 
@@ -45,13 +47,16 @@ module.exports = (function () {
      * @param {*} urls 
      */
     function ping(urls) {
+        // ping与原来理解的不同
+        return Promise.resolve(true);
+
         var netInfo = helper.netInfo();
         if (!Array.isArray(urls)) {
             urls = [urls];
         }
         if(netInfo.offline){
             return Promise.resolve(false);
-        }else if(urls.filter(function(i){return netInfo.address ===helper.getDomain(i) || ping[helper.getDomain(i)];}).length){
+        }else if(urls.filter(function(i){return [netInfo.address, helper.hostname()].indexOf(helper.getDomain(i).toLocaleLowerCase()) !== -1 || ping[helper.getDomain(i)];}).length){
             return Promise.resolve(true);
         }else{
             return new Promise(function (succ) {

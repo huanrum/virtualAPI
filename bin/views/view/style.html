@@ -105,10 +105,23 @@
             list-style: none;
             padding: 0;
         }
+        #list.flex{
+            display: flex;
+            flex-wrap: wrap;
+        }
+        #list.flex li div{
+            width: 80px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+        #list.flex li a{
+            display: block;
+        }
 
         #list li {
             padding: 0.7rem 1.0rem;
-            border-bottom: 1px solid #d3d3d3;
         }
 
         #list li div {
@@ -124,6 +137,10 @@
         #list li a {
             cursor: pointer;
             font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+            width: 80px;
+            word-break: break-all;
         }
         #list li a:hover{
             text-decoration:underline;
@@ -156,6 +173,7 @@
         }
         .friends .friends-item:hover{
             color: #a3d5ef;
+            cursor: pointer;
         }
         .friends .friends-item.logout{
             color:#a3d5ef;
@@ -206,7 +224,7 @@
             min-width: 12em;
             padding: 1rem;
             min-height: 4rem;
-            overflow: auto;
+            overflow: hidden!important;
         }
 
         .dialog .footer {
@@ -241,24 +259,6 @@
             margin: 0.2rem;
         }
 
-        .context-menu{
-            cursor: pointer;
-            position: fixed;
-            width: 125px;
-            list-style: none;
-            padding: 8px;
-            background: #d3d3d3;
-            border-radius: 8px;
-        }
-        
-        .context-menu li+li{
-            padding-top: 8px;
-        }
-        .context-menu li:hover{
-            color: #00AAEF;
-            text-decoration:underline;
-        }
-
         .dialog .content .message{
             /* width:30em; */
             height:20em;
@@ -273,7 +273,7 @@
             color:#696969;
         }
         .message-input{
-            width: 100%;
+            width: 97%;
             height: 18%;
             border-top: 1px solid #696969;
             overflow: auto;
@@ -284,5 +284,31 @@
             background: rgb(12, 112, 53);
             text-align: center;
         }
+
+        .search-select-panel input{
+            border: none;
+            background: transparent;
+            border-bottom: 1px solid #dddddd;
+            margin: 0 6px;
+            padding: 0 10px;
+        }
+
+        .search-select-panel input:focus{
+            outline: none;
+            border-bottom: 1px solid #00aaef;
+        }
         
+        .search-select-panel button{
+            float: right;
+        }
+    </style>
+
+    <style>
+        #list.flex li div{
+            background: url(/images/icon/wangluo.png) !important;
+            background-size: cover!important;
+        }
+        #list.flex li a{
+            color: #00aaef;
+        }
     </style>

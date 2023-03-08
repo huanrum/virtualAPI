@@ -1,4 +1,5 @@
 var fs = require("fs");
+var path = require("path");
 
 module.exports = (function(){
 
@@ -23,9 +24,14 @@ module.exports = (function(){
 
     
 
-    return function (helper,request,response){
+    return function (request,response,helper){
         if(!request){
-            return data;
+            var viewspath = path.join(__dirname + '/../../views');
+            var $data = JSON.parse(JSON.stringify(data));
+            fs.readdirSync(viewspath).forEach(function(i){
+                $data.web[i] = path.join(viewspath, i);
+            })
+            return $data;
         }else{
             var mod = request.url.split('?')[0].replace(/\/?((?!\/).)*\/*/,'');
             if(!mod){
@@ -61,11 +67,22 @@ module.exports = (function(){
         }
     };
 
+    function split(obj, char) {
+        var result = [];
+        Object.keys(obj).forEach(function(key){
+            (obj[key] || '').split(char).forEach(function(value,index){
+                result[index] = result[index] || {};
+                result[index][key] = value;
+            });
+        });
+        return result;
+    }
+
     function getContent(file,defaultValue){
         if(fs.existsSync(file)){
             return JSON.parse(fs.readFileSync(file).toString());
         }else{
-            fs.writeFileSync(file,'{}');
+            fs.writeFile(file,'{}');
             return defaultValue!==undefined?defaultValue:{};
         }
     }

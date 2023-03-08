@@ -11,6 +11,9 @@ module.exports = (function(){
         else if (/^\/*test\/+/.test(request.url)) {
             return true;
         }
+        else if (/^\/*(permission|websocket|javascript|favicon)\/*/.test(request.url)) {
+            return true;
+        }
         else if (/^\/*framework\/+/.test(request.url)) {
             return true;
         }
@@ -36,18 +39,22 @@ module.exports = (function(){
         }
         //配置Web
         else if (/^\/*config\/+/.test(request.url)) {
-            return helper.localhost(request) || helper.parameters(request).netSegment;
+            return helper.localhost(request) || helper.parameters(request).netsegment;
         }
         //WEB操作控制服务端
         else if (/^\/*action\/+/i.test(request.url)) {
-            return helper.localhost(request) || helper.parameters(request).netSegment;
+            return helper.localhost(request) || helper.parameters(request).netsegment;
+        }
+         //个人纪录数据
+        else if (/^\/*note\/+/i.test(request.url)) {
+            return helper.localhost(request) || helper.parameters(request).netsegment;
         }
         //资源文件
         else if (resource.test(request.url)) {
             return true;
         }
         else {
-            return true;
+            return false;
         }
     };
 

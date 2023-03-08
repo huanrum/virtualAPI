@@ -1,27 +1,21 @@
 <script>
-    (function(){
-        var wsSendMessage = function(){};
+    window.initWebsocket(function(ws){
+        var wsSendMessage = function(to, data){
+            ws.send(JSON.stringify({
+                action: 'message',
+                to: to,
+                data: data
+            }));
+        };
+
         var updateFunList = {};
         var friends = document.createElement('div');
         friends.className = 'friends';
         document.body.appendChild(friends);
 
-        fetch('/websocket?ip=' + location.hostname).then(function (req) { return req.json(); }).then(function(req){
-            var ws = new WebSocket(req.message);
-            wsSendMessage = function(to,data){
-                ws.send(JSON.stringify({
-                    action: 'message',
-                    to: to,
-                    data:data
-                }));
-            };
-            ws.onopen = function (e) {
-                fetch('/random',{method:'POST',body:JSON.stringify({name:"[(@)1]([now])"})}).then(function (req) { return req.json(); }).then(function(req){
-                    friends.innerHTML = '<div class="self-name">'+req.name.replace(/\(.*\)/,'')+'</div>';
-                    ws.send(JSON.stringify({ data:  req.name, action: 'login' }));
-                });
-            }
-            ws.onmessage = function (e) {
+        friends.innerHTML = '<div class="self-name">'+ws.handle.replace(/\(.*\)/,'')+'</div>';
+
+        ws.onmessage = function (e) {
                 var dataMessage = JSON.parse(e.data);
                 switch(dataMessage.action){
                     case 'login':
@@ -30,11 +24,11 @@
                         }else if(!updateFunList[dataMessage.from]){
                             updateFunList[dataMessage.from] = addFirend(dataMessage.from + '')
                         }else {
-                            updateFunList[dataMessage.from](true);
+                            updateFunList[dataMessage.from] && updateFunList[dataMessage.from](true);
                         }
                     break;
                     case 'logout':
-                        updateFunList[dataMessage.from](false);
+                    updateFunList[dataMessage.from] && updateFunList[dataMessage.from](false);
                     break;
                     default:
                         if (dataMessage.data && dataMessage.data.url) {
@@ -42,16 +36,11 @@
                                 window.open(dataMessage.data.url);
                             }), 2000);
                         }
-                        updateFunList[dataMessage.from](dataMessage.data);
+                        updateFunList[dataMessage.from] && updateFunList[dataMessage.from](dataMessage.data);
                     break;
                 }
             };
-            window.addEventListener("beforeunload", function () {
-                ws.send(JSON.stringify({
-                    action: 'logout'
-                }));
-            });
-        });
+            
 
         function addFirend(id){
             var messageList = [];
@@ -59,7 +48,7 @@
 
             friends.appendChild(item);
             item.className = 'friends-item';
-            item.innerHTML = id?id.replace(/\(.*\)/,''):'';
+            item.innerHTML = id?id.replace(/\(.*\)/,'').replace(/\d+/g, ''):'';
             item.title = id;
             item.onclick = openDialog;
 
@@ -115,6 +104,14 @@
                     }
                 };
 
+                window.candrag(messageSendElement, '', function(file,content){
+                    var messageRow = document.createElement('div');
+                    messageRow.className = 'self';
+                    messageRow.innerHTML = '<div class="file icon">' + file.name + '</div>';
+                    messageListElement.appendChild(messageRow);
+                    wsSendMessage(id,{file:file.name,content:content,message:messageRow.innerHTML});
+                });
+
                 function showMessage(data){
                     var messageRow = document.createElement('div');
                     messageRow.innerHTML = data.message;
@@ -130,5 +127,5 @@
                 }
             };
         }
-    })();
+    });
 </script>

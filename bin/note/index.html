@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Note</title>
+  <style>
+    body {
+      -webkit-user-select: element;
+      -moz-user-select: element;
+      -ms-user-select: element;
+      user-select: element;
+    }
+
+    .dialog .content .input-name {
+      margin: 20px;
+      padding: 5px 15px;
+      border: 1px solid #d3d3d3;
+      font-size: 20px;
+    }
+
+    .add-button {
+      zoom: 5;
+      text-align: center;
+      margin: 2em;
+    }
+
+    div>fieldset+fieldset {
+      margin-top: 2em;
+    }
+
+    div>fieldset.group>div {
+
+      display: none;
+    }
+
+    div>fieldset.group>legend>label {
+      color: #00AAEF;
+      font-weight: bold;
+      font-size: 30px;
+      cursor: pointer;
+      padding: 0 8px;
+    }
+
+    div>fieldset fieldset {
+      border: 1px solid #d3d3d3;
+    }
+
+    div>fieldset.item>div {
+      position: relative;
+      font-size: 13.3px;
+    }
+
+    div>fieldset.item>div div,
+    .float-panel div {
+      position: relative;
+      font-size: 13.3px;
+      min-height: 20px;
+    }
+
+    div>fieldset.item>div .editor,
+    .float-panel .editor {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      color: #00AAEF;
+    }
+
+    div>fieldset.item>div .editor:focus,.float-panel .editor:focus {
+      outline: none;
+    }
+
+    div>fieldset.item>legend {
+      color: #999999;
+      font-size: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      padding: 0 1em;
+    }
+
+    .add-warp-center {
+      display: flex;
+      justify-content: center;
+    }
+
+    .backdir-list li {
+      margin: 4px;
+    }
+
+    .backdir-list li:hover {
+      cursor: pointer;
+      color: #00aaef;
+      opacity: 0.8;
+    }
+
+    .backdir-list li strong {
+      font-size: 24px;
+      margin-right: 10px;
+    }
+
+    a[onclick]:hover {
+      cursor: pointer;
+      opacity: 0.6;
+      text-decoration: underline;
+    }
+  </style>
+  <!--html>/../compatible/native.html</html-->
+  <!--html>/../compatible/dialog.html</html-->
+  <!--html>/../compatible/drag.html</html-->
+  <!--html>/../compatible/editor.html</html-->
+  <!--html>/../debug/index.html</html-->
+  <!--html>/template/base.html</html-->
+  <!--html>/template/float.html</html-->
+  <!--html>/template/widget.html</html-->
+</head>
+
+<body>
+  <script>
+
+    window.visibilitychange.apply(window, (function () {
+      var hidden = null;
+      return [function () {
+        if (hidden && Date.now() - hidden > 1000 * 60) {
+          console.log('++++++++++++++++++++++你激活了窗口，距离上次间隔超过' + Math.floor((hidden && Date.now() - hidden) / 60000) + 'min');
+        }
+      }, function () { hidden = Date.now(); }]
+    })());
+
+    var autosave = false;
+    var content = document.createElement('div');
+    var addWarp = document.createElement('div');
+    var addPanel = document.createElement('legend');
+    var addButton = document.createElement('a');
+    addButton.title = '添加分类'
+    addWarp.className = 'add-warp-center';
+    addPanel.className = 'add-button';
+
+    addPanel.appendChild(addButton);
+    addWarp.appendChild(addPanel);
+    document.body.appendChild(content);
+    document.body.appendChild(addWarp);
+    window.$data.list.forEach(function (item) {
+      if (/\-list$/.test(item)) {
+        window.createFloatButton(localSave, item, item.replace(/\-+list$/, ''), item.match(/\-/g).length);
+      } else {
+        content.appendChild(createGroup(item));
+      }
+    });
+
+    window.candrag(content.children, function (el) { return el.children[1].children; }, function (drag, form, to) {
+      console.log(drag, form, to);
+      form.children[1].removeChild(drag);
+      to.children[1].appendChild(drag);
+      window.update(drag.children[0].innerText, form.children[0].innerText, to.children[0].innerText);
+    });
+
+    addButton.onclick = function () {
+      showDialog('添加一个文件', '<input class="input-name">', ['确定'], function (index, inputContent) {
+        content.appendChild(createGroup(inputContent.children[0].value));
+      });
+    };
+
+    if (localSave('autosave') != 'true') {
+      if (Date.now() - (+localSave('autosave') || 0) > 1000 * 60) {
+        localSave('autosave', Date.now());
+        showDialog('请注意', '是否自动保存修改？', ['确定'], function () {
+          autosave = true;
+          localSave('autosave', true);
+        });
+      }
+    } else {
+      autosave = true;
+    }
+
+    function createGroup(item) {
+
+      var initId = function (childStr) {
+        var id = item.replace(/((?![a-zA-Z0-9]).)+/ig, '').toLocaleLowerCase();
+        if (childStr) {
+          return id + '-' + childStr.replace(/((?![a-zA-Z0-9]).)+/ig, '').toLocaleLowerCase();
+        } else {
+          return id;
+        }
+      }
+      var fieldset = document.createElement('fieldset');
+      var legend = document.createElement('legend');
+      var content = document.createElement('div');
+
+      var label = document.createElement('label');
+      var a = document.createElement('a');
+
+      legend.appendChild(label);
+      legend.appendChild(a);
+      fieldset.appendChild(legend);
+      fieldset.appendChild(content);
+
+      fieldset.className = 'group';
+      label.id = initId();
+      label.innerHTML = item;
+      label.onclick = function (open) {
+        if (open === true || content.style.display !== 'block') {
+          content.style.display = 'block'
+          localSave('open', localSave('open') + '' + item + '');
+        } else {
+          content.style.display = 'none'
+          localSave('open', localSave('open').split(' ').filter(function (i) { return i !== item; }).join(' '))
+        }
+      };
+      content.style.display = localSave('open').indexOf(' ' + item + ' ') === -1 ? 'none' : 'block';
+
+      fetch(location.origin + location.pathname + '/' + item + location.search).then(function (i) {
+        return i.json();
+      }).then(function (data) {
+        Object.keys(data).forEach(function (k) {
+          content.appendChild(initContent(initId, k, data[k], function (value) {
+            if (data[k] != value) {
+              data[k] = value;
+              if (autosave) {
+                window.save(item, data);
+              } else {
+                legend.className = 'modify';
+              }
+            }
+          }));
+        });
+
+        a.onclick = function () {
+          if (/modify/.test(legend.className)) {
+            showDialog('提交', '提交所有的改动', ['确定'], function () {
+              legend.className = '';
+              window.save(item, data);
+            });
+          } else {
+            content.style.display = 'block'
+            showDialog('添加一条数据', '<input class="input-name">', ['确定'], function (index, inputContent) {
+              var key = inputContent.children[0].value;
+              content.appendChild(initContent(initId, key, null, function (value) {
+                if (data[key] != value) {
+                  data[key] = value;
+                  if (autosave) {
+                    window.save(item, data);
+                  } else {
+                    legend.className = 'modify';
+                  }
+                }
+              }));
+            });
+          }
+        };
+
+        content.querySelectorAll('a').forEach(function (el) {
+          if (el.hasAttribute('auto')) {
+            var time = +el.attributes['auto'].value || 0;
+            if (new Date().getHours() < 10 || time < 0) {
+              setTimeout(function () {
+                el.click();
+                el.focus();
+              }, Math.abs(time));
+            }
+          }
+
+          // if(el.hasAttribute('$title')){
+          //   window.webTitle(el.attributes[el.attributes['$title'].value].value).then(function(titleData){
+          //     el.innerHTML = titleData || el.innerHTML;
+          //   });
+          // }
+
+        });
+      });
+
+      return fieldset;
+    }
+
+    function initContent(initId, item, text, blur) {
+      var fieldset = document.createElement('fieldset');
+      var legend = document.createElement('legend');
+      var content = document.createElement('div');
+      var input = window.keyReplace(document.createElement('textarea'));
+      var show = window.candrag(document.createElement('div'));
+      show.input = input;
+      content.appendChild(show);
+      content.appendChild(input);
+      fieldset.appendChild(legend);
+      fieldset.appendChild(content);
+
+      fieldset.className = 'item';
+      input.className = 'editor';
+      legend.id = initId(item);
+      legend.innerHTML = item;
+      show.innerHTML = '';
+      input.value = text;
+      window.editors(input);
+      if (text == null) {
+        input.style.display = 'block';
+      } else {
+        input.style.display = 'none';
+        show.innerHTML = (text || '').transform();
+      }
+
+      setTimeout(function () {
+        input.focus();
+      }, 500);
+
+      content.style.display = localSave('open').indexOf(' ' + item + ' ') === -1 ? 'none' : 'block';
+      legend.onclick = function (open) {
+        if (open === true || content.style.display !== 'block') {
+          content.style.display = 'block'
+          localSave('open', localSave('open') + ' ' + item + ' ');
+        } else {
+          content.style.display = 'none'
+          localSave('open', localSave('open').split('').filter(function (i) { return i !== item; }).join(' '));
+        }
+      };
+
+      legend.onrightmenu = [{
+        name: '修改', fn: function (i) {
+          showDialog(item, '<input class="input-name">', ['确定'], function (index, inputContent) {
+            console.log(item + ' ==> ' + inputContent.children[0].value)
+          });
+        }
+      }];
+
+      show.ondblclick = function () {
+        input.style.display = 'block';
+        input.focus();
+      }
+
+      input.onblur = function () {
+        input.style.display = 'none';
+        show.innerHTML = (input.value).transform();
+        blur(input.value);
+      }
+
+      input.onkeydown = function (e) {
+        if (e.keyCode === 9) {
+          var self = this, selectionStart = self.selectionStart, selectionEnd = self.selectionEnd;
+          var replaceStr = self.value.slice(selectionStart, selectionEnd).split(/\n/).map(function (i) { return ' ' + i; }).join('\n');
+          self.value = self.value.slice(0, selectionStart) + replaceStr + self.value.slice(selectionEnd);
+          setTimeout(function () {
+            self.selectionStart = selectionStart + replaceStr.length;
+            self.selectionEnd = selectionStart + replaceStr.length;
+          })
+          return false;
+        }
+      };
+
+      window.changesize(input);
+      return fieldset;
+    }
+
+    window.changesize = function (element) {
+      //element.addEventListener('keyup',resize);
+      //element.addEventListener('focus',resize);
+      function resize() {
+        input.style.width = '';
+        input.style.height = '';
+        setTimeout(function () {
+          input.style.width = input.scrollWidth + 'px';
+          input.style.height = input.scrollHeight + 'px';
+        }, 100);
+      }
+    }
+
+    window.onkeydowns('LIST', function () {
+      if(!$data.backdirs){ return; }
+      var height = document.documentElement.clientHeight * 0.8;
+      var dialogContent = document.createElement('ul');
+      var closeDialog = showDialog('查看备份的历史数据', dialogContent);
+      dialogContent.className = 'backdir-list';
+      dialogContent.style.maxHeight = height + 'px';
+      $data.backdirs.sort().reverse().forEach(function (i) {
+        var item = document.createElement('li');
+        item.innerHTML = '<strong>' + i.slice(0, 4) + '/' + i.slice(4, 6) + '/' + i.slice(6, 8) + '</strong>' + i.slice(8, 10) + ':' + i.slice(10, 12) + ':' + i.slice(12, 14);
+        item.onclick = function () {
+          // closeDialog();
+          window.open(location.href + '/' + i);
+        };
+        dialogContent.appendChild(item);
+      })
+    })
+
+  </script>
+</body>
+
+</html>

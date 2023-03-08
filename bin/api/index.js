@@ -8,6 +8,10 @@ var log = require("./../log");
 
 module.exports = (function () {
 
+    var isNotNormalObject = function(data, base){
+        return (typeof data === 'object' && data.constructor.name !== 'Object') || base;
+    }
+
     var defaultReturn = {
         message: '根据具体逻辑处理返回'
     };
@@ -16,7 +20,7 @@ module.exports = (function () {
         disableList = [];
     var configs = [];
 
-    initConfig(__dirname + '/config', configData, returnData);
+    initConfig('', __dirname + '/config', configData, returnData);
 
     api.config = function (web, __dir) {
         if (typeof __dir === 'function') {
@@ -25,7 +29,7 @@ module.exports = (function () {
                 fn: __dir
             });
         } else {
-            initConfig(__dir, configData, returnData);
+            initConfig(web, __dir, configData, returnData);
         }
     };
 
@@ -57,10 +61,17 @@ module.exports = (function () {
             var mothedUrl = urls.filter(function (i) {
                 return new RegExp('\\[' + request.method + '\\]', 'i').test(i.match(/\[(.*)\]/) ? i : ('[GET]' + i));
             });
-            if (mothedUrl.length) {
-                return run(countValue(mothedUrl));
-            }
-            return run(countValue(urls));
+            return new Promise(function(succ,fail){
+                if(request.headers['debug-statuscode']){
+                    request.statusCode = +request.headers['debug-statuscode'];
+                }
+                setTimeout(function(){
+                    if (mothedUrl.length) {
+                        return run(countValue(mothedUrl)).then(succ,fail);
+                    }
+                    return run(countValue(urls)).then(succ,fail);
+                }, request.headers['debug-timeout']);
+            });
         } else {
             return new Promise(succ => {
                 helper.getBodyData(request).then(bodyData => {
@@ -78,37 +89,47 @@ module.exports = (function () {
          */
         function run(filterUrlKV) {
             var key = filterUrlKV[Math.max.apply(Math, Object.keys(filterUrlKV))];
+            var isEndType = function(data){return /\[object (Uint8Array|string)\]/.test(Object.prototype.toString.call(data));};
             return new Promise(succ => {
                 helper.getBodyData(request).then(bodyData => {
-                    returnResult(key, request, toObject(bodyData.toString() || '{}')).then(function(data){
+                    returnResult(key, request,response, toObject(bodyData.toString() || '{}')).then(function(data){
+                        request.statusCode = request.statusCode || 200;
                         if (data) {
                             var webModuleReg = /\^(((?!\/).)*)/;
-                            var datas = random(returnData[key].path)(data);
-                            if (typeof datas === 'string' && fs.existsSync(returnData[key].path + '/' + datas)) {
-                                response.writeHead(200, {
-                                    'Content-Type': helper.type(datas.split('.').pop())
+                            var notRandom = request.html || /text\/html/.test(response.getHeader('Content-Type'));
+                            var datas = notRandom ? data : random(returnData[key].path)(data);
+                            if (isNotNormalObject(data)){
+                                response.end(isEndType(data) ? data : JSON.stringify(data));
+                            } else if (typeof datas === 'string' && fs.existsSync(returnData[key].path + '/' + datas)) {
+                                response.writeHead(request.statusCode, {
+                                    'Content-Type': response.getHeader('Content-Type') || helper.type(datas.split('.').pop())
                                 });
                                 response.end(fs.readFileSync(returnData[key].path + '/' + datas));
-                            } else if (webModuleReg.test(datas) && fs.existsSync(datas.replace(webModuleReg,helper.config(webModuleReg.exec(datas)[1])))) {
-                                response.writeHead(200, {
-                                    'Content-Type': helper.type(datas.split('.').pop())
+                            } else if (webModuleReg.test(datas) && datas.replace && fs.existsSync(datas.replace(webModuleReg,helper.config(webModuleReg.exec(datas)[1])))) {
+                                response.writeHead(request.statusCode, {
+                                    'Content-Type': response.getHeader('Content-Type') || helper.type(datas.split('.').pop())
                                 });
                                 response.end(fs.readFileSync(datas.replace(webModuleReg,helper.config(webModuleReg.exec(datas)[1]))));
                             } else {
                                 var jsonp = request.url.split('?').pop().split('&').filter(i=>/^callback\s*=\s*.+/i.test(i)).pop();
-                                response.writeHead(200, {
-                                    'Content-Type': 'text/plain;charset=utf-8'
+                                response.writeHead(request.statusCode, {
+                                    'Content-Type': response.getHeader('Content-Type') || helper.type(request.url) || 'text/plain;charset=utf-8'
                                 });
                                 if(jsonp){
                                     response.end(';' + jsonp.split('=')[1] + '(' +JSON.stringify(datas) + ')');
                                 }else{
-                                    response.end(JSON.stringify(datas));
+                                    response.end(typeof datas === 'string' ? datas : JSON.stringify(datas));
                                 }
                                 
                             }
-                        } else {
+                        } else if(data !== undefined){
                             succ();
                         }
+                    }, function(error){
+                        response.writeHead(400, {
+                            'Content-Type': 'text/plain;charset=utf-8'
+                        });
+                        response.end(JSON.stringify(error));
                     });
                 });
             });
@@ -117,7 +138,7 @@ module.exports = (function () {
                 try {
                     return JSON.parse(data);
                 } catch (e) {
-                    return {};
+                    return data;
                 }
             }
         }
@@ -138,23 +159,30 @@ module.exports = (function () {
     }
 
 
-    function returnResult(key, request, bodyData) {
+    function returnResult(key, request, response, bodyData) {
         var parameters = helper.parameters(request,key);
 
         return new Promise(function (resolve) {
-            var apiFn = typeof returnData[key].js === 'function' ? returnData[key].js(JSON.parse(JSON.stringify(returnData[key].data || defaultReturn)), parameters, bodyData, request) : returnData[key].data;
-            if (apiFn.then) {
-                apiFn.then(data => resolve(done(JSON.stringify(data))));
+            var apiFn = typeof returnData[key].js === 'function' ? returnData[key].js(JSON.parse(JSON.stringify(returnData[key].data || defaultReturn)), parameters, bodyData, request, response) : returnData[key].data;
+            if (apiFn && apiFn.then) {
+                apiFn.then(data => resolve(done(data)));
             } else {
-                resolve(done(JSON.stringify(apiFn)));
+                resolve(done(apiFn));
             }
         });
 
-        function done(configStr) {
+        function done(data) {
+            if(isNotNormalObject(data)){
+                return data;
+            }
+            var configStr = JSON.stringify(data);
+            if(!configStr){
+                return configStr;
+            }
             if (typeof (returnData[key] && returnData[key].js) === 'function') {
-                console.log('\x1B[38m', 'use localhost api :' + key);
+                helper.console('bold', 'use localhost api :' + key);
             } else {
-                console.log('\x1B[39m', 'use random :' + key);
+                helper.console('bold', 'use random :' + key);
             }
             if (Object.keys(request.headers).indexOf('disable') !== -1) {
                 if (request.headers.disable === 'true') {
@@ -172,7 +200,7 @@ module.exports = (function () {
             Object.keys(bodyData).forEach(function (parm) {
                 configStr = configStr.replace(new RegExp(':' + parm, 'g'), bodyData[parm]);
             });
-            log(new Date(), helper.clientIp(request), request.headers['referer'], key, request.url, JSON.stringify(bodyData));
+            log(new Date(), helper.clientIp(request), request.headers['referer'], request.headers['user-agent'], key, request.url, JSON.stringify(bodyData));
             try {
                 return JSON.parse(configStr);
             } catch (e) {
@@ -187,13 +215,13 @@ module.exports = (function () {
      * @param {*} configData 
      * @param {*} returnData 
      */
-    function initConfig(dirpath, configData, returnData) {
+    function initConfig(web, dirpath, configData, returnData) {
         if (fs.existsSync(dirpath)) {
             fs.readdirSync(dirpath).forEach(function (item) {
                 try {
                     var info = fs.statSync(dirpath + '/' + item);
                     if (info.isDirectory()) {
-                        initConfig(dirpath + '/' + item, configData, returnData);
+                        initConfig(web, dirpath + '/' + item, configData, returnData);
                     } else if (/\.(js|json)$/.test(item)) {
                         try {
                             var fileName = path.join(dirpath + '/' + item.replace(/\.(js|json)$/, ''));
@@ -202,17 +230,26 @@ module.exports = (function () {
                             var json = fs.existsSync(fileName + '.json') ? JSON.parse(fs.readFileSync(fileName + '.json') || '{}') : {};
 
                             Object.keys(js).forEach(k => jsNew[k] = typeof js[k] === 'function' ? defaultReturn : js[k]);
-                            configData[fileName.replace(path.join(__dirname + '/../../'), '')] = Object.assign({}, jsNew, JSON.parse(JSON.stringify(json).replace(/</g, '&lt;').replace(/>/g, '&gt;')));
+                            configData['[' + web + ']' + fileName.replace(path.join(__dirname + '/../../'), '')] = Object.assign({}, jsNew, JSON.parse(JSON.stringify(json).replace(/</g, '&lt;').replace(/>/g, '&gt;')));
 
                             Object.keys(json).concat(Object.keys(js)).forEach(function (key) {
                                 returnData[key.replace(/\(.*\)/g, '')] = Object.assign(Object.create({random:random}),{
                                     path: dirpath,
-                                    data: json[key],
-                                    js: js[key]
+                                    data: json[Object.keys(json).filter(i=>i.replace(/\(.*\)/g,'') === key.replace(/\(.*\)/g,'')).pop()],
+                                    js: js[Object.keys(js).filter(i=>i.replace(/\(.*\)/g,'') === key.replace(/\(.*\)/g,'')).pop()] || function(data, parameters){
+                                        var parms = (/\((.*)\)/.exec(key) && /\((.*)\)/.exec(key)[1].split(',') || []).filter(p=>/\*/g.test(p)).map(p=>p.replace(/\*/g,''));
+                                        var r_parms = parms.filter(p=>!/=/.test(p) && !parameters[p.split(/[:=]/).shift()]);
+                                        if(r_parms.length){
+                                            return {
+                                                message: '缺少必填参数: ' + r_parms.join()
+                                            }
+                                        }
+                                        return data;
+                                    }
                                 });
                             });
                         } catch (e) {
-
+                            helper.console(e);
                         }
                     }
                 } catch (e) {

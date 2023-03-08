@@ -1,0 +1,97 @@
+<style>
+  .custom-tool-panel{
+    position: fixed;
+    z-index: 999999;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+  }
+  .custom-tool-panel-tools{
+    background: #d3d3d3;
+    width: 40px;
+    height:40px;
+    border-radius: 50%;
+    transform: translateX(50%);
+  }
+  .custom-tool-panel-tools:hover{
+    max-height: 400px;
+    overflow: auto;
+    border-radius: 0;
+    transform: none;
+    width: auto;
+    height: auto;
+    border-radius: 6px;
+    padding: 10px;
+  }
+  .custom-tool-panel-tools>*{
+    display: none;
+  }
+  .custom-tool-panel-tools:hover>*{
+    display: block;
+  }
+  .custom-tool-panel-tools>div+div{
+    margin-top: 8px;
+  }
+  .custom-tool-panel-tools>div{
+    color:#333333;
+  }
+  .custom-tool-panel-tools a:hover{
+    cursor: pointer;
+    color: #00aaef;
+  }
+  .custom-tool-panel-tools fieldset{
+    border-color: #f3f3f3;
+  }
+
+</style>
+
+<script>
+  window.initSetting = (function(){
+    var displayPanel = document.querySelector('.code-panel-content');
+    var toolPanel = document.createElement('div');
+    var tools = document.createElement('div');
+    toolPanel.className = 'custom-tool-panel';
+    tools.className = 'custom-tool-panel-tools';
+    toolPanel.appendChild(tools);
+
+    return function(items){
+      tools.innerHTML = '';
+      init(items, tools);
+    }
+
+    function init(items, panel){
+      if(!toolPanel.parentNode){
+        document.body.appendChild(toolPanel);
+      }
+
+      items.forEach(function(item){
+        var name = typeof item.name === 'function' ? item.name() : item.name;
+        if(name){
+          var toolEle = document.createElement('div');
+          if(!item.children){
+            var menu = document.createElement('a');
+            menu.innerHTML = item.name;
+            menu.onclick = (item.fn || item);
+            toolEle.appendChild(menu);
+          }else{
+            var fieldset = document.createElement('fieldset');
+            var legend = document.createElement('legend');
+            var content = document.createElement('div');
+            var label = document.createElement('label');
+            label.innerHTML = item.name;
+            init(item.children, content);
+            legend.appendChild(label);
+            fieldset.appendChild(legend);
+            fieldset.appendChild(content);
+            toolEle.appendChild(fieldset);
+          }
+          panel.appendChild(toolEle);
+        }
+      });
+    };
+
+  })();
+
+
+
+</script>

@@ -11,27 +11,55 @@ module.exports = (function () {
          * 文件的mete类型
          */
         type: function type(type) {
-            return config().mete[type];
+            type = type.split('.').pop() || '';
+            return config().mete[type.toLocaleLowerCase()];
+        },
+        /**
+         * 文件编码类型
+         */
+        filetype: function(file){
+            var type = this.type(file);
+            if(!type || /(html|text|json|javascript|xmls|sh|dat|cmd)/.test(type)){
+                return 'text';
+            } else if(/image/.test(type)){
+                return 'img';
+            } else if(/(audio|video)/.test(type)){
+                return 'media';
+            } else if(/pdf/.test(type)){
+                return 'new';
+            }
+            return 'null';
         },
         /**
          * 获取绝对地址
          */
         config: function configPath(webModule) {
-            var paths = config().web;
+            var paths = config().web, result = webModule;
             if (webModule) {
                 var basePath = path.join(__dirname + '/../../../views/');
-                if (/https?:\/\/.*\/views\/*/.test(webModule)) {
-                    webModule = webModule.replace(/https?:\/\/.*\/views\/*/i, basePath);
+                if (/https?:\/\//.test(webModule)) {
+                    if (/https?:\/\/.*\/views\/*/.test(webModule)) {
+                        webModule = webModule.replace(/https?:\/\/.*\/views\/*/i, basePath);
+                    }else{
+                        webModule = basePath + '/../';
+                    }
                 }
+                webModule = path.join(webModule);
+
                 if(Object.keys(paths).some(i=>i.toLocaleLowerCase()===webModule.toLocaleLowerCase())){
-                    return paths[Object.keys(paths).filter(i=>i.toLocaleLowerCase()===webModule.toLocaleLowerCase()).pop()];
+                    result = paths[Object.keys(paths).filter(i=>i.toLocaleLowerCase()===webModule.toLocaleLowerCase()).pop()];
                 }else{
                     var filterPath =  Object.keys(paths).sort((a, b) => a.length - b.length).filter(i => path.join(webModule).toLocaleLowerCase().indexOf(path.join(basePath, i).toLocaleLowerCase()) !== -1).pop();
                     if (filterPath) {
-                        return path.join(webModule).toLocaleLowerCase().replace(path.join(basePath, filterPath).toLocaleLowerCase(), paths[filterPath]);
+                        result = path.join(webModule).replace(new RegExp(path.join(basePath, filterPath).replace(/\\/g, '\\\\'), 'i') , paths[filterPath]);
                     } else {
-                        return path.join(webModule);
+                        result = path.join(webModule);
                     }
+                }
+                if(/https?:\/\/.*\/views\/*/.test(result)){
+                    return this.config(result);
+                }else{
+                    return result;
                 }
 
             } else {
@@ -64,15 +92,37 @@ module.exports = (function () {
                 var packTool = Object.keys(packs).filter(p=>allfiles.some(i => i.toLocaleLowerCase() === packs[p])).pop();
                 if (packTool) {
                     return packTool;
-                } else if (path.dirname(dir) !== dir) {
+                } else if (path.basename(dir) !== 'node_modules' && path.dirname(dir) !== dir) {
                     return this.packTool(path.dirname(dir));
-                } else {
-                    return '';
                 }
-            } else {
-                return '';
             }
+            return '';
+        },
+        /**
+         * 获取版本信息
+         */
+        package: function(dir){
+            try{
+                if(fs.existsSync(dir + '/package.json')){
+                    return JSON.parse(fs.readFileSync(dir + '/package.json').toString());
+                }
+            }catch(e){
 
+            }
+            return {};
+        },
+        /**
+         * 获取相对路径
+         */
+        relativelyPath: function(referer, file){
+            var basePath = path.join(__dirname + '/../../../views/');
+            var files = file.split(/\?#/).shift().toLocaleLowerCase().split(/[\\\/]/).filter(function(i){return !!i;});
+            var refererPaths = (this.config((referer || '').split(/[\?#]/).shift() || basePath) || basePath).toLocaleLowerCase().replace(/((?![\\\/]).)+\.html$/,'').split(/[\\\/]/).filter(function(i){return !!i;});
+            while(files[0] === refererPaths[0]){
+                files.shift();
+                refererPaths.shift();
+            }
+            return refererPaths.map(function(){return '../';}).join('') + files.join('/');
         }
     };
 

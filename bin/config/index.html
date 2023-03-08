@@ -13,6 +13,7 @@
         }
 
         legend a {
+            cursor: pointer;
             display: inline-block;
             width: 20px;
             height: 5px;
@@ -93,11 +94,22 @@
             font-weight: 600;
         }
 
+        fieldset>div>div label:hover {
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
         fieldset>div>div input {
             float: right;
             width: calc(100% - 200px);
             border: none;
-            padding: 0.5em;
+            padding: 0.4em;
+        }
+
+        fieldset>div>div input:focus {
+            outline: none;
+            color: #00AAEF;
+            caret-color: rgb(0,0,0);
         }
 
         fieldset.hide-content div,
@@ -245,6 +257,12 @@
                             fieldset.className += ' hide-content';
                         }
                     };
+                } else {
+                    content.onclick = function(e){
+                        if(e.target.nodeName === 'LABEL'){
+                            window.open(location.origin + '/views/' + e.target.innerHTML);
+                        }
+                    };
                 }
 
                 fetch(location.origin + '/config/' + mod).then(function (i) {
@@ -320,7 +338,7 @@
 
                 label.innerHTML = key;
                 
-                input.value = data[key];
+                input.value = data[key] || '';
 
                 row.appendChild(remove);
                 row.appendChild(label);
@@ -330,7 +348,8 @@
 
                 if(editData){
                     label.title = editData[key] || '';
-                    label.onclick = function(){
+                    label.onclick = function(e){
+                        e.stopPropagation();
                         showDialog('修改' + modules[mod] + ' ' + key + ' 的编辑路径', '<input style="width: calc(100% - 0.6em);" value="'+(editData[key]||'')+'">').then(function (children) {
                             if(children[0].value && children[0].value !== editData[key]){
                                 editData[key] = children[0].value;

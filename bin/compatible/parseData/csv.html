@@ -1,0 +1,59 @@
+<script>
+  window.ParseCSV = function csv(data) {
+    var nonull = function (i){
+      return !!i;
+    };
+    var items = data.split(/[\r\n]/).filter(function (i){
+      return !!i;
+    });
+    var fields = items.shift().split(/[,\t]/).map(function (i){
+      return i.replace(/["\r\n]/g, '')
+    });
+    
+    var list =[];
+    items.forEach(function (item){
+      var obj = {};
+      replaceA(item, function (str, replaces){
+        str.split(/[,\t]/).forEach(function (v, i){
+          if (fields[i]){
+            obj[fields[i]]= v.replace(/@(\d+)/, function(str){
+              return replaces[str.replace('@','')]
+            });
+          }
+        });
+      });
+      list.push(obj);
+    });
+
+    return list.filter(function(i){
+      return Object.keys(i).filter(function(o){
+        return /\S/.test(i[o]);
+      }).length;
+    });
+
+    function replaceA(str, callback){
+      var replaces  = [],
+        line = '',
+        add = false;
+      str = str.replace(/""/g,'\\"');
+      for (var i =0; i < str.length; i++){
+        if (!/[\\]/.test(str[i - 1]) && str[i] === '"'){
+          if(add){
+            add = false;
+            replaces.push(line);
+          } else {
+            add = true;
+            line ='';
+          } 
+        } else {
+            line += str[i];
+        }
+      }
+      replaces = replaces.map(function(rep, i){
+        str = str.replace('"' + rep + '"', '@' + i);
+        return rep.replace(/\\"/g, '"').replace(/[\r\n]/g,'').replace(/""/g, '"');
+      });
+      callback(str.replace(/""/g,'"'), replaces);
+    }
+  }
+</script>

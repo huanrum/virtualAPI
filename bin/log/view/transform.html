@@ -1,0 +1,167 @@
+<style>
+  .url {
+    color: #000099;
+  }
+
+  .log-item {
+    margin: 8px;
+    padding: 8px;
+    border: 1px solid #0968de;
+  }
+</style>
+
+<script>
+  window.addEventListener('load', function () {
+    Array.prototype.forEach.call(document.getElementsByClassName('transform'), function (element) {
+      if ('PRE' === element.nodeName) {
+        element.innerHTML = element.innerText.transform();
+      }
+    });
+  });
+
+  String.transform((function () {
+    var getid = function (type) {
+      getid.id = getid.id || 1;
+      return type + '-' + (getid.id++);
+    };
+    var transformList = function () {
+      var transformObject = [
+        '不格式', '不完全()', '完全(transform)'
+      ];
+      var texts = transformObject.map(function (i) { return i.replace(/\(.*\)/, '') });
+      var values = transformObject.map(function (i) { return /\((.*)\)/.test(i) ? /\((.*)\)/.exec(i)[1] : null });
+      return [texts, values]
+    }
+
+    var replaceEnter = function (str) {
+      return str.replace(/\n\{([\s\S]+)\}\n/g, function ($0, $1) {
+        return $0.replace($1, $1.replace(/\n/g, ''));
+      });
+    }
+
+    var replaceTranslation = function (str) {
+      //转义字符 https://blog.csdn.net/feiniu55662/article/details/13624619
+      var replaces = { '\\[': '&#91;', '\\]': '&#93;' };
+      Object.keys(replaces).forEach(function (key) {
+        str = str.replace(new RegExp(key, 'g'), replaces[key]);
+      });
+      return str;
+    };
+
+    var stringToObject = function (str) {
+      var lines = replaceEnter(str).split(/\n/).filter(function (i) { return !/^\s*\*+/.test(i); }), item = {
+        ip: /^(::ffff:)?[0-9]{1,3}(\.[0-9]{1,3}){3}/,
+        ref: /^https?:/,
+        request: /^\/.+(\?.+)?/,
+        api: { test: function (str) { return /^((\[[A-Z]+\])|(\([a-z0-9:]+\))|\/)((?!\?).)+/i.test(str) } },
+        body: /\{.*\}/,
+        date: { test: function (i) { return new Date(i).valueOf(); } },
+      };
+
+      Object.keys(item).forEach(function (key) {
+        item[key] = (lines.filter(function (line) { return item[key].test(line); }).pop() || '');
+        lines = lines.filter(function (i) { return i !== item[key]; });
+      });
+
+      if (!item.request && item.api) {
+        item.request = item.api;
+        item.api = '';
+      }
+
+      if (item.request && !item.api) {
+        item.api = lines.filter(function (line) { return item.request.indexOf(line) !== -1; }).pop() || '';
+        lines = lines.filter(function (i) { return i !== item.api; });
+      }
+
+      if (item.ip) {
+        item.ip = item.ip.replace(/::ffff:/, '');
+      }
+
+      if (item.date) {
+        item.date = new Date(item.date).toDateString();
+      }
+
+      item.message = lines.join('\n');
+      return item;
+    };
+
+    var showBody = function (title, body) {
+      if (body.length < 100) {
+        return body;
+      }
+      var id = getid('show-body');
+      setTimeout(function () {
+        var el = document.getElementById(id);
+        el.onclick = function () {
+          try {
+            body = JSON.stringify(JSON.parse(body), null, 4).replace(/\r/g, '&nbsp;&nbsp;').replae(/ /g, '&nbsp;').replace(/\n/, '<br>');
+          } catch (e) { }
+          showDialog(title, body);
+        };
+      });
+      return '<div id="' + id + '" style="cursor: pointer;">{...}</div>';
+    };
+
+    var manageType = function (type) {
+      var types = transformList()[1];
+      var finename = /(\d+)/.test(location.pathname) ? /(\d+)/.exec(location.pathname)[1] : '';
+      var key = '[log]type';
+      var value = localStorage[key] || '';
+      if (type) {
+        var index = types.indexOf(type.replace('format=', ''));
+        value = value.replace(new RegExp('!*' + finename, 'g'), '') + (index > 1 ? ',!' : ',') + finename;
+        localStorage[key] = value.replace(/^,+/, '').replace(/,{2,}/, ',');
+      } else {
+        if (new RegExp('!' + finename, 'g').test(value)) {
+          return ['', types[2]]
+        }
+        if (new RegExp(finename, 'g').test(value)) {
+          return ['', types[1]]
+        }
+      }
+      return null;
+    };
+
+    var type = /format=(((?!\&).)*)/.exec(location.search);
+    if (type) {
+      manageType(type[0]);
+    } else {
+      type = manageType();
+    }
+
+    return function (content) {
+      if (!type && content && !/^[0-9a-z_\-@$#]+$/i.test(content)) {
+        var transforms = transformList();
+        showDialog('提示', '是否格式化显示', transforms[0], function (index) {
+          if (index) {
+            location.search = '?format=' + transforms[1][index];
+          }
+        });
+        return content;
+      }
+      return content.replace(/\*+(\n.+)+(\n)?\*+/g, function (str) {
+        var logId = getid('log-item');
+        setTimeout(function () {
+          var logItem = document.querySelector('.' + logId);
+          logItem.title = str;
+        }, 500);
+        switch (type && type[1]) {
+          case 'transform':
+            var item = stringToObject(str);
+            return [
+              '<div class="log-item ' + logId + '">',
+              '   26[${ip}][${date}]12,#009900[${message}]\n[${api}]?HTTP:${request}\n' + showBody(item.api, item.body),
+              '</div>'
+            ].join('').replace(/\$\{(((?!\}).)+)\}/gm, function ($0, $1) {
+              return replaceTranslation(item[$1] || '**');
+            });
+          case '':
+            return '<div class="log-item ' + logId + '">' + str.replace(/\*{8,}\n?/g, '') + '</div>';
+          default:
+            return str;
+        }
+      });
+    };
+
+  })());
+</script>

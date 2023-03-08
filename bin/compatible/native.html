@@ -1,92 +1,692 @@
-<script>
+<!--script src="/../../../lib/qrcode.js"></script-->
+<!--script src="/../../../lib/es6-promise.js"></script-->
+
+<!--html>ie8.html</html-->
+<script class="native-function">
     (function () {
-        window.Promise = window.Promise || $Promise;
+        var isIE = window.navigator.userAgent.indexOf("MSIE") >= 1;
+
+        window.$data = window.$data || null;
+        window.$setting = window.$setting || null;
+
+        window.Proxy = window.Proxy || $Proxy;
+        window.WebSocket = (isIE ? null : window.WebSocket) || $WebSocket;
+
         window.fetch = window.fetch || $fetch;
+        window.String.prototype.hump = hump;
+        window.execCopy = $copy;
+        window.create = window.create || $createElement;
+
+        Object.assign = Object.assign || $assign;
+        Object.extend = Object.extend || $extend;
 
         function $fetch(url, option) {
-            var xhr = null,
-                callBack = [],
-                errorBack = [];
-            if (window.XMLHttpRequest) {
-                xhr = new window.XMLHttpRequest();
-                if (xhr.overrideMimeType) {
-                    xhr.overrideMimeType('text/xml');
-                }
-            } else {
-                xhr = new window.ActiveXObject('Microsoft.XMLHTTP');
-            }
-            xhr.onreadystatechange = onreadystatechange;
-            xhr.open(option.method||'GET', url, true);
-            xhr.send(option.body);
+            return new window.Promise(function (resolve, reject) {
+                var xhr = null,
+                    callBack = [],
+                    errorBack = [];
 
-            return {
-                then: then,
-                error: error
-            };
-
-            function onreadystatechange() {
-                var data = {
-                    status: 200,
-                    headers: {
-                        get: function (name) {
-                            return xhr.getResponseHeader(name);
-                        }
-                    },
-                    text: function () {
-                        return xhr.responseText;
-                    },
-                    json: function () {
-                        return JSON.parse(xhr.responseText);
+                option = option || {};
+                option.method = option.method || (option.body ? 'POST' : 'GET');
+                if (window.XMLHttpRequest) {
+                    xhr = new window.XMLHttpRequest();
+                    if (xhr.overrideMimeType) {
+                        xhr.overrideMimeType('text/xml');
                     }
-                };
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    callBack.forEach(function (fn) {
-                        data = fn(data) || data;
-                    });
-                } else if (xhr.readyState === 3 && xhr.status !== 200) {
-                    errorBack.forEach(function (fn) {
-                        data = fn(data) || data;
-                    });
+                } else {
+                    xhr = new window.ActiveXObject('Microsoft.XMLHTTP');
                 }
-            }
+                xhr.onreadystatechange = onreadystatechange;
+                xhr.onerror = onerror;
+                xhr.onabort = onerror;
+                xhr.open(option.method, url, true);
+                Object.keys(option.headers || {}).forEach(function (n) {
+                    xhr.setRequestHeader(n, (option.headers[n] || '').trim());
+                });
+                xhr.send(option.body);
 
-            function then(fn) {
-                callBack.push(fn);
-                return this;
-            }
+                function data() {
+                    return {
+                        status: 200,
+                        headers: {
+                            get: function (name) {
+                                return xhr.getResponseHeader(name);
+                            }
+                        },
+                        text: function () {
+                            return window.Promise.resolve(xhr.responseText);
+                        },
+                        json: function () {
+                            return window.Promise.resolve(JSON.parse(xhr.responseText));
+                        }
+                    };
+                }
 
-            function error(fn) {
-                errorBack.push(fn);
-                return this;
-            }
+                function onerror() {
+                    reject(data());
+                }
+                function onreadystatechange() {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        resolve(data());
+                    } else if (xhr.readyState === 3 && xhr.status !== 200) {
+                        reject(data());
+                    }
+                }
+                function then(fn) {
+                    callBack.push(fn);
+                    return this;
+                }
+                function error(fn) {
+                    errorBack.push(fn);
+                    return this;
+                }
+            });
         }
 
+        function $Proxy(target, handler) {
+            this.__proto__ = null;
+            return Object.assign(this, {
+                '[[Target]]': target,
+                '[[Handler]]': handler
+            });
+        }
 
+        function $WebSocket(url) {
+            var $id = 'websocket' + Date.now();
+            var $url = url.replace(/^ws/, 'http').replace(/\d{4}/, '8888') + '/websocket';
+            var self = this;
+            var fnList = { message: [] };
+            setTimeout(function () {
+                loolCall(function (data) {
+                    if (data) {
+                        if (self.onmessage) {
+                            self.onmessage({ data: data });
+                        }
+                        fnList.message.forEach(function (fn) {
+                            fn({ data: data });
+                        });
+                    }
+                });
+            });
+            setTimeout(function () {
+                if (self.onopen) {
+                    self.onopen();
+                }
+            }, 500);
 
-        function $Promise(init) {
-            var resloveList = [],
-                rejectList = [];
-            this.then = function (reslove, reject) {
-                resloveList.push(reslove);
-                rejectList.push(reject);
+            this.addEventListener = function (type, fn) {
+                fnList[type] = fnList[type] || [];
+                fnList[type].push(fn);
             };
-            this.reslove = function (req) {
-                setTimeout(function () {
-                    resloveList.forEach(function (reslove) {
-                        reslove && reslove(req);
-                    });
-                }, 10);
-            }
-            this.reject = function (err) {
-                setTimeout(function () {
-                    resloveList.forEach(function (reject) {
-                        reject && reject(err);
-                    });
-                }, 10);
+            this.removeEventListener = function (type, fn) {
+                fnList[type] = fnList[type] || [];
+                fnList[type] = fnList[type].filter(function (f) { return fn && fn !== f; });
             }
 
-            init(this.reslove, this.reject);
+            this.send = sendXHR;
+
+            function sendXHR(data, callback) {
+                var xhr = null;
+                callback = callback || function () { };
+                if (window.XMLHttpRequest) {
+                    xhr = new window.XMLHttpRequest();
+                    if (xhr.overrideMimeType) {
+                        xhr.overrideMimeType('text/xml');
+                    }
+                } else {
+                    xhr = new window.ActiveXObject('Microsoft.XMLHTTP');
+                }
+                xhr.onreadystatechange = function (e) {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        callback(xhr.responseText);
+                    }
+                };
+                xhr.open('POST', $url, true);
+                xhr.setRequestHeader('websocket', (self.handle || '').trim());
+                xhr.send(data || null);
+                setTimeout(function () {
+                    xhr.onreadystatechange = function () { };
+                    xhr.abort();
+                }, 60 * 1000);
+            }
+
+            function loolCall(callback) {
+                var timeout = setTimeout(function () {
+                    loolCall(callback);
+                }, 60 * 1000);
+                var xhr = sendXHR(null, function (res) {
+                    callback(res);
+                    clearTimeout(timeout);
+                    loolCall(callback);
+                });
+            }
+
+        }
+
+        function $assign(target) {
+            for (var i = 1; i < arguments.length; i++) {
+                var obj = arguments[i] || {};
+                for (var pro in obj) {
+                    target[pro] = obj[pro];
+                }
+            }
+            return target;
+        }
+
+        function $extend(target) {
+            var newObj = target;
+            for (var i = 1; i < arguments.length; i++) {
+                if (arguments[i]) {
+                    newObj = Object.assign(Object.create(newObj), arguments[i]);
+                }
+            }
+            return newObj;
+        }
+
+        function hump() {
+            return this.replace(/[_\-]/g, '').replace(/\s+/g, '').split(/\s/).filter(Boolean).map(function (str) {
+                return str[0].toLocaleUpperCase() + str.substring(1);
+            }).join('');
+        }
+
+        function $copy(data) {
+            return new Promise(function (succ) {
+                var textarea = document.createElement('textarea');
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = 0.01;
+                document.body.appendChild(textarea);
+                textarea.value = data.replace(/[0-9a-zA-Z_\"]\s+[0-9a-zA-Z_\"]/g, function (str1) { return str1[0] + ' ' + str1[str1.length - 1]; });
+                textarea.focus();// 选择对象
+                textarea.select();// 选择对象
+                Array(10).forEach(function (v, i) {
+                    setTimeout(function () {
+                        document.execCommand('Copy', 'false', null);
+                    }, 10 * i);
+                });
+                setTimeout(function () {
+                    if (document.execCommand('Copy', 'false', null)) {
+                        setTimeout(showDialog('复制数据', '复制的内容: ' + data), 2000);
+                        succ(data);
+                    }
+                    document.body.removeChild(textarea);
+                }, 200);
+            });
+        }
+
+        function $createElement(content, classname) {
+            classname = classname || '';
+            if (content instanceof HTMLElement) {
+                content.className += '' + classname;
+                content.find = find;
+                return content;
+            } else if (content instanceof Array) {
+                var ul = document.createElement('ul');
+                ul.className += '' + classname;
+                ul.find = find;
+                content.forEach(function (item) {
+                    var li = document.createElement('li');
+                    ul.appendChild(li);
+                    li.appendChild($createElement(item));
+                });
+                return ul;
+            } else if (typeof content === 'object') {
+                var div = document.createElement('div');
+                div.className += '' + classname;
+                div.find = find;
+                Object.keys(content || {}).forEach(function (key) {
+                    var child = document.createElement('div');
+                    div.appendChild(child);
+                    child.appendChild($createElement(content[key], key));
+                });
+                return div;
+            } else if (typeof content === 'string') {
+                var temp = document.createElement('div');
+                temp.innerHTML = content;
+                temp.firstChild.find = find;
+                return temp.firstChild;
+            } else {
+                return document.createElement('empty')
+            }
+
+            function find(selector) {
+                selector = (selector || '').toLocaleUpperCase();
+                return filter(this);
+
+                function filter(element) {
+                    return Array.prototype.concat.apply([], Array.prototype.map.call(element.childNodes, function (child) {
+                        if (check(child)) {
+                            return [child].concat(filter(child));
+                        } else {
+                            return filter(child)
+                        }
+                    }));
+                }
+
+                function check(el) {
+                    return el.nodeName === selector;
+                }
+            }
         }
 
     })();
+
+    (function () {
+        window.Promise = window.Promise || $Promise;
+
+        $Promise.resolve = function (arg) {
+            return new $Promise(function (resolve) {
+                if (arg && arg.then) {
+                    arg.then(resolve);
+                } else {
+                    resolve(arg);
+                }
+            });
+        };
+
+        $Promise.reject = function (arg) {
+            return new $Promise(function (resolve, reject) {
+                if (arg && arg.then) {
+                    arg.then(function () { }, reject);
+                } else {
+                    reject(arg);
+                }
+            });
+        };
+
+        $Promise.all = function (promises) {
+            return new $Promise(function (resolve) {
+                var res = promises.map(function () { return undefined; });
+                var callback = function (r, index) {
+                    res[index] = r || null;
+                    if (!res.filter(function (i) { return i === undefined; }).length) {
+                        resolve(res);
+                    }
+                }
+                if (!promises.length) {
+                    resolve();
+                } else {
+                    promises.forEach(function (promise, index) {
+                        if (promise && promise.then) {
+                            promise.then(function (r) {
+                                callback(r, index)
+                            });
+                        } else {
+                            callback(r, index);
+                        }
+                    });
+                }
+            });
+        };
+
+        $Promise.race = function (promises) {
+            return new $Promise(function (resolve) {
+                var done = false;
+                var callback = function (r) {
+                    if (!done) {
+                        resolve(r);
+                    }
+                    done = true;
+                };
+                promises.forEach(function (promise) {
+                    if (promise && promise.then) {
+                        promise.then(function (d) {
+                            callback(d);
+                        });
+                    } else {
+                        callback(promise);
+                    }
+                });
+            });
+        };
+
+        $Promise.lastId = 0;
+
+        function $Promise(init) {
+            var self = this;
+            var id = ++$Promise.lastId;
+            var status = 0;//0等待,1成功,2失败
+            var data = null;
+            var resolveList = [],
+                rejectList = [],
+                catchList = [],
+                finallyList = [];
+
+            self.__get = function () {
+                return { status: status, data: data };
+            };
+            Object.defineProperties(self, {
+                '__id': {
+                    get: function () {
+                        return id;
+                    }
+                },
+                '[[PromiseStatus]]': {
+                    get: function () {
+                        return ['pending', 'sucess', 'fail'][status] || 'unknow';
+                    }
+                },
+                '[[PromiseValue]]': {
+                    get: function () {
+                        return data;
+                    }
+                }
+            });
+            self.then = function (resolve, reject) {
+                if (status == 1) {
+                    resolve(data);
+                } else if (status == 2) {
+                    reject(data);
+                } else {
+                    resolveList.push(resolve);
+                    rejectList.push(reject);
+                }
+                return self;
+            };
+            self.sucess = function (resolve) {
+                if (status == 1) {
+                    resolve(data);
+                } else {
+                    resolveList.push(resolve);
+                }
+                return self;
+            };
+            self.error = function (reject) {
+                if (status == 2) {
+                    reject(data);
+                } else {
+                    rejectList.push(reject);
+                }
+                return self;
+            };
+            self.catch = function ($catch) {
+                catchList.push($catch);
+                return self;
+            };
+            self.finally = function ($finally) {
+                finallyList.push($finally);
+            };
+            self.resolve = function (req) {
+                setTimeout(function () {
+                    status = 1;
+                    foreach(resolveList.concat(finallyList), req, function (d) {
+                        data = d;
+                    })
+                }, 10);
+            }
+            self.reject = function (err) {
+                setTimeout(function () {
+                    status = 2;
+                    foreach(rejectList.concat(finallyList), err, function (d) {
+                        data = d;
+                    })
+                }, 10);
+            }
+
+            setTimeout(function () {
+                init(self.resolve, self.reject);
+            });
+
+            function foreach(fnList, data, callback) {
+                var iteration = function (newData) {
+                    callback(newData);
+                    if (fnList && fnList.length) {
+                        foreach(fnList.slice(1), fnList[0](newData) || newData, callback);
+                    }
+                }
+
+                try {
+                    if (data && data.then) {
+                        data.then(iteration);
+                    } else {
+                        iteration(data);
+                    }
+                } catch (e) {
+                    catchList.forEach(function (cFn) {
+                        cFn(e);
+                    })
+                }
+            }
+        }
+
+    })();
+
+    //猴子补丁
+    (function () {
+        try {
+            Object.defineProperty(Object.prototype, '$class', {configurable: true, enumerable: false, get: function () {
+                var result = [], obj = this.__proto__;
+                while (obj) {
+                    result.push(obj.constructor.name);
+                    obj = obj.__proto__;
+                }
+                return result.join('->');
+                //return /\[object\s+(\S+)\]/.exec(Object.prototype.toString.apply(this))[1];
+            }});
+
+            Object.defineProperty(Element.prototype, 'onlonghold', {
+                configurable: true,
+                enumerable: false,
+                get: function () {
+                    return this.__longhold;
+                },
+                set: function (val) {
+                    var timeout = null, startE = null;
+                    this.addEventListener('mousedown', start);
+                    this.__longhold = val;
+                    function start(e) {
+                        startE = e;
+                        timeout = setTimeout(function () { val(e); }, 1000);
+                        this.addEventListener('mouseup', end);
+                        this.addEventListener('mouseleave', end);
+                        this.addEventListener('mouseover', end);
+                        this.addEventListener('mousemove', move);
+                    }
+
+                    function move(e) {
+                        if ((startE.clientX - e.clientX) * (startE.clientX - e.clientX) + (startE.clientY - e.clientY) * (startE.clientY - e.clientY) > 25) {
+                            end(e);
+                        }
+                    }
+
+                    function end(e) {
+                        this.removeEventListener('mouseup', end);
+                        this.removeEventListener('mouseleave', end);
+                        this.removeEventListener('mouseover', end);
+                        this.removeEventListener('mousemove', move);
+                        clearTimeout(timeout);
+                    }
+                }
+            });
+
+            var contextmenu = document.createElement('ul');
+            contextmenu.className = 'context-menu';
+            function removeContextmenu(e) {
+                if (contextmenu && contextmenu.parentNode) {
+                    contextmenu.menutarget = null;
+                    contextmenu.parentNode.removeChild(contextmenu);
+                }
+            };
+
+            function isParent(parent, child) {
+                if (!child || child === document.body) { return false; }
+                return parent === child || isParent(parent, child.parentNode);
+            }
+
+            window.addEventListener('click', removeContextmenu);
+            window.addEventListener('scroll', removeContextmenu);
+            Object.defineProperty(Element.prototype, 'onrightmenu', {
+                configurable: true,
+                enumerable: false,
+                set: function (menus) {
+                    this.addEventListener('contextmenu', function (e) {
+                        if (isParent(e.target, contextmenu.menutarget)) { return; }
+                        removeContextmenu();
+                        setTimeout(removeContextmenu, 30000);
+                        contextmenu.innerHTML = '';
+                        menus.forEach(function (menu) {
+                            var name = typeof menu.name === 'function' ? menu.name(e.target) : menu.name;
+                            if (name) {
+                                var menuitem = document.createElement('li');
+                                menuitem.innerHTML = name;
+                                menuitem.onclick = function (event) {
+                                    (menu.fn || menu)(Object.assign(event, { select: e.target }));
+                                };
+                                contextmenu.appendChild(menuitem);
+                            }
+                        });
+                        if (contextmenu.children.length) {
+                            contextmenu.menutarget = e.target;
+                            document.body.appendChild(contextmenu);
+                            e.preventDefault();
+                            setTimeout(function () {
+                                var x = e.clientX, y = e.clientY;
+                                if (x + e.target.offsetLeft + contextmenu.offsetWidth > document.body.offsetWidth) {
+                                    x = x - contextmenu.offsetWidth;
+                                }
+                                if (y + +e.target.offsetTop + contextmenu.offsetHeight > document.body.offsetHeight) {
+                                    y = y - contextmenu.offsetHeight;
+                                }
+                                //根据事件对象中鼠标点击的位置，进行定位
+                                contextmenu.style.left = x + 'px';
+                                contextmenu.style.top = y + 'px';
+                            });
+                        }
+                    });
+                }
+            });
+        } catch (e) {
+            console.log(e);
+        }
+    })();
+
+        (function () {
+            Array.prototype.fill = function (value) {
+                return this.map(function () { return value; });
+            };
+
+        })();
 </script>
+<script>
+    // document.documentElement.style.zoom = Math.ceil(window.screen.width * 1000 / 1920)/ 1000;
+</script>
+<style class="native-function">
+    ::-webkit-scrollbar {
+        /*滚动条整体样式*/
+        width: 10px;
+        /*高宽分别对应横竖滚动条的尺寸*/
+        height: 1px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        /*滚动条里面小方块*/
+        border-radius: 10px;
+        box-shadow: inset 0 0 5px rgba(76, 173, 173, 0.2);
+        background: #535353;
+    }
+
+    ::-webkit-scrollbar-track {
+        /*滚动条里面轨道*/
+        box-shadow: inset 0 0 5px rgba(16, 122, 122, 0.2);
+        border-radius: 10px;
+        background: #EDEDED;
+    }
+
+    .context-menu {
+        cursor: pointer;
+        position: fixed;
+        z-index: 9999;
+        width: 125px;
+        max-height: 400px;
+        overflow: auto;
+        list-style: none;
+        padding: 8px;
+        background: #d3d3d3;
+        border-radius: 8px;
+    }
+
+    .context-menu li {
+        padding: 3px;
+        border-radius: 5px;
+    }
+
+    .context-menu li+li {
+        margin-top: 5px;
+    }
+
+    .context-menu li:hover {
+        color: #00AAEF;
+        text-decoration: underline;
+    }
+
+    .context-menu li *:hover {
+        color: #00AAEF !important;
+    }
+
+    .context-menu.menu-children {
+        position: relative;
+        width: auto;
+        background: transparent;
+        max-height: 300px;
+        font-weight: 600;
+        overflow: auto;
+    }
+
+    .context-menu.menu-children li.selected {
+        background: #535353;
+        color: #00aaef;
+    }
+
+    legend a {
+        cursor: pointer;
+        display: inline-block;
+        width: 20px;
+        height: 5px;
+        margin: 0 0.5rem;
+        background: green;
+        line-height: 0;
+        font-size: 0;
+        vertical-align: middle;
+    }
+
+    legend a:after {
+        content: '|';
+        display: block;
+        width: 20px;
+        height: 5px;
+        background: green;
+        transform: rotate(-90deg);
+    }
+
+    legend a:hover {
+        opacity: 0.6;
+    }
+
+    legend.modify a {
+        display: inline-block;
+        width: 10px;
+        height: 5px;
+        margin: 0 0.5rem;
+        background: green;
+        line-height: 0;
+        font-size: 0;
+        vertical-align: middle;
+        transform: rotate(45deg);
+    }
+
+    legend.modify a:after {
+        content: '/';
+        display: block;
+        width: 20px;
+        height: 5px;
+        background: green;
+        transform: rotate(-90deg) translateY(-50%) translateX(50%);
+    }
+</style>
+
+<!--html>style.html</html-->
+<!--html>browser.html</html-->
+<!--html>extend.html</html-->
+<!--html>thread.html</html-->
+<!--html>transform.html</html-->
+<!--html>parseData/csv.html</html-->
+<!--html>function.html</html-->

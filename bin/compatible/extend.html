@@ -1,0 +1,407 @@
+<style class="extend-style">
+  .shift-ctrl-alt * {
+    cursor: copy;
+  }
+
+  .shift-ctrl-alt>*:hover {
+    outline: 3px solid #00aaef;
+  }
+
+  div[contenteditable=true]:empty::before {
+    content: attr(placeholder);
+    font-size: 14px;
+    color: #CCC;
+    line-height: 21px;
+    padding-top: 10px;
+  }
+</style>
+<style class="background-style">
+  .background-fixed {
+    position: fixed;
+    /*opacity: 0.5;*/
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    top: 0;
+    left: 0;
+    z-index: -1;
+  }
+</style>
+<script class="extend-function">
+
+  fetch('/images/background/').then(function (i) { return i.json(); }).then(function (list) {
+    Array.prototype.forEach.call(document.getElementsByClassName('background-style'), function (style) {
+      style.innerHTML += list.map(function (f, index) {
+        return [
+          '.background - ' + index + '{',
+          '  background-image: url(/images/background/'+f+');',
+          '}'
+        ].join('\n')
+      }).join('\n');
+    });
+
+    setTimeout(function () {
+      localStorage['[All]/disabledBackground'] = (localStorage['[All]/disabledBackground'] || '[]').toLocaleUpperCase();
+      localStorage['[All]/opacityBackgrounds'] = (localStorage['[All]/opacityBackgrounds'] || '{}').toLocaleUpperCase();
+      if (/\.html/.test(location.href) || ($setting && $setting.background)) { return; }
+      var rootPath = (location.pathname.split('/').filter(Boolean).shift() || '').toLocaleUpperCase();
+      var disabledBackgrounds = JSON.parse((localStorage['[All]/disabledBackground'] || '').toLocaleUpperCase());
+      var opacityBackgrounds = JSON.parse((localStorage['[All]/opacityBackgrounds'] || '{}').toLocaleUpperCase());
+      var webname = location.href.split(/[#\?]/).shift().replace(/((?!\/).)+\.html/, '').replace(/\/+$/, '').split('/').pop();
+      var index = eval(Array.prototype.map.call(webname, function (i) { return i.charCodeAt() }).join('+')) % list.length;
+      var background = document.createElement('div');
+      background.className = 'background-fixed background-' + (disabledBackgrounds.indexOf(rootPath) !== -1 ? 'x' : index);
+      if (opacityBackgrounds && opacityBackgrounds[rootPath]) {
+        background.style.opacity = parseFloat(opacityBackgrounds[rootPath]) || 1;
+      }
+      document.body.appendChild(background);
+
+      /*
+        window.colorfromimage('/images/background/'+ list[index]+'',{x:100,y:100}).then(function(colors){
+          console.log('颜色:', colors.join());
+        });
+      */
+
+      if (window.onkeydowns) {
+        // disabledBackground 改变
+        window.onkeydowns('BGDE', function () {
+          disabledBackgrounds = JSON.parse((localStorage['[All]/disabledBackground'] || '').toLocaleUpperCase());
+          if (disabledBackgrounds.indexOf(rootPath) !== -1) {
+            background.className = background.className.replace('background-x', 'background-' + index)
+            disabledBackgrounds = disabledBackgrounds.filter(function (i) { return i !== rootPath; });
+          } else {
+            background.className = background.className.replace('background-' + index, 'background-x')
+            disabledBackgrounds.push(rootPath);
+          }
+          localStorage['[All]/disabledBackground'] = JSON.stringify(disabledBackgrounds);
+        });
+        //opacityBackgrounds 改变
+        window.onkeydowns(/^BGO\d?/, function (key) {
+          var opacity = parseInt(key.replace(/^BGO/, 0)) / 10 || 1;
+          background.style.opacity = opacity;
+          opacityBackgrounds[rootPath] = opacity;
+          localStorage['[All]/opacityBackgrounds'] = JSON.stringify(opacityBackgrounds);
+        });
+      }
+
+    }, 500);
+
+  }).catch(function () {
+
+  });
+
+
+  window.colorfromimage = function (url, points) {
+    var toString16 = function (num) {
+      return ('00' + num.toString(16)).slice(-2);
+    };
+    var oCan = document.createElement('canvas').getContext('2d');
+    var oImg = new Image();
+
+    if (url instanceof HTMLElement) {
+      url = getComputedStyle(url).backgroundImage.replace(/url\("?(.*)"?\)/, '$1');
+    }
+
+    return new Promise(function (resolve) {
+      oImg.onload = function () {
+        try {
+          oCan.drawImage(oImg, 0, 0);
+          var colors = [];
+          var data = oCan.getImageData(0, 0, oImg.width, oImg.height).data;//读取整张图片的像素。
+          for (var i = 0, len = data.length; i < len; i += 4) {
+            //因此RGB颜色就是(red,green, blue, alpha)
+            colors.push('rgba(' + data[i] + ',' + data[i + 1] + ',' + data[i + 2] + ',' + data[i + 3] / 255 + ')');
+            // colors.push('#'+ toString16(data[i])+ toString16(data[i+1])+ toString16(data[i+2])+ toString16(data[i+3]));
+          }
+          if (points) {
+            points = (points instanceof Array) ? points : [points];
+            resolve(points.map(function (p) { return colors[p.y * oImg.width + p.x]; }));
+          } else {
+            resolve(colors);
+          }
+        } catch (e) {
+
+        }
+      };
+      oImg.src = url;
+    });
+  }
+
+  window.styleShiftCtrlAlt = function (element, callback) {
+    window.document.addEventListener('keydown', function (e) {
+      if (e.altKey || e.shiftKey || e.ctrlKey) {
+        element.className = element.className + ' shift-ctrl-alt';
+      }
+    });
+
+    window.document.addEventListener('keyup', function (e) {
+      if (!(e.altKey || e.shiftKey || e.ctrlKey)) {
+        element.className = element.className.replace(/shift\-ctrl\-alt/g, '');
+      }
+    });
+
+
+    element.doShiftCtrlAlt = function (callback) {
+      if (/shift\-ctrl\-alt/.test(element.className)) {
+        if (typeof callback !== 'function') {
+          execCopy(callback).then(function (data) {
+            localStorage['webservice/clipbrd'] = data;
+          });
+        } else {
+          callback(localStorage['webservice/clipbrd']);
+          delete localStorage['webservice/clipbrd'];
+        }
+      }
+    };
+  };
+
+  window.download = function (filename, content) {
+    Object.assign(document.createElement('a'), {
+      href: 'data:attachment/csv;charset=utf-8,\uFEFF' + encodeURIComponent(content),
+      target: '_blank',
+      download: filename
+    }).click();
+  };
+
+
+  window.downloadExcle = function (filename, data) {
+    if (!data) { return; }
+
+    var getTable = function (list) {
+      if (!(list instanceof Array)) { return ''; }
+      var table = document.createElement('table'), columns = {};
+      list.forEach(function (item) {
+        Object.keys(item || {}).forEach(function (column) {
+          columns[column] = item[column] ? (typeof item[column]) : columns[column];
+        });
+      });
+
+      table.innerHTML = [
+        '<tr>',
+        Object.keys(columns).map(function (column) {
+          return '<td>' + (/^\d+$/.test(column) ? '' : column) + '</td>';
+        }).join(''),
+        '</tr>'
+      ].join('') + list.map(function (item) {
+        return '<tr>' + Object.keys(columns).map(function (column) {
+          return '<td>' + (item[column] || '') + '</td>';
+        }).join('') + '</tr>';
+      }).join('');
+
+      return table;
+    };
+
+    if (window.navigator.userAgent.indexOf("MSIE") >= 0) {
+      var oXL = new ActiveXObject("Excel.Application");
+      var oWB = oXL.Workbooks.Add();
+      var xlsheet = oWB.Worksheets(1);
+      var sel = document.body.createTextRange();
+      sel.moveToElementText(getTable(data));
+      sel.select();
+      sel.execCommand("Copy");
+      xlsheet.Paste();
+      oXL.Visible = true;
+      try {
+        var fname = oXL.Application.GetSaveAsFilename(filename || "Excel.xls", "Excel Spreadsheets (*.xls), *.xls");
+      } catch (e) {
+        console.log("Nested catch caught " + e);
+      } finally {
+        oWB.SaveAs(fname);
+        oWB.Close(savechanges = false);
+        oXL.Quit();
+        oXL = null;
+        var idTmr = window.setInterval(function () {
+          window.clearInterval(idTmr);
+          CollectGarbage();
+        }, 1);
+      }
+    } else {
+      var uri = 'data:application/vnd.ms-excel;base64,';
+      var format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p] || ''; }) };
+      var base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) };
+      var template = {
+        workBook: '<html><{0}><meta charset="UTF-8"><title>excel</title></{0}><{1}>{2}</{1}></html>',
+        sheet: '<table name="{nameWS}"">{table}</table>'
+      }
+
+      var worksheets = (data instanceof Array) ? format(template.sheet, { nameWS: filename, table: getTable(data).innerHTML }) : Object.keys(data).map(function (sheet) {
+        return format(template.sheet, { nameWS: sheet, table: getTable(data[sheet]).innerHTML });
+      }).join('<br><br><br>');
+
+      // window.open(uri + base64(format(template.workBook,{worksheets:worksheets})),{name:filename});
+      Object.assign(document.createElement('a'), {
+        href: uri + base64(format(template.workBook, ['head', 'body', worksheets])),
+        target: '_blank',
+        download: filename
+      }).click();
+    }
+  }
+
+  /**
+   * key (key | key?type 两种数据结构)
+   */
+  window.serviceCache = (function () {
+    var domain = location.protocol + '//@@hostname@@:' + (/https/.test(location.protocol) ? '1@@port@@' : '@@port@@');
+    return new Proxy({}, {
+      get: function (target, name) {
+        return fetch(domain + '/cache/' + name).then(function (i) { return i.json(); });
+      },
+      set: function (target, name, value) {
+        var data = { method: 'POST', body: JSON.stringify(value) };
+        var callbacks = Object.keys(value || {}).filter(function (k) { return typeof value[k] === 'function' });
+        return fetch(domain + '/cache/' + name, data).then(function (i) { return i.json(); }).then(function (res) {
+          callbacks.forEach(function (cb) {
+            value[cb](res);
+          })
+        });
+      }
+    })
+  })();
+
+  window.visibilitychange = (function () {
+    var list = { hidden: [], visible: [] };
+    var trycatch = function () { var args = arguments; return function (fn) { try { fn.apply(this,args); } catch (e) { } }; }
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === 'visible') {
+        list.visible.forEach(trycatch());
+      } else {
+        list.hidden.forEach(trycatch())
+      }
+    });
+    return function (visible, hidden) {
+      if (typeof visible === 'function')
+        list.visible.push(visible);
+      if (typeof hidden === 'function')
+        list.hidden.push(hidden);
+    }
+  })();
+
+
+
+  window.localSave = function (key, value) {
+    var note = location.pathname.split(/[\\\/]/).filter(Boolean).shift();
+    var fullkey = '[' + note + ']' + key;
+    if (value !== undefined) {
+      localStorage[fullkey] = value;
+      window.serviceCache.localSave = localStorage;
+    }
+    return localStorage[fullkey] || '';
+  };
+
+  if (Object.keys(localStorage).length < 2) {
+    const $showDialog = window.showDialog;
+    const $localSave = window.localSave;
+    window.showDialog = function () { };
+    window.localSave = function () { };
+    window.serviceCache.localSave.then(function (res) {
+      Object.keys(res || {}).forEach(function (key) {
+        localStorage[key] = res[key];
+      });
+      location.reload();
+    }, function () {
+      window.showDialog = $showDialog;
+      window.localSave = $localSave;
+    });
+  }
+
+</script>
+
+<script class="extend-function-2">
+  !(function () {
+    Element.prototype.fire = Element.prototype.fire || function (type, data, ext) {
+      if (this['on' + type]) {
+        this['on' + type]({ target: this });
+      }
+      if (document.createEvent) {
+        var evObj = document.createEvent('HTMLEvents');
+        evObj.initEvent(type, true, false);
+        evObj.data = data;
+        Object.assign(evObj, ext || {});
+        this.dispatchEvent(evObj);
+      } else if (document.createEventObject) {
+        this.fireEvent('on' + type);
+      }
+    };
+
+    //多次点击
+    Element.prototype.mclick = function () {
+      var self = this;
+      var callbacks = Array.prototype.slice.call(arguments).filter(function (i) { return typeof i === 'function'; });
+      var clickCount = 0;
+      var timeout = null;
+      this.addEventListener('click', handleClick);
+
+      function handleClick() {
+        clickCount += 1;
+        clearTimeout(timeout);
+        timeout = setTimeout(function () {
+          if (callbacks.filter(function (cb) { return cb(clickCount); }).length) {
+            self.removeEventListener('click', handleClick);
+          }
+          self.fire('mclick' + clickCount);
+          clickCount = 0;
+        }, 500);
+      }
+    };
+
+    String.prototype.format = (function () {
+      return function (type) {
+        if (/^(js|json|css|ts|jsx|vue|html|cs)$/.test(type)) {
+          return codeFormatter(this);
+        }
+        if (/^(csv)$/.test(type)) {
+          return csvFormatter(this);
+        }
+
+        return this.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>').replace(/\r/g, '&nbsp;&nbsp;').replace(/\s/g, '&nbsp;')
+        .replace(/(\+?https?:\/\/((?![\s\r\n\t]).)*)/g, '<a href="$1">$1</a>');
+      };
+
+      function csvFormatter(str) {
+        return [
+          '<table><tbody>',
+          str.split(/\n/).map(function (item) {
+            return [
+              '<tr>',
+              item.split(',').map(function (i) { return '<td>' + i + '</td>'; }).join('\n'),
+              '</tr>'
+            ].join('\n')
+          }).join('\n'),
+          '</tbody></table>'
+        ].join('\n')
+      }
+
+      function codeFormatter(str) {
+        var keywords = {
+          'color:#a3a300': 'class|function|var|let|const|if|else|for|switch|return',
+          'color:#a300a3': 'import|from|export|extends|default|as',
+          'color:#0033d3': 'this|super|constructor'
+        };
+
+        str = str.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/\n/g, '<br>').replace(/\r/g, '&nbsp;&nbsp;').replace(/\s/g, '&nbsp;')
+          .replace(/\/\*((?!\*\/).)*\*\//gm, function ($0) { return '<i style="color:#d3d3d3">' + $0 + '</i>'; })
+          .replace(/[\r\n](\s+)/g, function ($0, $1) { return $0.replace($1, Array($1.length).fill('&nbsp;').join('')); })
+          .replace(/(\r\n)/g, '<br>').replace(/(\r|\n)/g, '<br>')
+
+        Object.keys(keywords).forEach(function (style) {
+          str = str.replace(new RegExp('(?![a-zA-Z0-9_$])?(' + keywords[style] + ')(?![a-zA-Z0-9_$])', 'g'), function ($0) {
+            return '<strong style="' + style + '">' + $0 + '</strong>';
+          });
+        });
+        return str;
+      }
+    })();
+
+    Object.assign(document, {
+      fire: Element.prototype.fire,
+      mclick: Element.prototype.mclick
+    });
+
+    setTimeout(function () {
+      if (browserInfo.browser === 'IE') {
+        Element.prototype.fire.call(window, 'load');
+      }
+    }, 3000)
+  })();
+</script>

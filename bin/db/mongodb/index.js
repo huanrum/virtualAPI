@@ -27,7 +27,7 @@ module.exports = (function () {
         var db = null;
 
         helper.initModule('mongodb').then(mongodb => {
-            new mongodb.MongoClient("mongodb://" + helper.netInfo().address + ":27017/").on('error', e => {}).connect(function (error, client) {
+            new mongodb.MongoClient("mongodb://127.0.0.1:27017/").on('error', e => {}).connect(function (error, client) {
                 if (error) {
                     return;
                 }

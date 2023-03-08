@@ -27,6 +27,7 @@ module.exports = (function () {
         var db = null;
 
         helper.initModule('sqlite3').then(sqlite3 => {
+            if(!sqlite3){return;}
             db = new HandleDB({
                 databaseFile: database || './data/services.db3'
             });
@@ -51,6 +52,11 @@ module.exports = (function () {
                 } else {
                     bodyData = JSON.parse(JSON.stringify(bodyData).replace(/\[IP\]/gi, helper.clientIp(request)) || '{}') || {};;
                     switch (request.method) {
+                        case '==':
+                            db.sql(`PRAGMA table_info('${table}')`, {}, 'all').then((res) => {
+                                response.end(JSON.stringify(res));
+                            });
+                            break;
                         case 'GET':
                             db.sql(`select * from ${table} where ${condition}`, {}, 'all').then((res) => {
                                 response.end(JSON.stringify(res));
@@ -64,8 +70,9 @@ module.exports = (function () {
                             break;
                         case 'PUT':
                             db.sql(`select max(id) from ${table}`, {}, 'all').then((res) => {
+                                var id = res.data && res.data[0] && res.data[0]['max(id)'] || 0;
                                 var insert = extendObject(bodyData, {
-                                    id: res.data[0]['max(id)'] + 1
+                                    id: id + 1
                                 });
                                 db.sql(`insert into ${table} (${Object.keys(insert).join()}) values (${Object.values(insert).map(transverterValue).join()})`, {}, 'all').then((res) => {
                                     response.end(JSON.stringify(res));
@@ -76,6 +83,9 @@ module.exports = (function () {
                             db.sql(`delete * from ${table} where ${condition}`, {}, 'all').then((res) => {
                                 response.end(JSON.stringify(res));
                             });
+                            break;
+                        default:
+                            response.end();
                             break;
                     }
                 }
@@ -151,15 +161,15 @@ class HandleDB {
      * @param param     参数(可以是数组或者数字或者字符串,根据sql语句来定)
      * @param mode    执行模式, 默认run,执行sql,如果查询的话,则使用get(单个)all(多个)
      * @returns {Promise}
-       @used
-       增 : this.sql(`insert into ${this.tableName} (begin_time, create_time, end_time, play_id, postion_id, status, task_id) values(?, ?, ?, ?, ?, ?, ?)`,
-                    [obj.begin_time, obj.create_time, obj.end_time, obj.play_id, obj.postion_id, obj.status, obj.task_id]);
-
-       删 : this.sql(`delete from ${this.tableName} where id = ?`, id);
-
-       改 : this.sql(`update ${this.tableName} set begin_time = ?, status = ? where postion_id = ?`, [begin_timeValue, statusValue, postion_idValue]);
-
-       查 : this.sql(`select * from ${this.tableName} where id = ?`, id, 'get/all');
+     * @used
+     * 增 : this.sql(`insert into ${this.tableName} (begin_time, create_time, end_time, play_id, postion_id, status, task_id) values(?, ?, ?, ?, ?, ?, ?)`,
+     *              [obj.begin_time, obj.create_time, obj.end_time, obj.play_id, obj.postion_id, obj.status, obj.task_id]);
+     *  
+     * 删 : this.sql(`delete from ${this.tableName} where id = ?`, id);
+     * 
+     * 改 : this.sql(`update ${this.tableName} set begin_time = ?, status = ? where postion_id = ?`, [begin_timeValue, statusValue, postion_idValue]);
+     * 
+     * 查 : this.sql(`select * from ${this.tableName} where id = ?`, id, 'get/all');
      */
     sql(sql, param, mode) {
         let _self = this;

@@ -1,0 +1,46 @@
+<script class="upload-function">
+  window.upload = function(file,data, progressFn){
+    if(!file){return Promise.resolve();}
+    if(typeof data  === 'function'){
+      progressFn = data;
+      data = null;
+    }
+    var size = 1024 * 1024;
+    var subpath = typeof data === 'string'? '../data/mix/':'';
+    var uploadItem = function(filename, total,part,content){
+      return fetch(location.origin +'/upload/'+ filename,{
+        method:'POST',
+        headers:{size:size,totle:total,part:part,path:subpath},
+        body:content
+      })
+    };
+    return new Promise(function(resolve,rejected){
+      if(subpath){
+        upload(file.size +'^'+ file.name, data.split(',').pop(),0,0);
+      }else{
+        var reader = new FileReader();
+        reader.onload = function(){
+          upload(Date.now() + '^' + file.name, this.result.split(',').pop(),0,0);
+        };
+        reader.readAsDataURL(file);
+      }
+      
+      function upload(filename, allContent,page,count){
+        uploadItem(filename, allContent.length,page,allContent.slice(page*size,page*size+size)).then(function(){
+          progressFn(allContent.length,Math.min(allContent.length,(page+1)*size));
+          if(allContent.length>(page+1)*size){
+            upload(filename,allContent,page+1,0);
+          }else{
+            resolve(filename);
+          }
+        },function(e){
+          if(count<3){
+            upload(filename,allContent,page,count+1);
+          }else{
+            rejected(e);
+          }
+        });
+      }
+    });
+  };
+</script>

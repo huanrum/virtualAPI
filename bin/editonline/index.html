@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv=" X-UA-Compatible" content="ie=edge">
+  <title>Code Editor</title>
+  <link rel="icon" href="/images/icon/wenjian_2.png" type="image/x-icon">
+  <style>
+    body {
+      -webkit-user-select: element;
+      -moz-user-select: element;
+      -ms-user-select: element;
+      user-select: element;
+      margin: 0;
+      padding: 0;
+    }
+
+    .edit-body {
+      display: flex;
+      flex-flow: row;
+    }
+
+    .gutter-horizontal {
+      background: #ffff00;
+      cursor: col-resize;
+    }
+
+    .menu-panel {
+      float: left;
+      width: 200px;
+      height: 100vh;
+      overflow: auto;
+      background: rgba(0, 0, 0, 0.6);
+      color: #ffffff;
+    }
+
+    .code-panel {
+      float: right;
+      flex: 1;
+      height: 100vh;
+      overflow: hidden;
+      justify-items: center;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .menu-panel .dir-menus {
+      padding: 1em 6px;
+    }
+
+    .menu-panel .dir-menus-item .dir-menus-item-menu {
+      cursor: pointer;
+      margin: 1px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .menu-panel .dir-menus-item .dir-menus-item-menu:hover {
+      color: #999999;
+    }
+
+    .menu-panel .dir-menus-item .dir-menus-item-menu>i {
+      width: 20px;
+      line-height: 17px;
+      display: inline-block;
+      margin-right: 5px;
+      text-align: center;
+      font-size: 10px;
+    }
+
+    .menu-panel .dir-menus-item .dir-menus-item-menu>.empty {
+      border: 1px solid #ffffff;
+    }
+
+    .menu-panel .dir-menus-item .dir-menus-item-menu>.fold {
+      background: #00aaef;
+      color: #ffffff;
+    }
+
+    .menu-panel .dir-menus-item .dir-menus-item-menu>.expand {
+      background: #33aa33;
+      color: #ffffff;
+    }
+
+    .menu-panel .dir-menus-item .dir-menus-item-child {
+      padding-left: 6px;
+    }
+
+    .code-panel .code-panel-tabs {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .code-panel .code-panel-tabs li {
+      cursor: pointer;
+      padding: 2px 4px;
+      background: #d3d3d3;
+      display: inline-block;
+      border-left: 1px solid #000;
+    }
+
+    .code-panel .code-panel-tabs li a {
+      margin-left: 10px;
+    }
+
+    .code-panel .code-panel-tabs li a:hover {
+      opacity: 0.6;
+    }
+
+    .code-panel .code-panel-tabs li.active {
+      background: #00aaef;
+      color: #ffffff;
+    }
+
+    .code-panel-content,
+    .code-panel-content>* {
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+    }
+
+    .code-panel textarea {
+      width: 100%;
+      height: 100%;
+      padding: 1em 6px;
+      overflow: auto;
+      border: none;
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .code-panel textarea:focus {
+      border: none;
+    }
+
+    .code-panel img {
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 95%;
+      margin: 0 auto;
+      padding: 10px;
+    }
+
+    input.create-file {
+      padding: 8px;
+      width: 92%;
+    }
+
+    .context-menu {
+      width: auto !important;
+    }
+
+    .red {
+      font-weight: bold;
+      color: #ff3333;
+    }
+
+    .red1 {
+      font-weight: bold;
+      color: #993333;
+    }
+
+    .green {
+      font-weight: bold;
+      color: #33ff33;
+    }
+
+    .dialog .content {
+      max-height: 90vh !important;
+    }
+
+    .open-other-page li:hover {
+      cursor: pointer;
+      background: #d3d3d3;
+      color: #00aaef;
+    }
+  </style>
+  <link rel="stylesheet" href="/lib/codemirror/lib/codemirror.css">
+  <script src="/lib/codemirror/lib/codemirror.js"></script>
+  <script src="/lib/codemirror/mode/meta.js"></script>
+  <script src="/lib/jquery/split.js"></script>
+  <!--html>/../compatible/native.html</html-->
+  <!--html>/../compatible/dialog.html</html-->
+  <!--html>/../compatible/drag.html</html-->
+  <!--html>/../debug/index.html</html-->
+  <!--html>/html/code-editor.html</html-->
+  <!--html>/html/setting.html</html-->
+  <!--html>/html/command.html</html-->
+</head>
+
+<body>
+  <div>
+
+  </div>
+  <div class="edit-body">
+    <div class="menu-panel"></div>
+    <div class="code-panel"></div>
+  </div>
+    <script>(function () {
+        document.title = location.pathname.split('?').shift().split(/[\\/]/).filter(Boolean).pop();
+
+        var localCache = (function () {
+          return function (key, value, baseValue) {
+            var note = location.pathname.split(/[\\\/]/).filter(Boolean).shift();
+            var fullKey = (location.pathname.replace(new RegExp('^\\/*' + note + '\\/+'), '') + '/' + (/>/.test(key) ? '' : '>') + key).replace(/\/\/+/g, '/').replace(/\/+>/, '>');
+            if (value) {
+              localSave(fullKey, JSON.stringify(value));
+            }
+            try {
+              value = JSON.parse(localSave(fullKey) || '');
+              if (!baseValue && !(value instanceof Array)) {
+                value = [value];
+              }
+              return value;
+            } catch (e) {
+              return baseValue || [];
+            }
+          };
+        })();
+
+        var ws = null;
+        window.localCache = localCache;
+        window.initWebsocket(function (w) { ws = w; });
+        window.onmessage = function (e) { console.log('##########********************##########', e) };
+
+        var activeMenu = null;
+        var activeMenuAction = function (menu, paths) {
+          if (!paths.length) {
+            return menu;
+          }
+          for (var i = 0; i < menu.children.length; i++) {
+            var child = menu.children[i];
+            if (child.children[0] && child.children[0].title === paths[0]) {
+              child.children[0].onclick();
+              return activeMenuAction(child.children[1],paths.slice(1));
+            }
+          }
+        };
+
+        var replaceChildren = (function () {
+          var codePanel = document.querySelector('.code-panel');
+          var tabs = document.createElement('ul');
+          var displayPanel = document.createElement('div');
+          tabs.className = 'code-panel-tabs';
+          displayPanel.className = 'code-panel-content';
+          codePanel.appendChild(tabs);
+          codePanel.appendChild(displayPanel);
+
+          tabs.onrightmenu = [{
+            name: function (target) {
+              if (tabs.children.length > 1) {
+                if (target.nodeName === 'LI') {
+                  return '<span class="red1">关闭其他</span>';
+                }
+                return '<span class="red">关闭所有</span>';
+              }
+            },
+            fn: function (e) {
+              var content = e.select.nodeName === 'LI' ? '其他' : '';
+
+              showDialog('关闭提示', '确定关闭所有的' + content + 'tab？', ['确认'], function () {
+                tabs.innerHTML = '';
+                localCache('path', content ? [e.select.title] : []);
+                if (content) {
+                  tabs.appendChild(e.select);
+                  e.select.click();
+                } else {
+                  displayPanel.innerHTML = '';
+                }
+              });
+            }
+          },
+          {
+            name: function (target) { return /\.md$/i.test(target.title) ? '视图' : '' },
+            fn: function (e) {
+              var editor = e.select.tag && e.select.tag.editor;
+              if (editor) {
+                showDialog(e.select.title, marked.marked(editor.getValue()), ['确认']);
+              }
+            }
+          },
+          {
+            name: function (target) { return /\.html$/i.test(target.title) ? '调试web' : '' },
+            fn: function (e) {
+              var node = location.pathname.split(/[\\\/]/).filter(Boolean).shift();
+              window.open(location.href.replace(new RegExp(node, 'i'), 'views') + '/' + e.select.title);
+            }
+          }];
+
+          initSetting([
+            {
+              name: '打开新的编辑器',
+              fn: function () {
+                var node = location.pathname.split(/[\\\/]/).filter(Boolean).shift();
+                var paths = Object.keys(localStorage).map(function (i) { return new RegExp('\\[' + node + '\\](.*)>path', 'i').exec(i) });
+                var content = document.createElement('ol');
+                content.className = 'open-other-page';
+                [''].concat(paths.filter(Boolean)).forEach(function (p) {
+                  var li = document.createElement('li');
+                  li.innerHTML = (p && p[1]) || '新文件夹';
+                  li.onclick = function () {
+                    window.open(location.origin + location.pathname.replace(/([a-z]:[\\\/][^:]+)/i, '') + (p && p[1]));
+                  }
+                  content.appendChild(li);
+                });
+
+                showDialog('打开', content);
+              }
+            },
+            {
+              name: '用本地编辑器打开',
+              fn: function () {
+                fetch(location.origin + '/action/?contextmenu[editor]=' + /([a-z]:[\\\/][^:]+)/i.exec(location.pathname)[0]);
+              }
+            },
+            {
+              name: '切换主题',
+              children: $data.themes.map(function (theme) {
+                return {
+                  name: theme,
+                  fn: function () {
+                    localCache('theme', [theme]);
+                    Array.prototype.forEach.call(displayPanel.children, function (child) {
+                      if (child.editor) {
+                        child.editor.$setOption("theme", theme);
+                      }
+                    });
+                  }
+                }
+              })
+            }
+          ]);
+
+          return function (file, nodeName) {
+            var tab = Array.prototype.filter.call(tabs.children, function (i) { return i.title === file; }).pop();
+            if (!tab) {
+              var child = document.createElement(nodeName);
+              var childPanel = document.createElement('div');
+              var close = document.createElement('a');
+              close.innerHTML = 'x';
+              close.title = '关闭' + file;
+              tab = document.createElement('li');
+              tab.title = file;
+              tab.innerHTML = file.split(/[\\\/]/).pop();
+              tab.appendChild(close);
+              tabs.appendChild(tab);
+              tab.tag = childPanel;
+              tab.onclick = function () {
+                Array.prototype.filter.call(tabs.children, function (i) { return i.className = i.className.replace(/active/g, '').replace(/\s+/, ''); });
+                Array.prototype.filter.call(displayPanel.children, function (i) { return i.style.display = 'none'; });
+                tab.className += ' active';
+                childPanel.style.display = '';
+                child.update && child.update();
+                // activeMenuAction(document.querySelector('.menu-panel .dir-menus'), file.split(/[\\\/]/).filter(Boolean));
+              };
+              close.onclick = function () {
+                var index = Array.prototype.indexOf.call(tabs.children, tab);
+                tab.parentNode.removeChild(tab);
+                index = Math.min(tabs.children.length - 1, Math.max(0, index));
+                childPanel.parentNode.removeChild(childPanel);
+                localCache('path', localCache('path').filter(function (i) { return i !== file; }));
+                setTimeout(function () {
+                  tabs && tabs.children[index] && tabs.children[index].click();
+                }, 500);
+              };
+              childPanel.appendChild(child);
+              displayPanel.appendChild(childPanel);
+              localCache('path', localCache('path').filter(function (i) { return i !== file; }).concat([file]));
+              tab.onclick();
+              return child;
+            }
+            tab.onclick();
+          }
+        })();
+
+        function loadFile(item) {
+          var file = location.href + '?' + item.path;
+          var childElement = replaceChildren(item.path, ({ new: 'iframe', text: 'textarea', img: 'img', media: 'video' })[item.edit] || 'div');
+          var localComment = function (line, value) {
+            var key = item.path + '>comment';
+            var comment = localCache(key, undefined, {});
+            if (value) {
+              comment[line] = value;
+              localCache(key, comment);
+            }
+            return comment[line];
+          };
+
+          if (childElement) {
+            switch (item.edit) {
+              case 'text':
+                fetch(file).then(function (i) {
+                  return i.text();
+                }).then(function (res) {
+                  codeEditor(localCache('theme')[0] || 'blackboard', childElement, item, localComment).then(function (done) {
+                    done(res, function (data) {
+                      return new Promise(function (changeStatus) {
+                        showDialog('提示', '是否保存修改的数据，否则将丢弃', ['保存', '取消'], function (index) {
+                          if (index) {
+                            fetch(file, { method: 'POST', body: data }).then(function () {
+                              changeStatus(true);
+                              ws.send(JSON.stringify({
+                                data: {
+                                  message: file + '保存成功'
+                                }
+                              }));
+                            });
+                          } else {
+                            changeStatus(false);
+                          }
+                        });
+                      });
+                    });
+                  });
+                });
+                break;
+              case 'new':
+                childElement.width = '100%';
+                childElement.height = '100%';
+                childElement.src = file;
+                break;
+              case 'img':
+                childElement.parentNode.style.textAlign = 'center';
+                childElement.src = file;
+                break;
+              case 'media':
+                childElement.parentNode.style.textAlign = 'center';
+                childElement.controls = 'controls';
+                childElement.src = file;
+                break;
+              default:
+                childElement.style.padding = '10%';
+                childElement.innerHTML = '<strong>暂时不支持打开该文件(*file*)</strong>'.replace('*file*', item.path);
+                break;
+            }
+          }
+        }
+
+        function loadDir(item) {
+          return fetch(location.href + '?' + item.path).then(function (i) {
+            return i.json();
+          });
+        }
+
+        if ($data.dirs instanceof Array) {
+          Split(['.menu-panel', '.code-panel'], { gutterStyle: function () { return { width: '3px' }; } });
+          document.querySelector('.menu-panel').style.width = 'calc(200px)';
+          document.querySelector('.code-panel').style.width = 'calc(100% - 210px)';
+          (function createDirMenu(parent, dirs) {
+            dirs.forEach(function (dir) {
+              var menuPanel = document.createElement('div');
+              var menu = document.createElement('div');
+              var menuChild = document.createElement('div');
+              menuPanel.className = 'dir-menus-item';
+              menu.className = 'dir-menus-item-menu';
+              menuChild.className = 'dir-menus-item-child';
+              menuPanel.appendChild(menu);
+              menuPanel.appendChild(menuChild);
+              parent.appendChild(menuPanel);
+              menu.title = dir.name;
+              menu.innerHTML = '<i class="empty">' + getMode(dir.name) + '</i>' + dir.name;
+              menu.tag = dir;
+              if (!dir.mime) {
+                createDirMenu(menuChild, dir.children || []);
+                menu.onclick = function () {
+                  menuOnClick();
+                  if (!dir.children) {
+                    loadDir(dir).then(function (dirs) {
+                      dir.children = dirs;
+                      createDirMenu(menuChild, dir.children || []);
+                    });
+                  }
+                };
+                menuOnClick();
+              } else {
+                menu.onclick = function () {
+                  if (activeMenu) {
+                    activeMenu.style.color = '';
+                  }
+                  if (activeMenu !== menu) {
+                    activeMenu = menu;
+                    activeMenu.style.color = '#00aaef';
+                    loadFile(dir);
+                  }
+                };
+              }
+
+              if (localCache('path').filter(function (ph) { return ph.indexOf(dir.path) === 0; }).length) {
+                setTimeout(function () {
+                  menu.onclick();
+                }, 1000);
+              }
+
+              function menuOnClick() {
+                if (/expand/.test(menu.innerHTML)) {
+                  menu.innerHTML = '<i class="fold">-</i>' + dir.name;
+                  menuChild.style.display = '';
+                } else {
+                  menu.innerHTML = '< i class="expand">+</i>' + dir.name;
+                  menuChild.style.display = 'none';
+                }
+              }
+
+              function getMode(file) {
+                var mode = CodeMirror.findModeByFileName(file) || { mode: 'file' };
+                dir.codeMirror = mode;
+                dir.ext = file.split('.').pop().toLocaleLowerCase()
+                return ({
+                  json: '{}',
+                  html: '<>'
+                })[dir.ext] || (dir.ext.length > 3 ? 'f' : dir.ext);
+              }
+            })
+          })((function () {
+            var dirMenus = document.createElement('div');
+            dirMenus.className = 'dir-menus';
+            document.querySelector('.menu-panel').appendChild(dirMenus);
+            return dirMenus;
+          })(), $data.dirs);
+        } else {
+          document.title = location.pathname.split('/').filter(function (i) { return !!i; }).pop();
+          $data.dirs.codeMirror = CodeMirror.findModeByFileName(location.pathname) || { mode: 'file' };
+          loadFile($data.dirs);
+          document.querySelector('.menu-panel').style.display = 'none';
+          document.querySelector('.code-panel-tabs').style.display = 'none';
+        }
+
+        document.querySelector('.menu-panel').onrightmenu = [
+          {
+            name: function (target) { return target.tag && target.tag.mime ? '打开文件' : '打开文件夹' },
+            fn: function (e) {
+              var path = /([a-z]:[\\\/][^:]+)/i.exec(location.pathname)[0] + (e.select.tag ? e.select.tag.path : '');
+              fetch('http://127.0.0.1:8888/action/', {
+                method: 'POST', body: JSON.stringify([
+                  'cd ' + path.split('\\').shift() + '\\', 'start ' + path
+                ])
+              });
+            }
+          },
+          {
+            name: function (target) { return target.tag ? '在新的窗体中打开' : '' },
+            fn: function (e) {
+              window.open(location.href.replace(/\/+$/, '') + e.select.tag.path.replace(/^\/*/,'/'))
+            }
+          },
+          {
+            name: function (target) { return target.tag && target.tag.mime ? '' : '<span class="green">创建</span>' },
+            fn: function (e) {
+              var path = e.select.tag ? e.select.tag.path : '';
+              showDialog('新建文件','<input class="create-file"><br><br>不可直接创建文件夹,但可以a/b.js来创建a文件夹',['确认'],function(index, content){
+                var file = location.href + '?' + path + '/' + content.querySelector('input').value;
+                fetch(file, {method:'POST',body:''}).then(function(){
+                  location.reload();
+                })
+              });
+            }
+          },
+          {
+            name: function (target) { return target.tag && target.tag.mime ? '' : '<span class="red">运行脚本</span>' },
+            fn: function (e) {
+              var path = e.select.tag ? e.select.tag.path : '';
+              e.select.command = e.select.command || window.createCommand(path);
+              showDialog('命令行' +path, e.select.command, ['隐藏']);
+            }
+          },
+          {
+            name: function (target) { return target.tag ? '<span class="red">删除</span>':'' },
+            fn: function (e) {
+              if( e.select.tag){
+                showDialog('删除文件','确定删除' + e.select.tag.path, ['确认'],function(){
+                  fetch(location.href + '?!' + e.select.tag.path , {method:'POST',body:''}).then(function(){
+                    location.reload();
+                  })
+                });
+              }
+            }
+          }
+        ];
+      })();
+
+    </script>
+</body>
+
+</html>

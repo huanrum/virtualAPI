@@ -10,13 +10,16 @@ module.exports = {
 function views(file, content, merge, debug, request) {
     var extendScript = '';
     if(fs.existsSync(__dirname + '/../data/account.json')){
-        var account = JSON.parse(fs.readFileSync(__dirname + '/../data/account.json').toString());
+        var accounts = JSON.parse(fs.readFileSync(__dirname + '/../data/account.json').toString());
         extendScript = [
             '<script>',
-            '   sessionStorage[\'[TongueExercises]/username\']=sessionStorage[\'[TongueExercises]/username\'] || \'$0\';'.replace('$0',account.username),
-            '   sessionStorage[\'[TongueExercises]/password\']=sessionStorage[\'[TongueExercises]/password\'] || \'$1\';'.replace('$1',account.password),
+            '   var accounts = ' + JSON.stringify(accounts,null,4) + ';',
+            '   var account = accounts.filter(function(i){return i.username===sessionStorage[\'[TongueExercises]/username\'];}).pop() || accounts[0];',
+            '   sessionStorage[\'[TongueExercises]/username\']=sessionStorage[\'[TongueExercises]/username\'] || account.username;',
+            '   sessionStorage[\'[TongueExercises]/password\']=sessionStorage[\'[TongueExercises]/password\'] || account.password;',
+            '   window.baseurl = account.url;',
             '</script>'
-        ].join(' ');
+        ].join('\n');
     }
     
     if(/\\dist\\/.test(file)){

@@ -4,16 +4,17 @@ var child_process = require('child_process');
 
 module.exports = {
     /**
-     * 会被正式的websocket替换
-     */
-    websocket:function(data){
-
-    },
-    /**
      * 提取域名或者IP
      */
     getDomain: function (url) {
         return /https?:\/\/(((?!\/).)*)/.exec(url)[1].split(/[:\/\\]/).shift();
+    },
+    /**
+     * 获取当前的机器名
+     */
+    hostname: function(){
+        var hostname = os.hostname();
+        return hostname?os.hostname().toLocaleLowerCase():'localhost';
     },
     /**
      * 获取当前的IP地址
@@ -24,7 +25,7 @@ module.exports = {
             var iface = interfaces[devName];
             for (var i = 0; i < iface.length; i++) {
                 var alias = iface[i];
-                if (alias.family === 'IPv4' && /192\.168\.[0-1]\.\d+/.test(alias.address) && !alias.internal) {
+                if (alias.family === 'IPv4' && (!/^00(\.00)+$/.test(alias.mac)) && !alias.internal) {
                     return alias;
                 }
             }
@@ -40,11 +41,12 @@ module.exports = {
     killPort: function (port) {
         return new Promise(succ => {
             getTaskPort(function (list) {
-                Promise.all(list.filter(i => i.port == port).map(i => new Promise(resolve => {
+                var findPorts = list.filter(i => i.port == port);
+                Promise.all(findPorts.length?findPorts.map(i => new Promise(resolve => {
                     child_process.exec('taskkill /pid ' + i.pid + ' -t -f ', function (err, stdout, stderr) {
-                        resolve();
+                        resolve(stdout || stderr);
                     });
-                }))).then(succ);
+                })):[Promise.resolve(port + '：该端口没有被占用')]).then(succ);
             });
         });
 
@@ -52,13 +54,13 @@ module.exports = {
             if (process.platform !== 'win32') {
                 return;
             }
-            child_process.exec('tasklist', function (err1, stdout1, stderr1) {
+            child_process.exec('tasklist', (err1, stdout1, stderr1) => {
                 if (err1) {
-                    return console.log(err1);
+                    return this.console(err1);
                 }
-                child_process.exec('netstat -aon', function (err2, stdout2, stderr2) {
+                child_process.exec('netstat -aon', (err2, stdout2, stderr2) => {
                     if (err2) {
-                        return console.log(err2);
+                        return this.console(err2);
                     }
                     var result = {};
                     var tasklist = stdout1.split('\n').map(i => i.trim().split(/\s+/));

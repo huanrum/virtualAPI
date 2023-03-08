@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Share</title>
+  <style>
+    body {
+      background-color: rgba(200, 200, 200, 0.6);
+    }
+
+    .background-fixed {
+      background-image: none !important;
+      background-color: #d3d3d3 !important;
+    }
+
+    .share-content {
+      position: relative;
+      min-height: 96vh;
+    }
+
+    .share-content .share-view {
+      min-height: 400px;
+      min-width: 400px;
+    }
+
+    .share-content .share-input {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      color: #00AAEF;
+    }
+
+    .share-view .chart {
+      width: 98vw;
+      height: 98vh;
+    }
+  </style>
+  <!--html>/../compatible/native.html</html-->
+  <!--html>/../compatible/dialog.html</html-->
+  <!--html>/../compatible/drag.html</html-->
+  <!--html>/../compatible/websocket.html</html-->
+  <!--html>/../compatible/editor.html</html-->
+  <!--html>/../debug/index.html</html-->
+</head>
+
+<body>
+  <script>
+    var fetchData = function (text) {
+      return fetch(location.origin + location.pathname, { method: 'POST', body: text || '' }).then(function (i) { return i.text()});
+    };
+
+    var refshFriends = (function () {
+      var _friends = [];
+      return function (friends) {
+        if (friends instanceof Array) {
+          _friends = friends;
+        } else if (typeof friends === 'function') {
+          _friends = friends.filter(friends);
+        } else {
+          _friends.push(friends);
+        }
+      };
+    })();
+
+    document.title = location.pathname.replace(/[\\\/]/g, '-').hump();
+    window.initWebsocket(function (ws) {
+      if (document.querySelector('.share-content')) {
+        document.body.removeChild(document.querySelector('.share-content'));
+      }
+      var updateFunList = {};
+      var panel = document.createElement('div');
+      var input = window.keyReplace(document.createElement('textarea'));
+      var show = window.candrag(document.createElement('div'));
+      show.input = input;
+      panel.className = 'share-content';
+      show.className = 'share-view';
+      input.className = 'share-input';
+      panel.appendChild(show);
+      panel.appendChild(input);
+      document.body.appendChild(panel);
+
+      window.candrag(document.body, function (file) {
+        var updateProgress = this.use(function (el, percentage) {
+          el.style.color = '#33' + Math.floor(256 * percentage).toString(16) + '33'
+        });
+
+        window.upload(file, function (total, done) {
+          updateProgress(done / total, done + '/' + total);
+        }).finally(function () {
+          updateProgress(1, '完成');
+        });
+      });
+
+      show.ondblclick = function () {
+        if (show.isDisabled) { return; }
+        input.style.display = 'block';
+        input.focus();
+        ws.send(JSON.stringify({
+          action: 'share-edit'
+        }));
+      };
+
+      input.onblur = function () {
+        input.style.display = 'none';
+        show.innerHTML = (input.value).transform();
+        fetchData(input.value).then(function () {
+          ws.send(JSON.stringify({
+            action: 'share-modify'
+          }));
+        });
+      };
+
+      ws.onmessage = function (e) {
+        var data = JSON.parse(e.data);
+        console.log(data);
+        switch (data.action) {
+          case 'login':
+            if (input.style.display !== 'none') {
+              ws.send(JSON.stringify({
+                action: 'share-edit',
+                to: data.from
+              }));
+            }
+            if (data.data) {
+              console.log(data.data);
+            } else if (!updateFunList[data.from]) {
+              updateFunList[data.from] = addFirend(data.from + '')
+            } else {
+              updateFunList[data.from](true);
+            }
+            break;
+          case 'logout':
+            show.isDisabled = false;
+            if (input.style.display !== 'none') {
+              ws.send(JSON.stringify({
+                action: 'share-edit'
+              }));
+            }
+            break;
+          case 'share-edit':
+            show.isDisabled = true;
+            break;
+          case 'share-modify':
+            show.isDisabled = false;
+            fetchData().then(initData);
+            break;
+        }
+      };
+
+      input.style.display = 'none';
+      if (window.$data) {
+        initData(window.$data);
+      } else {
+        fetchData().then(initData);
+      }
+
+      function initData(text) {
+        input.value = text || '';
+        show.innerHTML = (input.value).transform();
+      }
+
+    });
+
+  </script>
+</body>
+
+</html>

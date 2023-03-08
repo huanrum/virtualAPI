@@ -1,0 +1,257 @@
+<!--html>upload.html</html-->
+<style class="drop-style">
+  .droping {
+    outline: 2px dashed #00aaef;
+  }
+
+  .droping-element {
+    outline: 1px dashed #00aaef;
+  }
+</style>
+
+<script class="drop-function">
+  window.candrag = (function () {
+    var converts = {
+      csv: csv
+    };
+
+    var manageclass = function (element, className, add) {
+      var regex = new RegExp('\\s+' + className.replace(/\-/g, '\\-').replace(/\s+/g, '\\s+') + '\\s+', 'g');
+      element.className = element.className.replace(regex, '') + (add ? (' ' + className + ' ') : '');
+    };
+
+    document.ondragover = function (ev) {
+      ev.preventDefault();
+    };
+    document.ondragenter = function (ev) {
+      ev.preventDefault();
+    };
+    document.ondrop = function (ev) {
+      ev.preventDefault();
+    };
+
+    /*
+    *仅仅element一个参数的时候
+    */
+    return function (element, type, callback) {
+      if (!callback && typeof type === 'function') {
+        callback = type;
+        type = '';
+      }
+      if (!callback && !type) {
+        callback = updateFile(element);
+        type = '';
+      }
+      var typeClass = type && /\[object\s+(\S+)\]/.exec(Object.prototype.toString.apply(type))[1];
+      switch (typeClass) {
+        case '':
+        case 'String':
+          dragFile(element, type, callback);
+          break;
+        case 'Function':
+          dragElement(element, type, callback);
+          break;
+      }
+      return element;
+    };
+
+    function addDragEvent(element, ondrop) {
+      element.ondragstart = function (ev) {
+        manageclass(element, 'droping', true);
+      }
+      element.ondragover = function () {
+        manageclass(element, 'droping', true);
+      };
+      element.ondragenter = function (ev) {
+        manageclass(element, 'droping', true);
+      }
+      element.ondragleave = function (ev) {
+        manageclass(element, 'droping', false);
+      };
+      element.ondragend = function (ev) {
+        manageclass(element, 'droping', false);
+      };
+      element.ondrop = function (ev) {
+        manageclass(element, 'droping', false);
+        return ondrop.apply(element, arguments);
+      };
+    }
+
+    function useFn(ev) {
+      return function useFn(update) {
+        var upload = document.createElement('div');
+        upload.style.position = 'fixed';
+        upload.style.left = ev.clientX + 'px';
+        upload.style.top = ev.clientY + 'px';
+        upload.style.fontWeight = '700';
+        document.body.appendChild(upload);
+        return function (percentage, message) {
+          upload.innerHTML = message; update(upload, percentage);
+          if (percentage === 1) {
+            setTimeout(function () {
+              if (upload.parentNode) {
+                upload.parentNode.removeChild(upload);
+              }
+            }, 2000);
+          }
+        };
+      };
+    };
+
+    function dragFile(element, type, callback) {
+      addDragEvent(element, function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        element.className = element.className.replace(/\s+droping/g, '');
+        var callbackFn = function () {
+          return callback.apply({ use: useFn(ev) }, arguments);
+        };
+        var file = ev.dataTransfer.files[0];
+        var item = ev.dataTransfer.items[0];
+        if (file) {
+          var reader = new FileReader()
+          reader.onload = function () {
+            callbackFn(file, converts[type] ? converts[type](this.result) : this.result);
+          };
+          if (type) {
+            reader.readAsText(file, 'GB2312');
+          } else {
+            reader.readAsDataURL(file);
+          }
+        } else {
+          item.getAsString(function (i) { return callbackFn(null, i); });
+        }
+        console.log(ev.dataTransfer.files, ev.dataTransfer.items)
+      });
+    }
+
+    function dragElement(elementPanels, elementDragFn, callback) {
+      var dragActive = null;
+      Array.prototype.forEach.call(elementPanels, function (elementPanel) {
+        addDragEvent(elementPanel, function (e) {
+          if (dragActive) {
+            var from = Array.prototype.filter.call(elementPanels, function (elp) {
+              return Array.prototype.indexOf.call(elementDragFn(elp), dragActive) !== -1;
+            }).pop();
+            callback(dragActive, from, elementPanel);
+          }
+        });
+
+        window.addEventListener('mousedown', function (e) {
+          var findElement = Array.prototype.filter.call(elementDragFn(elementPanel), function (dragElement) {
+            return e.path && e.path.indexOf(dragElement) !== -1;
+          }).pop();
+          if (findElement && findElement.getAttribute('draggable') !== 'true') {
+
+            if (e.target.parentNode !== findElement) {
+              return;
+            }
+            findElement.setAttribute('draggable', true);
+            manageclass(findElement, 'droping-element', true);
+
+            window.addEventListener('mouseup', cancel);
+
+            findElement.ondragstart = function (ev) {
+              ev.dataTransfer.effectAllowed = 'move';
+              ev.dataTransfer.setData('text', this.innerHTML);
+              ev.dataTransfer.setDragImage(this, 0, 0);
+              manageclass(this, 'droping-element', true);
+
+              dragActive = this;
+            };
+            findElement.ondragend = function (ev) {
+              ev.dataTransfer.clearData('text');
+              cancel();
+            }
+
+            function cancel() {
+              manageclass(findElement, 'droping-element', false);
+              findElement.removeAttribute('draggable');
+              window.removeEventListener('mouseup', cancel);
+            }
+          }
+        });
+      });
+    }
+
+    function updateFile(element) {
+      var upload = function (file, data) {
+        var updateProgress = this.use(function (el, percentage) {
+          el.style.color = '#33' + Math.floor(256 * percentage).toString(16) + '33'
+        });
+        return new Promise(function (resolve) {
+          window.upload(file, data, function (total, done) {
+            updateProgress(done / total, done + '/' + total);
+          }).then(function (filename) {
+            resolve('\r\n[' + file.name + ']?HTTP:/io/' + filename.replace(/\s/g, '%20'));
+          }).finally(function () {
+            updateProgress(1, '完成');
+          });
+        });
+      };
+
+      return function (file, data) {
+        (file ? upload.call(this, file, data) : Promise.resolve('\r\n' + data)).then(function (addContent) {
+          if (element.input) {
+            element.input.value += addContent;
+            element.input.onblur();
+          } else {
+            element.innerHTML += addContent;
+          }
+        })
+      };
+    }
+
+    function csv(data) {
+      var nonull = function (i) {
+        return !!i;
+      };
+      var items = data.split(/[\r\n]/).filter(function (i) {
+        return !!i;
+      });
+      var fields = items.shift().split(/[,\t]/).map(function (i) { return i.replace(/["\r\n]/g, '') });
+      var list = [];
+      items.forEach(function (item) {
+        var obj = {};
+        replaceA(item, function (str, replaces) {
+          str.split(/[,\t]/).forEach(function (v, i) {
+            if (fields[i]) {
+              obj[fields[i]] = v.replace(/@(\d+)/, function (str) {
+                return replaces[str.replace('@', '')]
+              });
+            }
+          });
+        });
+        list.push(obj);
+      });
+      return list.filter(function (i) { return Object.keys(i).filter(function (o) { return /\S/.test(i[o]); }).length; });
+
+      function replaceA(str, callback) {
+        var replaces = [],
+          line = '',
+          add = false;
+        str = str.replace(/""/g, '\\"');
+        for (var i = 0; i < str.length; i++) {
+          if (!/[\\]/.test(str[i - 1]) && str[i] === '"') {
+            if (add) {
+              add = false;
+              replaces.push(line);
+            } else {
+              add = true;
+              line = '';
+            }
+          } else {
+            line += str[i];
+          }
+        }
+        replaces = replaces.map(function (rep, i) {
+          str = str.replace('"' + rep + '"', '@' + i);
+          return rep.replace(/\\"/g, '"').replace(/[\r\n]/g, '').replace(/""/g, '"');
+        });
+        callback(str.replace(/""/g, '"'), replaces);
+      }
+    }
+
+  })();
+
+</script>

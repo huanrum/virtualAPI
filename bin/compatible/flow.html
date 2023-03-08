@@ -1,0 +1,27 @@
+<style>
+
+</style>
+<script>
+  (function(){
+    var flowCache = {};
+
+    window.flow = function $flow(type, fn){
+      if(typeof type === 'function'){
+        fn = type;
+        type = 'default';
+      }
+
+      flowCache[type] = flowCache[type] || [];
+
+      if(typeof fn !== 'function'){
+        flowCache[type].push(function(callback){
+          callback();
+        });
+      } else {
+        flowCache[type].push(fn);
+      }
+    }
+
+    
+  })();
+</script>

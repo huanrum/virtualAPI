@@ -177,6 +177,7 @@
         };
     </script>
     <script>
+        $ehr(localValue('debug'));
         $ehr('main', ['binding', 'service', function (binding, service) {
             var getValue = $ehr('filter.getValue');
             var myApp = binding([
@@ -196,7 +197,7 @@
                 '   </div>',
                 '</div>'
             ].join(''), {
-                db: '',
+                db: localValue('tab') || '',
                 table: '',
                 fontSize: '16px',
                 width: 'calc(' + (Math.floor(1000 / window.$data.length) / 10) + '% - 11px)',
@@ -269,26 +270,45 @@
             }
         });
 
+        $ehr('control.my.navigation', ['binding', 'value', function (binding, value) {
+            return function(element, data, field){
+                var template = [
+                    '<div>',
+                    '   <a [pg:'+field+'] [class]="pg===page?\' active\':\'\'" [onclick]="clicknavigation(pg)">{{\' \'+pg + \' \'}}</a>',
+                    '</div>'
+                ].join('');
+
+                data.clicknavigation = function(page){
+                    var event = document.createEvent('HTMLEvents');
+                    event.initEvent("navigation", true, true);
+                    event.eventType = 'navigation';
+                    event.data = page;
+                    element.dispatchEvent(event,page);
+                };
+                binding(template, data, element);
+            };
+        }]);
+
         $ehr('control.my.grid', ['binding', 'value', function (binding, value) {
 
             var template = [
                 '<div >',
                 '   <div class="table-header">',
                 '       <div class="table-row">',
-                '           <div [column:columns] [class]="\'cell-\' + $index" (click)="sort(column)">',
+                '           <div [column:columns] [class]="\'cell-\' + $index" [style.width]="column.width" (click)="sort(column)">',
                 '               <a [class]="column===sortColumn?\' active\':\'\'">{{column|capitalize}}</a>',
                 '           </div>',
                 '       </div>',
                 '   </div>',
                 '   <div class="table-body">',
-                '       <div [item:$items] class="table-row" [ondblclick]="show(item)" [onclick]="select" [my.tooltip]="getTitle(item)" [style.display]="">',
+                '       <div [item:$items] class="table-row" [style.width]="column.width" [ondblclick]="show(item)" [onclick]="select" [my.tooltip]="getTitle(item)" [style.display]="">',
                 '           <div [column:columns] [class]="\'cell-\' + $index" [my.tooltip]="item[column]">',
                 '               {{item[column]}}',
                 '           </div>',
                 '       </div>',
                 '   </div>',
                 '   <div class="table-footer">',
-                '       <a [pg:$pages] [class]="pg===page?\' active\':\'\'" [onclick]="paging(pg)">{{\' \' + pg + \' \'}}</a>',
+                '       <p [my.navigation]="$pages" [onnavigation]="paging"></p>',
                 '   </div>',
                 '</div>'
             ].join('');
@@ -296,9 +316,7 @@
             return function (element, data, field) {
                 var size = 15;
                 var excludeColumns = col => {
-                    return ['ISLIVE', 'VERSION', 'INSERTBY', /*'INSERTDATE',*/ 'UPDATEBY',
-                        'UPDATEDATE'
-                    ].indexOf(col) === -1 && !/^(_|\$)/.test(col);
+                    return ['ISLIVE', 'VERSION', 'INSERTBY', /*'INSERTDATE',*/ 'UPDATEBY','UPDATEDATE'].indexOf(col) === -1 && !/^(_|\$)/.test(col);
                 };
                 var oldColumns = [],
                     newData = data.$extend({
@@ -320,7 +338,8 @@
                     configurable: true,
                     enumerable: false,
                     get: function () {
-                        return Math.ceil((value(data, field) || []).length / size);
+                        var pages = Array(Math.ceil((value(data, field) || []).length / size)).fill(null).map(function(v,i){return i;});
+                        return pages.length<10 ? pages : pages.slice(0, 5).concat(['...'], pages.slice(-5));
                     }
                 });
                 Object.defineProperty(newData, '$items', {
@@ -341,8 +360,7 @@
                         var columns = [];
                         (value(data, field) || []).forEach(function (it) {
                             Object.keys(it).forEach(function (k) {
-                                if (columns.indexOf(k) === -1 &&
-                                    excludeColumns(k.toLocaleUpperCase())) {
+                                if (columns.indexOf(k) === -1 && excludeColumns(k.toLocaleUpperCase())) {
                                     columns.push(k);
                                 }
                             });
@@ -369,6 +387,9 @@
                     }
                     render.element = binding(template, newData, element, function (scope) {
                         scope.paging = function (page) {
+                            if (page === '...'){
+                                page = prompt('输入页码0-'+ scope.$pages[scope.$pages.length - 1]);
+                            }
                             scope.page = page;
                             render();
                         };

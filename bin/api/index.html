@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Api</title>
+    <title>Document</title>
     <!--html>style.html</html-->
 </head>
 
@@ -43,7 +43,7 @@
         helpers.forEach(function(url){
             var tb = document.createElement('span');
             tb.title = JSON.stringify(eval(/\[.*\((.*)\)\]/.exec(url) && /\[.*\((.*)\)\]/.exec(url)[1] || ''),null,4) || '';
-            tb.innerHTML = ' - <a class="helper '+(/<(.*)>/.test(url)&&/<(.*)>/.exec(url)[1]) + '">'+/\[(.*)\]/.exec(url)[1].replace(/\(.*\)/,'')+'</a>';
+            tb.innerHTML = ' - <a class="helper '+(/<(.*)>/.test(url)&&/<(.*)>/.exec(url)[1] || '') + '">'+/\[(.*)\]/.exec(url)[1].replace(/\(.*\)/,'')+'</a>';
             tb.onclick = function () {
                 window.open(url.replace(/\[.*\]/,'').replace(/<.*>/,''));
             };
@@ -59,7 +59,7 @@
         };
         var groups = {};
         window.$data.forEach(function (item) {
-            var groupKey = item.file.split(/[\/\\]/).filter(function(i){return !!i;})[1];
+            var groupKey = /\[.+\]/.test(item.file) ? /\[(.+)\]/.exec(item.file)[1] : item.file.split(/[\/\\]/).filter(function(i){return !!i;})[1];
             groups[groupKey] = (groups[groupKey] || []).concat([item]);
         });
 
@@ -78,7 +78,7 @@
             var content = document.createElement('div');
             if (item.config) {
                 var charCount = 0;
-                Array.prototype.forEach.call('' + item.file.split('/')[1], function (i) {
+                Array.prototype.forEach.call('' + item.file.split(/[\\\/]/).pop(), function (i) {
                     charCount = charCount + i.charCodeAt();
                 });
                 fieldset.className = 'config-group';
@@ -139,6 +139,9 @@
             parent.appendChild(urlElement);
             parent.appendChild(returnElement);
 
+            urlElement.onrightmenu = [{name:'配置',fn:function(){
+                console.log('%c' + method.innerHTML, 'background:' + methodColor[method.innerHTML], urlData, returnData);
+            }}];
 
             url.onclick = function () {
                 returnElement.style.display = returnElement.style.display === 'none' ? 'block' : 'none';

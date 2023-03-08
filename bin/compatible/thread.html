@@ -1,0 +1,31 @@
+<script>
+  (function(){
+    window.Thread = window.Thread || $Thread;
+
+    var addThread = (function(){
+      var list = [];
+
+
+    })();
+
+    function $Thread(fn){
+      var worker = new Worker(fn.toString());
+      worker.onmessage = function(){};
+      worker.terminate();
+    }
+
+
+  /* 如何模拟这些代码
+
+  var action = i => console.log(i);
+  new Thread(() => {
+    for(var i=0;i<10;i++){
+      Thread.sleep(1000);
+      action(i);
+    }
+  });
+
+  
+  */
+  })();
+</script>

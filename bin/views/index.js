@@ -2,6 +2,7 @@ var fs = require("fs");
 var path = require('path');
 var child_process = require('child_process');
 
+var proxy = require('./../proxy');
 var helper = require('./../helper');
 
 
@@ -22,7 +23,7 @@ module.exports = (function () {
         function getObj() {
             return {
                 fn: () => '',
-                version: () => '',
+                version: () => ({}),
                 files: [],
                 path: helper.config(__dirname + '/../../views/' + web + '/')
             }
@@ -34,7 +35,7 @@ module.exports = (function () {
 
     //根据文件找到web对应的配置
     function findConfig(file, filetr) {
-        return configs.filter(cfn => cfn.path && filetr(cfn) && path.join(file).toLocaleLowerCase().indexOf(path.join(cfn.path).toLocaleLowerCase()) !== -1);
+        return configs.filter(cfn => cfn.path && filetr(cfn) && path.join(file).toLocaleLowerCase().indexOf(path.join(cfn.path.replace(/[\/\\\s]*$/,'')).toLocaleLowerCase()) !== -1);
 
     }
 
@@ -42,29 +43,64 @@ module.exports = (function () {
     function view(options, request, response) {
         var onlyUrl = decodeURIComponent(request.url.split('?').shift());
         var type = onlyUrl.split('.').slice(1).pop() || 'html';
-        var file = helper.config(basePath + onlyUrl);
+        var urlFile = onlyUrl.replace(/\/*views\/+/, '');
+        var file = fs.existsSync(urlFile) ? urlFile : helper.config(basePath + onlyUrl);
+        var filterConfigs = findConfig(file, cfn => cfn.fn);
 
-        if (fs.existsSync(file)) {
-            if (fs.statSync(file).isDirectory()) {
-                //默认主页存在就重定向否则显示列表
-                if (redirect(file)) {
-                    var params = request.url.split('?')[1] || '';
-                    response.writeHead(302, { 'Location': onlyUrl + '/' + redirect(file) + (params ? '?' : '') + params });
-                    response.end();
-                } else {
-                    response.setHeader('Content-Type', 'text/html;charset=utf-8');
-                    views(options, request, response, onlyUrl).then(content => response.end(content));
+        if(/^https?:\/\//.test(file)){
+            request.headers.cookie = request.headers.cookie || 'XXX';
+            request.headers.api = `${file}/${request.url.replace(onlyUrl,'').replace(/^\/+/,'')}`;
+            request.headers.domain = `${request.protocol}////${request.headers.host}${onlyUrl}`;
+            request.headers.remote = helper.clientIp(request);
+            return proxy(request, response, false);
+        } else if (fs.existsSync(file)) {
+            if (fs.statSync(file).isDirectory()) {//
+                if(/\.html([\?#].*)?/.test(request.headers.referer) && !/https?:\/\/((?!\/).)+\/bin/.test(request.headers.referer)){
+                    defaultFn();
+                }else{
+                    //默认主页存在就重定向否则显示列表
+                    if (redirect(file,request)) {
+                        var params = request.url.split('?')[1] || '';
+                        response.writeHead(302, { 'Location': onlyUrl + '/' + redirect(file,request,response) + (params ? '?' : '') + params });
+                        response.end();
+                    } else {
+                        response.setHeader('Content-Type', 'text/html;charset=utf-8');
+                        views(options, request, response, onlyUrl).then(content => response.end(helper.replaceContent(path.dirname(file),content)));
+                    }
                 }
             } else {
                 if (helper.parameters(request).preview) {
                     response.setHeader('Content-Type', 'text/html;charset=utf-8');
-                    transverter(options, request, response, file, true).then(content => response.end(content));
+                    transverter(options, request, response, file, true).then(content => response.end(helper.replaceContent(path.dirname(file),content)));
                 } else {
                     response.setHeader("Content-Type", helper.type(type) || 'text/plain;charset=utf-8');
-                    transverter(options, request, response, file).then(content => response.end(content));
+                    Promise.all(filterConfigs.filter(i=>i.redirect).map(f=>f.redirect(file,request,response))).then(function(datas){
+                        var data = datas.filter(i=>!!i).pop();
+                        if(data){
+                            transverter(options, request, response, file, false, data).then(content => response.end(content));
+                        } else if(/index\.html/.test(file)){
+                            transverter(options, request, response, file).then(content => response.end(helper.replaceContent(path.dirname(file),content)));
+                        } else {
+                            transverter(options, request, response, file).then(content => response.end(content));
+                        }
+                    })
                 }
             }
-        } else {
+        } else if(filterConfigs.filter(i=>!!i.redirect && !!i.redirect(file,request,response)).length && file.indexOf(redirect(file,request,response)) !== -1){
+            response.setHeader('Content-Type', 'text/html;charset=utf-8');
+            Promise.all(filterConfigs.filter(i=>i.redirect).map(f=>f.redirect(file,request,response))).then(function(datas){
+                var data = datas.filter(i=>!!i).pop();
+                if(data){
+                    transverter(options, request, response, file, false, data).then(content => response.end(content));
+                } else {
+                    views(options, request, response, onlyUrl).then(content => response.end(content));
+                }
+            });
+        } else{
+            defaultFn();
+        }
+
+        function defaultFn(){
             var webBaseUrl = new RegExp('https?:\/\/' + request.headers.host.replace(/\./g, '\\.'));
             var filterConfigs = findConfig(request.headers.referer ? helper.config(basePath + request.headers.referer.replace(webBaseUrl, '')) : file, cfn => cfn.api);
             if (filterConfigs.length) {
@@ -81,49 +117,78 @@ module.exports = (function () {
         }
     }
 
-    function redirect(file) {
+    function redirect(file,request,response) {
+        var filterConfigs = findConfig(file, cfn=>cfn.fn);
         var defaultPages = ['index.html', 'default.html'];
-        for (var i = 0; i < defaultPages.length; i++) {
-            if (fs.existsSync(file + '/' + defaultPages[i])) {
-                return defaultPages[i];
+        if(filterConfigs.filter(i=>!!i.redirect && !!i.redirect(file,request,response)).length){
+            return 'dev.html';
+        }else{
+            for (var i = 0; i < defaultPages.length; i++) {
+                if (fs.existsSync(file + '/' + defaultPages[i])) {
+                    return defaultPages[i];
+                }
             }
+            return '';
         }
-        return '';
     }
 
     //文件列表
     function views(options, request, response, _path) {
         var host = request.headers.host;
         return new Promise(succ => {
+            var contextMenus = helper.localhost(request)?['editor[打开编辑器]', 'editonline[#在线编辑代码]']:[]
             var htmlPath = helper.config(__dirname + '/../../service/' + _path.replace('/views', '') + '/views/index.html');
             var publish = !/^(10|127|192)\./.test(request.headers.host);
             var replace = request.headers.host + `/${_path}`;
             var addToolbar = fs.existsSync(htmlPath) ? fs.readFileSync(htmlPath).toString() : '';
             var divPath = helper.config(basePath + _path || basePath);
             var dirs = {}, menus = [], branch = helper.branch(divPath);
-            var netSegment = helper.parameters(request).netSegment;
+            var netsegment = helper.parameters(request).netsegment;
             var preview = helper.resolver().map(i => i.toString());
+            var filterConfigs = findConfig(divPath, cfn => cfn.list);
 
             fs.readdirSync(divPath).forEach(function (i) {
                 if (!exclude(i)) {
-                    var config = configs.filter(cfn => cfn.path && cfn.version && path.join(divPath + '/' + i).toLocaleLowerCase().indexOf(path.join(cfn.path).toLocaleLowerCase()) !== -1).pop();
-                    dirs['[' + (helper.gitignore(divPath + '/' + i) ? '' : helper.packTool(path.join(divPath + '/' + i))) + ']' + i] = config ? config.version(i) : {};
+                    try{
+                        var config = configs.filter(cfn => cfn.path && cfn.version && path.join(divPath + '/' + i).toLocaleLowerCase().indexOf(path.join(cfn.path).toLocaleLowerCase()) !== -1).pop();
+                        dirs['[' + (helper.gitignore(divPath + '/' + i) ? '' : helper.packTool(path.join(divPath + '/' + i))) + ']' + i] = Object.assign(config ? (config.version(i,path.join(divPath +'/' +i))||{}) : {}, {
+                            menus: contextMenus.concat(['.git','.svn'].some(f=>fs.existsSync(divPath+'/'+i+'/'+f))?['pull[#更新代码]']:(config&&config.menus||[])),
+                            package: helper.package(path.join(divPath + '/' + i))
+                        });
+                    }catch(e){
+                        console.log(e);
+                    }
                 }
             });
 
             if (/\/views\/*$/.test(_path)) {
                 var allPath = helper.config();
                 Object.keys(allPath).filter(include).forEach(function (i) {
-                    dirs['[' + helper.packTool(allPath[i]) + ']' + i] = {};
+                    dirs['[' + helper.packTool(allPath[i]) + ']' + i] = {
+                        menus: contextMenus.concat(['.git','.svn'].some(f=>fs.existsSync(i+'/'+f))?['pull[#更新代码]']:[])
+                    };
                 });
-                menus = ['editor[打开编辑器]', 'pull[#更新代码]'];
             }
 
-            succ(helper.replaceContent(__dirname + '/view/', fs.readFileSync(__dirname + '/index.html', 'utf-8').toString(), {
-                publish: publish, _path: _path, dirs: dirs, replace: replace, options: options, branch: branch, netSegment: netSegment, menus: menus, preview: preview
-            })
-                .replace(/<title>.*<\/title>/, `<title>${hump(_path.replace(/\/*views\/*/, '')) || 'Views'}<\/title>`)
-                .replace('/*addToolbar:(function(){})();*/', addToolbar.replace(/<\/?script>/gi, '')));
+            if(fs.existsSync(divPath + '/.github.config')){
+                fs.readFileSync(divPath + '/.github.config').toString().split(/[\r\n]/).filter(function(i){return !!i;}).forEach(function(github){
+                    var i = github.split('/').pop().replace(/.git$/,'');
+                    var tool = helper.gitignore(divPath + '/' + i)?'':helper.packTool(path.join(divPath + '/' + i));
+                    dirs['[' + tool + ']' + i] = dirs['[' + tool + ']' + i] || github;
+                });
+            }
+
+            Promise.all(filterConfigs.map(function(filterConfig){
+                return filterConfig.list(divPath, menus, dirs);
+            })).then(function(replaceContents){
+                succ(helper.replaceContent(__dirname + '/view/', helper.replaceHtml(fs.readFileSync(__dirname + '/index.html', 'utf-8').toString(),`
+                    <script>${replaceContents.join('\n\n')}</script>
+                `), {
+                    publish: publish, _path: _path, dirs: dirs, replace: replace, options: options, branch: branch, netsegment: netsegment, menus: menus, preview: preview
+                })
+                    .replace(/<title>.*<\/title>/, `<title>${hump(_path.replace(/\/*views\/*/, '')) || 'Views'}<\/title>`)
+                    .replace('/*addToolbar:(function(){})();*/', addToolbar.replace(/<\/?script>/gi, '')));
+            });
         });
 
         function include(w) {
@@ -148,21 +213,23 @@ module.exports = (function () {
     }
 
     //读取文件
-    function transverter(options, request, response, file, preview) {
+    function transverter(options, request, response, file, preview, data) {
 
         var filterConfigs = findConfig(file, cfn => cfn.fn);
+        data = data || fs.readFileSync(file.replace(/\/\//g, '/'));
         return new Promise(succ => {
             var parameters = helper.parameters(request);
-            var data = fs.readFileSync(file.replace(/\/\//g, '/'));
             //启动页而非模板加载
             if (/(\/|\\)(\S+)\.html/.test(file) && /<\/html>/.test(data.toString())) {
                 var content = data.toString();
                 //补充标题
                 content = helper.replaceHtml(content, path.basename(file.replace('index.html', '')).replace(/\b\w+\b/g, word => word.substring(0, 1).toUpperCase() + word.substring(1)));
                 //添加远程调试
-                if (options.ip !== '127.0.0.1' && options.weinre && !helper.localhost(request)) {
-                    content = helper.replaceHtml(content, 'http://' + options.ip + ':' + options.weinre + '/target/target-script-min.js#anonymous');
+                if (options.ip !== '127.0.0.1' && options.weinre && /\[Mobile\]/i.test(helper.browser(request))) {
+                    content = helper.replaceHtml(content, 'http://' + options.hostname + ':' + options.weinre + '/target/target-script-min.js#anonymous');
                 }
+
+                content = helper.replaceHtml(content, helper.replaceContent(__dirname + '/../compatible/', fs.readFileSync(__dirname + '/../compatible/native.html').toString()));
 
                 filterConfigs.forEach(cfn => {
                     content = cfn.fn(file, content, parameters.merge, parameters.debug || options.debug, request);
@@ -172,8 +239,8 @@ module.exports = (function () {
                     content = helper.replaceHtml(content, helper.simulator(parameters.simulator));
                 }
 
-                if ((parameters.debug || options.debug) && !findConfig(file, cfn => cfn.extend).length) {
-                    //content = helper.replaceHtml(content,fs.readFileSync(__dirname + '/../debug/index.html').toString().replace('_$pack$_',helper.packTool(path.dirname(file))).replace(/\^\//mg,'http://' + request.headers.host + '/'));
+                if (parameters.debug || options.debug) {
+                    content = helper.replaceHtml(content, helper.replaceContent(__dirname + '/../debug/', fs.readFileSync(__dirname + '/../debug/index.html').toString().replace('_$pack$_',helper.packTool(path.dirname(file))).replace(/\^\//mg,'http://' + request.headers.host + '/')));
                 }
 
                 data = new Buffer(content.toString());
@@ -186,9 +253,7 @@ module.exports = (function () {
                     helper.resolver(file).then(succ);
                 } else {
                     if (/\.jsx?$/.test(file)) {
-                        findConfig(file, cfn => cfn.extend).forEach(cfn => {
-                            data = cfn.extend(file, data.toString(),request);
-                        });
+                        filterConfigs.forEach(cfn => data = cfn.extend ? cfn.extend(file, data, request) : data);
                     }
                     succ(data);
                 }

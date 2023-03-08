@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Work</title>
+  <style>
+    div>fieldset>div {
+      display: none;
+    }
+
+    @media print {
+      div>fieldset>div {
+        display: block;
+      }
+    }
+
+    div>fieldset>legend {
+      color: #00AAEF;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    div fieldset+fieldset {
+      margin-top: 20px;
+    }
+
+    div>fieldset fieldset {
+      display: inline-block;
+    }
+
+    .day-0,
+    .day-6 {
+      background: #d3d3d3;
+    }
+
+    .day-list-count {
+      border-radius: 50%;
+      background: #6d7543;
+      color: #ffffff;
+      padding: 6px;
+      font-size: 10px;
+      margin: 0 8px;
+    }
+
+    .day i {
+      color: #ffffff;
+      font-size: 13px;
+    }
+  </style>
+  <!--html>/../compatible/native.html</html-->
+  <!--html>/../compatible/dialog.html</html-->
+  <!--html>/../compatible/drag.html</html-->
+</head>
+
+<body>
+  <script>
+    window.document.addEventListener('keydown', function(e){
+      if(e.altKey && e.shiftKey && e.ctrlKey){
+        if(e.key === 'R'){
+          location.reload();
+        }
+      }
+    });
+  </script>
+  <script>
+    var daysElement = document.createElement('div');
+    document.body.appendChild(daysElement);
+
+    if(/\/work[^\/]+\/*/.test(location.pathname)){
+      createGroup(window.$data);
+    }else{
+      Object.keys(window.$data).forEach(function(i){
+        createGroup(window.$data[i],new Date(i),i);
+      })
+    }
+
+  function createGroup(data, date, i){
+    var fieldset = document.createElement('fieldset');
+    var legend = document.createElement('legend');
+    var group = document.createElement('div');
+    var logCount = Object.keys(data.log || {}).map(function(i){return data.log[i].length;}).join(' + ');
+
+    fieldset.className ='day day-' + (date?date.getDay():'status');
+    legend.innerHTML = (i || 'status') + (logCount ? ('<i class="day-list-count">'+ logCount + '</i>') : '');
+
+    var planElement = document.createElement('div');
+    var messageElement = document.createElement('div');
+    planElement.innerHTML = data.plan || '<i>No plan</i>';
+
+    Object.keys(data.log || {}).forEach(function(web){
+      var getTime = /\[([^\]]*)+\]/;
+      var fieldsetLog = document.createElement('fieldset');
+      var legendLog = document.createElement('legend');
+      var groupLog = document.createElement('div');
+      fieldsetLog.appendChild(legendLog);
+      fieldsetLog.appendChild(groupLog);
+      messageElement.appendChild(fieldsetLog);
+      legendLog.innerHTML = web;
+      groupLog.innerHTML = data.log[web].map(function(l){
+        return '<span title="'+(getTime.test(l)? getTime.exec(l)[1]:'') + '">' + l.replace(getTime,'') + '</span>'
+      }).join('<br>');
+      groupLog.style.display ='block';
+    });
+
+    group.appendChild(planElement);
+    group.appendChild(messageElement);
+    fieldset.appendChild(legend);
+    fieldset.appendChild(group);
+    daysElement.appendChild(fieldset);
+    messageElement.innerHTML = messageElement.innerHTML || '没有数据';
+
+    legend.onclick = function(){
+      if(group.style.display !== 'block'){
+        group.style.display = 'block'
+      }else{
+        group.style.display = 'none'
+      }
+    };
+
+
+    if(!date){
+      legend.onclick();
+    }
+  }
+
+  </script>
+</body>
+</html>

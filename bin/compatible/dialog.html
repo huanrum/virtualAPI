@@ -1,0 +1,553 @@
+<style class="dialog-style">
+    .dialogBack {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 9999;
+    }
+
+    .dialog {
+        position: absolute;
+        margin-left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        padding: 2px;
+        border-radius: 10px;
+        background: #f3f3f3;
+    }
+
+    .dialog.max-dialog {
+        margin-left: 0 !important;
+        left: 0 !important;
+        top: 0 !important;
+        transform: none !important;
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 9999 !important;
+    }
+
+    .dialog.max-dialog .content {
+        height: calc(100%- 3em) !important;
+    }
+
+    .dialog .header {
+        background: #666699;
+        color: #ffffff;
+        padding: 0.5em;
+        border-radius: 5px;
+    }
+
+    .dialog .header a {
+        font-size: 1.5rem;
+        float: right;
+        margin-left: 8px;
+        line-height: 1.2rem;
+        color: #00aaef;
+        cursor: pointer;
+    }
+
+    .dialog .header a:hover {
+        color: #d3d3d3;
+    }
+
+    .dialog .content {
+        max-height: 100vh;
+        min-width: 12em;
+        padding: 1rem;
+        min-height: 4rem;
+        overflow: auto;
+    }
+
+    .dialog .content iframe {
+        border: none;
+    }
+
+    .dialog .footer {
+        border-top: 1px solid #d3d3d3;
+        text-align: center;
+        padding: 8px;
+    }
+
+    .dialog .footer a {
+        border: 1px solid #666699;
+        margin: 2px 1rem;
+        padding: 1px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .frame-selection {
+        opacity: 0.6;
+        background: #666699 !important;
+    }
+
+    .image-flex-center {
+        display: flex;
+        justify-content: center;
+        margin: 20px;
+    }
+</style>
+
+<script class="dialog-function">
+    var dialogBackClassName = 'dialogBack';
+    window.document.addEventListener('keyup', function (e) {
+        if (e.keyCode === 27) { // key === "esc"
+            var dialogs = document.getElementsByClassName(dialogBackClassName);
+            var el = dialogs[dialogs.length - 1];
+            if (el && el.parentNode) {
+                el.parentNode.removeChild(el);
+            }
+            if (dialogs.length < 2) {
+                document.body.style.overflow = '';
+            }
+        }
+    });
+
+    function showDialog(title, message, btns, callback) {
+        if (message instanceof Array) {
+            callback = btns;
+            btns = message;
+            message = title;
+            title = '提示';
+        }
+        if (!message) {
+            message = title;
+            title = '提示';
+        }
+
+        btns = btns || [];
+        callback = callback || function () { };
+        message = message || '这是一个提示框';
+
+        var dialogBack = document.createElement('div');
+        var dialog = document.createElement('div');
+        var header = document.createElement('div');
+        var content = document.createElement('div');
+        var footer = document.createElement('div');
+
+        var clossBtn = document.createElement('a');
+
+        dialogBack.className = dialogBackClassName;
+        dialog.className = 'dialog';
+        header.className = 'header';
+        content.className = 'content';
+        footer.className = 'footer';
+
+        dialog.appendChild(header);
+        dialog.appendChild(content);
+        dialog.appendChild(footer);
+        dialogBack.appendChild(dialog);
+        document.body.appendChild(dialogBack);
+        document.body.style.overflow = 'hidden';
+
+        header.innerHTML = title;
+        clossBtn.innerHTML = '&times;';
+        header.appendChild(clossBtn);
+        if (typeof message === 'string') {
+            content.innerHTML = message;
+        } else if (typeof message === 'function') {
+            message(header, content, footer);
+        } else {
+            content.appendChild(message);
+        }
+
+        header.ondblclick = function () {
+            content.fire('sizechanging');
+            if (/max-dialog/.test(dialog.className)) {
+                dialog.className = dialog.className.replace(/\s+max\-dialog/, '');
+            } else {
+                dialog.className += ' max-dialog';
+            }
+        };
+
+        clossBtn.onclick = function () {
+            if (dialogBack.parentNode) {
+                dialogBack.parentNode.removeChild(dialogBack);
+                document.body.style.overflow = '';
+            }
+        };
+
+        (btns || ['取消']).forEach(function (btn, index) {
+            var button = document.createElement('a');
+            button.innerHTML = btn;
+            footer.appendChild(button);
+
+            button.onclick = function () {
+                if (!btns) {
+                    clossBtn.onclick();
+                }
+                Promise.resolve(callback(index, content)).then(function (rs) {
+                    if (rs !== false) {
+                        clossBtn.onclick();
+                    }
+                });
+            };
+        });
+
+        drag(header, dialog);
+        return clossBtn.onclick;
+    }
+
+    function drag(canDragElement, element, moveover) {
+        var temp = {};
+        canDragElement.addEventListener('mousedown', function (e) {
+            var style = window.getComputedStyle(element);
+            if (/max-dialog/.test(element.className)) {
+                return;
+            }
+            if (e.clientX < (parseInt(style.left) || 0) + (parseInt(style.width) || 0) - 15 ||
+                e.clientY < (parseInt(style.top) || 0) + (parseInt(style.height) || 0) - 15) {
+                mousedown(e);
+            }
+
+        });
+        window.addEventListener('mouseup', function () {
+            temp.e = null;
+            element.style.cursor = 'default';
+            canDragElement.style.cursor = 'default';
+            window.removeEventListener('mousemove', mousemove);
+            if (typeof moveover === 'function') {
+                moveover({
+                    x: element.style.left,
+                    y: element.style.top
+                });
+            }
+        });
+
+        function mousedown(e) {
+            var style = window.getComputedStyle(element);
+            temp.e = e;
+            temp.x = e.clientX - (parseInt(style.left) || 0);
+            temp.y = e.clientY - (parseInt(style.top) || 0);
+            element.style.cursor = 'move';
+            canDragElement.style.cursor = 'move';
+            window.addEventListener('mousemove', mousemove);
+        }
+
+        function mousemove(e) {
+            element.style.left = e.clientX - temp.x + 'px';
+            element.style.top = e.clientY - temp.y + 'px';
+            element.style.bottom = 'auto';
+            element.style.right = 'auto';
+        }
+    }
+
+    function selection(canselectElement, callback) {
+        var startPoint = null,
+            selectElements = [];
+        canselectElement.addEventListener('mousedown', function (e) {
+            selectElements = null;
+            startPoint = e;
+        });
+        canselectElement.addEventListener('mouseup', function (e) {
+            if (selectElements) {
+                callback(selectElements);
+            }
+            startPoint = null;
+            selectElements = null;
+        });
+
+        window.addEventListener('mousemove', function (e) {
+            setTimeout(function () {
+                if (startPoint) {
+                    selectElements = Array.prototype.filter.call(canselectElement.children, function (el) {
+                        el.className = el.className.replace(/frame-selection/, '');
+
+                        if (collide({
+                            x: Math.min(startPoint.clientX, e.clientX),
+                            y: Math.min(startPoint.clientY, e.clientY),
+                            width: Math.abs(startPoint.clientX - e.clientX),
+                            height: Math.abs(startPoint.clientY - e.clientY),
+                        }, {
+                            x: el.offsetLeft,
+                            y: el.offsetTop,
+                            width: el.offsetWidth,
+                            height: el.offsetHeight
+                        })) {
+                            el.className = el.className + 'frame-selection';
+                            return true;
+                        };
+                    });
+                }
+            }, 1000);
+        });
+
+        var collide = function (rect1, rect2) {
+            console.log(rect1, rect2);
+            var maxX, maxY, minX, minY;
+
+            maxX = rect1.x + rect1.width >= rect2.x + rect2.width ? rect1.x + rect1.width : rect2.x + rect2.width
+            maxY = rect1.y + rect1.height >= rect2.y + rect2.height ? rect1.y + rect1.height : rect2.y + rect2.height
+            minX = rect1.x <= rect2.x ? rect1.x : rect2.x
+            minY = rect1.y <= rect2.y ? rect1.y : rect2.y
+
+            if (maxX - minX <= rect1.width + rect2.width && maxY - minY <= rect1.height + rect2.height) {
+                return true
+            } else {
+                return false
+            }
+        }
+    }
+
+</script>
+
+<style class="select-dialog">
+    .header-path {
+        background: #d3d3d3;
+        padding: 5px;
+    }
+
+    .back-path {
+        zoom: 0.5;
+        transform: scale(0.5);
+        margin: 0 40px 0 20px;
+    }
+
+    .back-path:hover {
+        cursor: pointer;
+        border-right-color: #00aaef;
+    }
+
+    .back-path:hover:after {
+        background-color: #00aaef;
+    }
+
+    .input-path {
+        width: calc(100% - 150px);
+        color: #00AAEF;
+        border: 1px solid #d3d3d3;
+        padding: 5px 16px;
+        font-weight: bold;
+    }
+
+    .list-path {
+        min-height: 200px;
+        max-height: 400px;
+        min-width: 600px;
+        max-width: 1024px;
+        overflow: auto;
+    }
+
+    .max-dialog .list-path {
+        max-height: 88vh;
+        max-width: 100%;
+        overflow: auto;
+    }
+
+    .list-path .item-icon {
+        display: inline-block;
+        margin: 5px;
+        padding: 10px;
+        background: #5f8e7a;
+        background-size: 100% 100%;
+        border-radius: 5px;
+    }
+
+    .list-path .item-element {
+        display: inline-flex;
+        align-items: center;
+        margin: 5px 0;
+        color: #333333;
+    }
+
+    .list-path .item-element:hover {
+        cursor: pointer;
+        color: #b3e91e;
+        font-weight: bold;
+    }
+
+    .error-path {
+        text-align: center;
+        margin: 20px;
+        color: #ff3333;
+    }
+</style>
+
+<!--html>contentFormatter/code.html/<html-->
+<script class="select-dialog">
+    var getbasepath = function (path) {
+        return fetch('/path').then(function (i) { return i.text() }).then(function (basepath) {
+            try {
+                return new URL(basepath + '/' + (path || '')).href.replace(/^file:\/+/, '');
+            } catch (e) { }
+            return basepath + '/' + (path || '')
+        });
+    };
+
+    function selectDialog(option, rightmenu, done) {
+        var localStorageKey = '[common]/selectDialog';
+        var path = typeof option === 'function' ? option(localStorageKey) : option;
+        done = done || function () { };
+        if (!(rightmenu instanceof Array)) {
+            rightmenu = [];
+        }
+
+        return new Promise(function (resolve) {
+            var sizechange = function () { };
+            var input = document.createElement('input');
+
+            Promise.resolve((/^[A-Z]+:/.test(path)) ? path : getbasepath(path)).then(function ($path) {
+                if (localStorage[localStorageKey] && localStorage[localStorageKey].indexOf($path) !== -1) {
+                    $path = '';
+                }
+                showDialog('选择文件或目录', function (header, content, footer) {
+                    var back = document.createElement('span');
+                    var create = document.createElement('span');
+                    var loading = document.createElement('span');
+                    var head = document.createElement('div');
+                    var list = document.createElement('div');
+                    back.className = 'back-path icon up_left';
+                    create.className = 'create-path icon plus';
+                    input.className = 'input-path';
+                    head.className = 'header-path';
+                    list.className = 'list-path';
+                    head.appendChild(back);
+                    head.appendChild(input);
+                    head.appendChild(create);
+                    head.appendChild(loading);
+                    content.appendChild(head);
+                    content.appendChild(list);
+
+                    content.addEventListener('sizechanging', function () {
+                        if (sizechange) {
+                            sizechange();
+                        }
+                    });
+
+                    content.onrightmenu = [
+                        {
+                            name: function (e) {
+                                return (e === content || /item-path/.test(e.className)) ? '新建文件(夹)' : ''
+                            },
+                            fn: function () { create.onclick(); }
+                        }
+                    ];
+
+                    updateList('', $path || localStorage[localStorageKey] || '');
+
+                    back.onclick = function () {
+                        updateList('', input.value.replace(/((?![\\\/]).)+\\*$/, ''));
+                    };
+                    create.onclick = function () {
+                        showDialog('新建文件(夹)', '<div style="display:flex;justify-content:center;"><input></div>', ['确定'], function (index, content) {
+                            var editor = content.querySelector('input');
+                            if (editor && editor.value) {
+                                console.log('创建文件夹或文件:' + editor.value);
+                                updateList('', input.value);
+                            }
+                        });
+                    };
+                    input.onkeyup = function (e) {
+                        if (e.keyCode === 13) {
+                            updateList('', input.value);
+                        }
+                    };
+
+                    list.onrightmenu = [{
+                        name: function (e) {
+                            return list.type || /item-path/.test(e.className) ? '' : '删除';
+                        },
+                        fn: function (e) {
+                            var path = e.select.innerText || e.select.parentNode.innerText;
+                            showDialog('提示', '确定删除' + path, ['确认'], function () {
+                                console.log('确定删除:' + path);
+                                updateList('', input.value);
+                            });
+                        }
+                    }].concat(rightmenu);
+
+                    function updateList(type, newDir) {
+                        loading.className = 'icon loading';
+                        if (input.value !== newDir) {
+                            input.value = (newDir + '\\').replace(/^\\+/, '').replace(/\\+$/, type ? '' : '\\').replace(/\\\\+/g, '\\');
+                            list.type = type;
+                        }
+
+                        var apiUrl = location.origin + '/io?dir=' + input.value;
+                        openFile(type, apiUrl).then(function (i) {
+                            loading.className = '';
+                            return i.text();
+                        }).then(function (data) {
+                            if (type) {
+                                if (/"type":"Buffer",/.test(data)) {
+                                    input.value = input.value.replace(/((?![\\\/]).)*$/, '');
+                                    showDialog('打开提示', '文件若不可在线阅读，会直接下载！<br><br><strong>' + newDir + '</strong>', ['取消', '确认'], function (index) {
+                                        if (index) {
+                                            window.open(apiUrl, { name: newDir.split(/[\\\/]/).pop() });
+                                        }
+                                    });
+                                } else {
+                                    list.innerHTML = data.format(type);
+                                }
+                            } else {
+                                localStorage[localStorageKey] = newDir;
+                                createList(data)
+                            }
+                        });
+                    }
+
+                    function openFile(type, apiUrl) {
+                        return new Promise(function (resolve) {
+                            if (/(png|jpg|jpeg|ico|gif|svg)/i.test(type)) {
+                                list.innerHTML = '<div class="image-flex-center">< img src="@src"></div>'.replace(/@src/g, apiUrl);
+                            } else if (/(mp3|mp4)/i.test(type)) {
+                                list.innerHTML = '<div class="image-flex-center"><audio controls src="@src"/></div>'.replace(/@src/g, apiUrl);
+                            } else {
+                                resolve(fetch(apiUrl));
+                            }
+                        });
+                    }
+
+                    function createList(dataList) {
+                        list.innerHTML = '';
+                        try {
+                            var data = JSON.parse(dataList)
+                            Object.keys(data).forEach(function (item) {
+                                var panel = document.createElement('div');
+                                var icon = document.createElement('span');
+                                var element = document.createElement('span');
+                                var title = document.createElement('span');
+                                element.appendChild(icon);
+                                element.appendChild(title);
+                                panel.appendChild(element);
+                                list.appendChild(panel);
+
+                                panel.className = 'item-path';
+                                icon.className = 'item-icon';
+                                title.className = 'item-title';
+                                element.className = 'item-element';
+
+                                element.title = JSON.stringify(data[item]);
+
+                                title.innerHTML = item;
+                                if (!data[item].type) {
+                                    icon.style.background = '#b1d814';
+                                } else if (/(png|jpg|jpeg|ico|gif|svg)/i.test(data[item].type)) {
+                                    var apiUrl = location.origin + '/io?dir=' + input.value.replace(/\\/g, '\\\\') + '/' + item;
+                                    icon.style.backgroundImage = 'url(@src)'.replace(/@src/g, apiUrl);
+                                }
+                                element.onclick = function () {
+                                    updateList(data[item].type, input.value + '\\' + item);
+                                };
+                            });
+                        } catch (e) {
+                            list.innerHTML = '<div class="error-path">' + dataList + '</div>';
+                        }
+                        return list.childNodes;
+                    }
+                }, ['确定'], function () {
+                    setTimeout(function () {
+                        resolve(input.value);
+                    }, 500);
+                });
+                done();
+            })
+        });
+    }
+
+
+
+</script>

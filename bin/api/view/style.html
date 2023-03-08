@@ -28,6 +28,10 @@
         margin: 1em 0.2em;
     }
 
+    .module-group legend{
+        cursor: pointer;
+    }
+
     .config-group {
         margin: 1em;
     }
@@ -109,6 +113,7 @@
     }
 
     .common-dialog-back .common-dialog .common-dialog-header label {
+        margin-right: 40px;
         color: #ffffff;
     }
 
@@ -138,7 +143,7 @@
         width: 20px;
         height: 0;
         content: '';
-        border-bottom: 2px solid #333333;
+        border-bottom: 2px solid #ffffff;
     }
 
     .common-dialog-back .common-dialog .common-dialog-header a:before {
@@ -165,9 +170,11 @@
     }
 
     .common-dialog-back .common-dialog .common-dialog-content div input {
+        width: calc(100% - 16em);
         background: #f3f3f3;
         border: none;
         border-bottom: 1px solid #666699;
+        outline: none;
     }
 
     .common-dialog-back .common-dialog .common-dialog-message {
@@ -176,16 +183,18 @@
         height: 100%;
         background: #d3d3d3;
         margin: 0.5em;
+        min-width: 400px;
         max-height: 33em;
         min-height: 10em;
         overflow: auto;
+        outline: none;
     }
 
     .common-dialog-back .common-dialog .common-dialog-footer {
         position: relative;
         border-top: 1px solid #d3d3d3;
         text-align: center;
-        padding: 2px;
+        padding: 5px;
     }
 
     .common-dialog-back .common-dialog .common-dialog-footer a {
@@ -197,7 +206,7 @@
 
     .common-dialog-back .common-dialog .common-dialog-footer a:hover {
         opacity: 0.8;
-        color: #f3f3f3;
+        color: #00aaef;
     }
 </style>
 <style>

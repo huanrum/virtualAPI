@@ -1,0 +1,177 @@
+<style>
+  .CodeMirror {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+  }
+
+  .CodeMirror-sizer>div {
+    padding-bottom: 1rem;
+  }
+
+  .file-loading {
+    position: fixed;
+    z-index: 9999;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.9);
+    text-align: center;
+  }
+
+  .file-loading * {
+    color: #ffffff;
+    font-size: 29px;
+    line-height: 100vh;
+  }
+</style>
+<script>
+  window.codeEditor = (function () {
+    var loadFilePromise = new Promise(function (resolve) {
+      window.addEventListener('load', function load() {
+        var loading = document.createElement('div');
+        document.body.appendChild(loading);
+        loading.className = 'file-loading';
+        loading.innerHTML = '<span>文件加载中，请稍后...</span>';
+
+        window.$data.addons.forEach(loadFile);
+        Promise.all(window.$data.modes.map(loadFile)).then(function () {
+          document.body.removeChild(loading);
+          resolve();
+        });
+        window.$data.themes.forEach(function (i) { loadFile('/lib/codemirror/theme/' + i + '.css') });
+        loadFile("https://cdn.jsdelivr.net/npm/marked/marked.min.js");
+      });
+    });
+
+    return function (theme, textarea, option, localInfo) {
+      return new Promise(function (resolve) {
+        option.codeMirror = option.codeMirror || {};
+        loadFilePromise.then(function () {
+          var editor = CodeMirror.fromTextArea(textarea, {
+            mode: option.codeMirror.mode || option.codeMirror.mime,//编辑器语言
+            theme: theme,//编辑器主题
+            extraKeys: {
+              "Ctrl+Alt": "autocomplete"
+            },
+            lineNumbers: true,//显示行号
+            styleActiveLine: true,
+            lineWrapping: true,//代码折叠
+            foldGutter: true,
+            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+            matchBrackets: true, //括号匹配
+            autoCloseBrackets: true,
+          });
+
+          textarea.parentNode.editor = editor;
+          setOpacity(editor);
+          editor.$setOption = function (type) {
+            if (type === 'theme') {
+              setOpacity(editor)
+            }
+            return editor.setOption.apply(editor, arguments);
+          }
+          editor.on('renderLine', function (cm, line, elt) {
+            var comment = '';
+            updateComment(elt, localInfo(line.lineNo()) || '')
+            elt.mclick(function (count) {
+              if (count > 2) {
+                showDialog('add comment', '<textarea style="width: calc(100% - 6px);height:200px;">' + comment + '</textarea>', ['OK'], function (index, content) {
+                  updateComment(elt, content.querySelector('input,textarea').value)
+                });
+              }
+            });
+
+            function updateComment(element, title) {
+              if (comment !== title) {
+                element.title = title;
+                if (title) {
+                  localInfo(line.lineNo(), title);
+                }
+              }
+              comment = title;
+            }
+          });
+
+          resolve(function (code, onchange) {
+            var oldValue = editor.setValue(code);
+            var value = editor.getValue();
+            textarea.update = function () {
+              oldValue = editor.getValue();
+              textarea.value = value;
+              editor.setValue(value);
+            };
+            editor.on('blur', function (instance, e) {
+              var newValue = editor.getValue();
+              if (newValue !== oldValue) {
+                oldValue = newValue;
+                onchange(newValue).then(function (status) {
+                  if (status) {
+                    value = newValue;
+                    setTimeout(showDialog('保存成功'), 2000);
+                  } else {
+                    textarea.update();
+                    oldValue = value;
+                  }
+                });
+              }
+            });
+            textarea.update();
+            gotoLine(editor, location.hash.replace(/\#l/i, ''));
+          });
+        });
+      });
+    };
+
+    function gotoLine(editor, line) {
+      if (+line) {
+        editor.scrollIntoView(line);
+      }
+    }
+
+    function setOpacity(editor) {
+      editor.display.wrapper.style.background = '';
+      setTimeout(function () {
+        editor.$$background = getComputedStyle(editor.display.wrapper).background;
+        editor.display.wrapper.style.background = editor.$$background.replace(/(rgba?\(((?!\)).)+\))/, function ($0, $1) {
+          return $1.replace(')', ',0.7)');
+        });
+      });
+    }
+
+    function loadFile(file) {
+      return new Promise(function (resolve) {
+        if (/\.[jt]s/.test(file)) {
+          var script = document.createElement('script');
+          script.type = 'text/javascript';
+          script.charset = 'utf-8';
+          script.onload = function () {
+            document.head.removeChild(script);
+            resolve();
+          };
+          script.onerror = function () {
+            document.body.removeChild(script);
+            resolve();
+          };
+          script.src = file;
+          document.head.appendChild(script)
+        } else {
+          var link = document.createElement('link');
+          link.type = 'text/css';
+          link.rel = 'stylesheet';
+          link.onload = function () {
+            resolve();
+          };
+          link.onerror = function () {
+            document.body.removeChild(link);
+            resolve();
+          };
+          link.href = file;
+          document.head.appendChild(link);
+        }
+      });
+    }
+
+  })();
+</script>

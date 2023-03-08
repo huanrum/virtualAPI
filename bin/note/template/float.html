@@ -1,0 +1,362 @@
+<style>
+  .float-bar {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    width: 60px;
+    height: 60px;
+    background: #339933;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+  }
+
+  .float-bar .url {
+    color: #33ffff;
+  }
+
+  .float-bar>* {
+    display: none;
+  }
+
+  .float-bar>p {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    margin: 0;
+    padding-left: 50%;
+    color: #ffffff;
+    word-break: break-all;
+  }
+
+  .float-bar>p>span {
+    display: block;
+  }
+
+  .float-bar:hover,
+  .float-bar.editing {
+    top: 0;
+    left: 0;
+    width: auto;
+    height: auto;
+    opacity: 1;
+    transform: none;
+    border-radius: 0;
+    padding: 8px !important;
+    margin: 0 !important;
+    z-index: 999 !important;
+    background: #aaaaaa;
+  }
+
+  .float-bar:hover *,
+  .float-bar.editing * {
+    display: initial;
+  }
+
+  .float-bar:hover .panel-switch *,
+  .float-bar.editing .panel-switch * {
+    display: inherit;
+  }
+
+  .float-bar:hover>p,
+  .float-bar.editing>p {
+    display: none;
+  }
+
+  .float-bar:hover>div,
+  .float-bar.editing>div {
+    display: block;
+    min-width: 360px;
+    height: 98vh;
+  }
+
+  .float-bar.editing {
+    min-height: 400px;
+  }
+
+  .float-bar a[auto] {
+    animation: none !important;
+  }
+
+  .float-content {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    border: 5px solid #00aaef;
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(128, 128, 128, 0.6);
+    transform: none;
+    opacity: 0.6;
+  }
+
+  .float-content:hover>div,
+  .float-content.editing>div {
+    max-height: 80vh;
+  }
+
+  .float-content-open {
+    width: auto;
+    height: auto;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    border: 5px solid #e03434d5;
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(128, 128, 128, 0.6);
+    transform: none;
+    opacity: 0.8;
+    padding: 8px;
+  }
+
+  .float-content-open>div {
+    display: block;
+  }
+
+  .float-content-open>p {
+    display: none;
+  }
+
+  .float-content>* {
+    padding: 8px;
+  }
+
+  .float-content>p {
+    padding: 0;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .float-content div {
+    /* min-height:400px;*/
+    min-width: 400px;
+  }
+
+  .scroll-bar {
+    overflow: auto;
+  }
+
+  .scroll-bar::-webkit-scrollbar {
+    /*滚动条整体样式*/
+    width: 5px;
+    /*高宽分别对应横竖滚动条的尺寸*/
+    height: 1px;
+  }
+
+  .scroll-bar::-webkit-scrollbar-thumb {
+    /*滚动条里面小方块*/
+    border-radius: 5px;
+    background: #339933;
+  }
+
+  .scroll-bar::-webkit-scrollbar-track {
+    /*滚动条里面轨道*/
+    border-radius: 5px;
+    background: #EDEDED;
+  }
+</style>
+
+<script>
+
+  (function () {
+    /**
+     * 是否在页面加载时候，对数据进行强制处理
+     */
+    var $mandatory = false;
+
+    var sum = function (list, fn) {
+      var result = 0;
+      fn = fn || function (i) { return i; };
+      Array.prototype.forEach.call(list, function (e) {
+        result += (fn(e) || 0);
+      });
+      return result;
+    };
+
+    var replaceTitle = function (value, title) {
+      var regex = /^#{(((?!\}#)[\s\S])*)}#/;
+      title.innerHTML = regex.test(value) ? (regex.exec(value)[1].trim().transform()) : title.innerHTML;
+      return value.replace(regex, '');
+    };
+
+    setTimeout(function () {
+      var onkeydown = function (e) {
+        $mandatory = true;
+      };
+      document.body.addEventListener('keydown', onkeydown);
+      setTimeout(function () {
+        $mandatory = false;
+        document.body.removeEventListener('keydown', onkeydown);
+      }, 30 * 1000);
+    });
+
+    window.createFloatButton = function (localSave, name, type, _count) {
+      var savePoint = _count > 1;
+      var floatClass = ['float-content', 'float-content-open'][_count - 2];
+      var floatButtonStyle = document.querySelector('.float-button-style');
+      if (!floatButtonStyle) {
+        floatButtonStyle = document.createElement('style');
+        floatButtonStyle.className = 'float-button-style';
+        document.head.appendChild(floatButtonStyle);
+      }
+
+      var taskListElement = document.createElement('div');
+      var title = document.createElement('p');
+      var input = window.keyReplace(document.createElement('textarea'));
+      var show = window.candrag(document.createElement('div'));
+      var baseClassName = '.float-bar.float-panel.list-' + type;
+      show.input = input;
+      taskListElement.className = (floatClass || '') + ' float-bar float-panel list-' + type;
+      input.className = 'editor';
+      show.className = 'scroll-bar';
+      title.innerHTML = '<span>' + type + '</span>';
+
+      if (savePoint) {
+        show.style.height = 'auto';
+        drag(show, taskListElement, function (point) {
+          var points = JSON.parse(localSave('point') || '{}') || {};
+          points[type] = point;
+          localSave('point', JSON.stringify(points));
+        });
+        if (localSave('point')) {
+          var point = JSON.parse(localSave('point') || '{}')[type] || { x: '0px', y: '0px' };
+          taskListElement.style.left = point.x;
+          taskListElement.style.top = point.y;
+          taskListElement.style.bottom = 'auto';
+          taskListElement.style.right = "auto";
+        }
+      } else {
+        var height = 0;
+        Array.prototype.forEach.call(document.getElementsByClassName('float-bar'), function (el, index, list) {
+          if (/float-content/.test(el.className)) return;
+          height += el.offsetHeight + 20;
+          // el.style.top = 'calc(50% - ' + sumHeight/2 + 'px');
+        })
+        taskListElement.style.marginTop = height + 'px';
+        floatButtonStyle.innerHTML += '\n' + createStyle(type);
+      }
+
+      taskListElement.appendChild(title);
+      taskListElement.appendChild(show);
+      taskListElement.appendChild(input);
+      document.body.appendChild(taskListElement);
+      show.ondblclick = function () {
+        taskListElement.className = taskListElement.className + 'editing';
+        input.style.display = 'block';
+        show.style.width = Math.max(savePoint ? 1000 : 200, show.offsetWidth) + 'px';
+        input.focus();
+        if (savePoint) {
+          taskListElement.style.left = (window.innerWidth - 1050) + 'px';
+        }
+      }
+
+      input.onblur = function () {
+        taskListElement.className = taskListElement.className.replace(/\s+editing/g, '');
+        input.style.display = 'none';
+        show.style.width = 'auto';
+        show.innerHTML = addAutoFlag(replaceTitle(input.value, title), show, input).transform(/[\?&=][0-9a-zA-Z_]*\[(((?!\]).)*)\]/);
+        window.save(name, input.value);
+        if (savePoint) {
+          taskListElement.style.left = JSON.parse(localSave('point')).x;
+        }
+      }
+
+      clearTimeout(window.createFloatButton.$$timeout);
+      window.createFloatButton.$$timeout = setTimeout(function () {
+        var sumHeight = sum(document.getElementsByClassName('float-bar'), function (el) { return /float-content/.test(el.className) ? 0 : (el.offsetHeight + 20) });
+        Array.prototype.forEach.call(document.getElementsByClassName('float-bar'), function (el, index, list) {
+          if (/float-content/.test(el.className)) return;
+          el.style.marginTop = parseFloat(el.style.marginTop) - sumHeight / 2 + 'px';
+        })
+      }, 500);
+
+      show.onlonghold = function () {
+        window.open(location.origin + location.pathname + '/' + name + location.search);
+      };
+
+      fetch(location.origin + location.pathname + '/' + name + location.search).then(function (i) {
+        return i.json();
+      }).then(function (data) {
+        input.value = data || '';
+        input.style.display = 'none';
+        show.innerHTML = addAutoFlag(replaceTitle(input.value, title), show, input).transform(/[\?&=][0-9a-zA-Z_]*\[(((?!\]).)*)\]/);
+        window.changesize(input);
+        setTimeout(function () {
+          Array.prototype.forEach.call(taskListElement.querySelectorAll('a[auto]'), function (el) {
+            var time = +el.attributes['auto'].value || 0;
+            if (new Date().getHours() < 10 || time < 0) {
+              setTimeout(function () {
+                el.click();
+                el.focus();
+              }, Math.abs(time));
+            }
+          });
+        });
+      });
+
+      // 提取style，检查是否为js方法
+      function addAutoFlag(value, showEl, input) {
+        if (savePoint) {
+          return value;
+        }
+
+        var replaces = [];
+
+        value = replaceStyle(value).replace(/\[(((?!\]).)*)\]/g, function ($0, $1) {
+          replaces.push($1);
+          return '[${' + (replaces.length - 1) + '}]';
+        });
+
+        return ('29,#FFFFFF,center[' + type.hump() + ']\n' + value).replace(/\n\s*(((?!\s).)+)/g, function ($0, $1) {
+          if (!/^[0-9a-zA-Z#\.\,]*\[.*\]/.test($1)) {
+            $1 = '24,#339933[' + $1.replace(/((?![0-9a-z\-]).)+/ig, '') + ']' + $1;
+          }
+
+          //一小时内只能触发一次
+          if (/auto/i.test(type) && ($mandatory || Date.now() - (localSave('lastrefsh') || 0) > 60 * 60 * 1000)) {
+            localSave('lastrefsh', Date.now());
+            return '\n' + $1.replace('[', '[$-60000:');
+          } else {
+            return $0;
+          }
+        }).replace(/\$\{([0-9]+)\}/g, function ($0, $1) {
+          return replaces[$1];
+        });
+      }
+
+      function createStyle(value) {
+        var colorNumber = sum(value, function (i) { return i.charCodeAt(); })
+        var styles = {
+          '.url': 'color:#' + ('000000' + sum(type, function (i) { return Math.pow(i.charCodeAt(), 4); }).toString(16)).slice(-6)
+        };
+
+        return Object.keys(styles).map(function (key) {
+          return baseClassName + ' ' + key + '{\n' + styles[key] + '\n}\n';
+        }).join('\n');
+      }
+
+      function replaceStyle(value) {
+        var styleRegexStr = '\\/\\*' + baseClassName + ' content-style \\*\\/';
+        var styleRegex = new RegExp(styleRegexStr + '\\n+((?!\\n' + styleRegexStr + '\\n)[\\s\\S])*\\n+' + styleRegexStr);
+        var regex = /^\s*##\n(((?!\n!##\n)[\s\S])*)\n!##/gmi;
+        var style = regex.exec(value);
+        if (style) {
+          var styleContent = (styleRegexStr + '\n' + style[1].replace(/{\n*/g, '{\n').replace(/\n*}/g, '\n}').replace(/([^\n])+{/g, function ($0) { return baseClassName + ' ' + $0; }) + '\n' + styleRegexStr).replace(/\\/mg, '');
+          if (!styleRegex.test(floatButtonStyle.innerHTML)) {
+            floatButtonStyle.innerHTML += '\n' + styleContent;
+          } else {
+            floatButtonStyle.innerHTML = floatButtonStyle.innerHTML.replace(styleRegex, styleContent);
+          }
+        } else {
+          floatButtonStyle.innerHTML = floatButtonStyle.innerHTML.replace(styleRegex, '');
+        }
+
+        return value.replace(regex, '');
+      }
+
+    }
+
+  })();
+
+
+</script>

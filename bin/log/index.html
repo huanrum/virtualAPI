@@ -9,31 +9,42 @@
     <style>
         div>fieldset>div{
             display: none;
-            text-align: center;
         }
         div>fieldset>legend{
             color:#00AAEF;
             font-size: 20px;
             cursor: pointer;
         }
+        div fieldset+fieldset{
+            margin-top: 20px;
+        }
+        div>fieldset fieldset{
+            display: inline-block;
+        }
 
     </style>
+    <!--html>/../compatible/native.html</html-->
 </head>
 
 <body>
     <script>
-        var groupList = {} ,content = document.createElement('div');
+        var rootList = {}, groupList = {} ,content = document.createElement('div');
 
         document.body.appendChild(content);
-        window.$data.forEach(function(item){
-            var day = new Date(parseInt(item)).toLocaleDateString();
+        window.$data.reverse().forEach(function(item){
+            var date = new Date(parseInt(item));
+            var day = date.toLocaleDateString();
+            var month = date.getFullYear() + '年' + (date.getMonth()+1) + '月';
+            if(!rootList[month]){
+                rootList[month] = createGroup(content, month);
+            }
             if(!groupList[day]){
-                groupList[day] = createGroup(day);
+                groupList[day] = createGroup(rootList[month],''+date.getDate()+'日');
             }
             groupList[day].appendChild(createItem(item));
         });
 
-        function createGroup(day){
+        function createRoot(parent, day){
             var fieldset = document.createElement('fieldset');
                 var legend = document.createElement('legend');
                 var group = document.createElement('div');
@@ -52,12 +63,32 @@
                 return group;
         }
 
+        function createGroup(parent, day){
+            var fieldset = document.createElement('fieldset');
+                var legend = document.createElement('legend');
+                var group = document.createElement('div');
+                fieldset.appendChild(legend);
+                fieldset.appendChild(group);
+                parent.appendChild(fieldset);
+
+                legend.innerHTML = day;
+                legend.onclick = function(){
+                    if(group.style.display !== 'block'){
+                        group.style.display = 'block'
+                    }else{
+                        group.style.display = 'none'
+                    }
+                };
+                return group;
+        }
+
         function createItem(item){
+            var date = new Date(parseInt(item));
             var element = document.createElement('div');
             var elementA = document.createElement('a');
             element.appendChild(elementA);
-            elementA.href = item;
-            elementA.innerHTML = item;
+            elementA.href = location.pathname + '/' + item;
+            elementA.innerHTML = date.getHours() + '时' + date.getMinutes() + '分'+date.getSeconds() + '秒';
             elementA.target = "_blank";
             return element;
         }

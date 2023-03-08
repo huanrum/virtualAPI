@@ -3,9 +3,9 @@
         var _fetch = window.fetch;
         window.fetch = function (url, option, other) {
             option = option || {};
-            if (localStorage['[seto-views]/netSegment']) {
+            if (localStorage['[seto-views]/netsegment']) {
                 option.headers = Object.assign(option.headers || {}, {
-                    netSegment: localStorage['[seto-views]/netSegment']
+                    netsegment: localStorage['[seto-views]/netsegment']
                 });
             }
             return _fetch(url, option, other);

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Capture</title>
+  <style>
+    div>fieldset>div{
+      display: none;
+    }
+    div>fieldset>legend{
+      color:#00AAEF;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    div fieldset+fieldset{
+      margin-top: 20px;
+    }
+    div>fieldset fieldset{
+      display: inline-block;
+    }
+  </style>
+  <!--html>/../compatible/native.html</html-->
+</head>
+
+<body>
+  <script>
+    fetch('',{method:'POST',body:JSON.stringify({
+      url: 'https://gz.fang.lianjia.com/loupan',
+      name: 'lianjia_loupan'.toLocaleUpperCase(),
+      path: 'data.list',
+      info: '链家楼盘信息'
+    })});
+  </script>
+</body>
+
+</html>

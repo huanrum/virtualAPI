@@ -1,0 +1,130 @@
+<script class="editor-list">
+  (function (fileds, initEditor) {
+    window.customizeEditor = (function () {
+      var editors = [];
+      return function (key, fn) {
+        if (fn) {
+          editors.push({ key: key, fn: fn });
+        } else {
+          var editor = editors.filter(function (i) {
+            return (i.key.test && i.key.test(key)) || i.key.toString().toLocaleLowerCase().trim() === key;
+          }).pop();
+          return editor ? editor.fn : function () { };
+        }
+      };
+    })();
+    initEditor(window.customizeEditor);
+    var domchangeFire = (function () {
+      var domchangeTimeout = null;
+      return function (self) {
+        clearTimeout(domchangeTimeout);
+        domchangeTimeout = setTimeout(function () {
+          self.fire('domchange');
+        }, 100);
+      }
+    })();
+    var innerHTMLDescriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+    if (innerHTMLDescriptor) {
+      var setFn = innerHTMLDescriptor.set;
+      Object.defineProperty(Element.prototype, 'innerHTML', Object.assign(innerHTMLDescriptor, {
+        set: function (value) {
+          if (value && this.innerHTML !== value) {
+            domchangeFire(this);
+          }
+          try {
+            setFn.apply(this, arguments);
+          } catch (e) { }
+        }
+      }));
+    }
+    fileds.forEach(function (field) {
+      var fn = Element.prototype[field];
+      Element.prototype['$$' + field] = Element.prototype[field];
+      Element.prototype[field] = function () {
+        domchangeFire(this);
+        return fn.apply(this, arguments);
+      };
+    });
+
+    var initElement = function (el) {
+      el.$$children = el.$$children || el.innerHTML;
+      Array.prototype.forEach.call(el.childNodes, initElement);
+      var props = {};
+      Array.prototype.forEach.call(el.attributes || [], function (attr) { props[attr.name] = attr.value || true; });
+      var html = window.customizeEditor(el.nodeName.toLocaleLowerCase())(el, Object.assign(props, { children: el.$$children }));
+      if (html) {
+        if (html instanceof HTMLElement) {
+          el.appendChild(html);
+        } else {
+          el.innerHTML = html;
+        }
+      }
+    };
+
+    setTimeout(function () {
+      document.body.addEventListener('domchange', function (e) {
+        clearTimeout(e.target.$$render);
+        e.target.$$render = setTimeout(function () {
+          initElement(e.target);
+        }, 100);
+      });
+    }, 500);
+
+    //定制自己的组件
+    var createElement = document.createElement;
+    document.createElement = function (name, option) {
+      var panel = createElement.apply(document, arguments);
+      Object.keys(option || {}).forEach(function (attr) {
+        panel.setAttribute(attr, option[attr]);
+      });
+      Object.assign(panel, option || {});
+      initElement(panel);
+      return panel.lastChild || panel;
+    }
+
+  })(['append', 'appendChild', 'before', 'insertBefore', 'after'], function (register) {
+
+    register('seto', function (el) {
+      el.innerHTML = '<strong>Seto</strong>';
+    });
+
+    register(/^space[0-9]*$/, function (el) {
+      el.style.display = 'inline-block';
+      el.style.width = el.nodeName.replace(/space/i, '') * 16 + 'px';
+      el.style.minHeight = '1px';
+    });
+
+    register('collapsible', function (el, props) {
+      el.innerHTML = [
+        '<fieldset class="collapsible">',
+        ' <legend>',
+        '   <label></label>',
+        '   <a></ a>',
+        ' </legend>',
+        ' <div style="display:none"></div>',
+        '</fieldset>'
+      ].join('\n');
+      var label = el.querySelector('label');
+      var content = el.querySelector('div');
+      label.innerHTML = props.title;
+      content.innerHTML = props.children;
+      label.onclick = function (open) {
+        if (open === true || content.style.display !== 'block') {
+          content.style.display = 'block'
+        } else {
+          content.style.display = 'none'
+        }
+      };
+      console.log(props);
+      if (props.opened) {
+        label.onclick();
+      }
+
+    });
+  });
+
+  window.addEventListener('error', function (event) {
+    console.log('error:' + event.reason); //捕获后自定义处理
+  });
+
+</script>

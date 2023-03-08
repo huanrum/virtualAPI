@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Web-Tagging</title>
+  <script src="/framework/ehuanrum/ehuanrum.js"></script>
+</head>
+
+<body>
+  <div id="show-panel">
+    <div>
+      <div class="table">
+        <div class="row">
+          <div class="cell" [*field]="fields">{{field}}</div>
+        </div>
+        <div class="row">
+          <div class="cell" [*field]="fields">
+            <input [value]="entity[field]" (blur)="search">
+          </div>
+        </div>
+        <div class="row" [*row]="rows">
+          <div class="cell" [*field]="fields" [title]="row[field]" [innerhtml]="row[field]"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.body.appendChild(Object.assign(document.createElement('style'), {
+      innerHTML: '.table .row .cell{ text-align: center;color:#ffffff;width:calc(' + (100 / $data.length) + '% - 4px); }'
+    }));
+
+    $ehr('+app', function ($binding) {
+      return $binding(document.getElementById('show-panel'), function (scope) {
+        scope.fields = $data;
+        scope.items = [];
+        scope.entity = {};
+        scope.rows = [];
+        scope.search = function () {
+          scope.rows = scope.items.filter(function () { return Object.keys(scope.entity) })
+        }
+
+        fetch(location.href, { method: 'POST', body: JSON.stringify(scope.entity) }).then(function (i) { return i.json(); }).then(function (res) {
+          scope.items = res.data;
+        });
+      });
+    })
+  </script>
+</body>
+
+</html>

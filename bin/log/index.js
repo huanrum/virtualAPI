@@ -13,17 +13,31 @@ module.exports = (function log() {
             var parameters = helper.parameters(request,keyUrl);
             
             helper.getBodyData(request, true).then(bodyData => {
+                //log(new Date(), helper.clientIp(request), request.headers['referer'],request.headers['user-agent'], keyUrl, request.url, bodyData);
                 if(bodyData){
-                    log(new Date(), helper.clientIp(request), request.headers['referer'], keyUrl, request.url, bodyData);
                     response.end('{}');
                 }else{
+                    var content = '';
+                    response.writeHead(200, {'Content-Type': 'text/html;charset=utf-8'});
                     if(parameters.filename){
-                        response.writeHead(404, { 'Content-Type': 'text/plain;charset=utf-8' });
-                        response.end(fs.readFileSync(baseDir + '/' + parameters.filename).toString());
+                        content = `
+                            <!--html>/../compatible/native.html</html-->
+                            <!--html>/../compatible/dialog.html</html-->
+                            <!--html>/view/transform.html</html-->
+                            <style>
+                                .dialog .content{
+                                    max-height: 90vh!important;
+                                    max-width: 98vw;
+                                }
+                            </style>
+                            <pre class="transform">
+                                ${fs.readFileSync(baseDir + '/' + parameters.filename).toString()}
+                            </pre>
+                        `;
                     }else{
-                        response.writeHead(404, { 'Content-Type': 'text/html;charset=utf-8' });
-                        response.end(helper.replaceHtml(fs.readFileSync(__dirname + '/index.html').toString(),'<script>\r\nwindow.$data = ' + JSON.stringify(fs.readdirSync(baseDir),null,4) + '\r\n</script>'));
+                        content = fs.readFileSync(__dirname + '/index.html').toString();
                     }
+                    response.end(helper.replaceContent(__dirname,content,fs.readdirSync(baseDir)));
                 }
             });
         } else {
@@ -40,14 +54,14 @@ module.exports = (function log() {
                 return;
             }
             var file = files.find(function (item) {
-                return /\.log$/.test(item) && fs.statSync('log/' + item).size < size;
+                return /\.log$/.test(item) && item.replace(/\.log$/,'')>new Date(new Date().toDateString()).valueOf() && fs.statSync('log/' + item).size < size;
             });
             if (!file) {
                 file = Date.now() + '.log';
             }
             fs.appendFile('log/' + file, message, function (err) {
                 if (err) {
-                    console.log(err);
+                    helper.console(err);
                 }
             });
         });

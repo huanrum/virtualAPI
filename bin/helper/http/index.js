@@ -1,4 +1,5 @@
 var http = require('http');
+var https = require('https');
 
 module.exports = (function(){
     return {
@@ -6,24 +7,56 @@ module.exports = (function(){
          * 访问其他API
          */
         httpGet: function httpGet(url){
-            return new Promise(function(succ){
-                http.get(url, function (res) {
+            return new Promise((succ) => {
+                http.get(url, (res) => {
                     var size = 0,
                         chunks = [];
-                    res.on('data', function (chunk) {
+                    res.on('data', (chunk) => {
                         size += chunk.length;
                         chunks.push(chunk);
                     });
-                    res.on('end', function () {
+                    res.on('end', () => {
                         if (/^2/.test(res.statusCode)) {
                             var responseText = Buffer.concat(chunks, size);
                             succ(responseText);
                         } else {
-                            console.log(bodyData);
+                            this.console(bodyData);
                         }
                     });
-                }).on('error', function (e) {
-                    console.log(e.message);
+                }).on('error', (e) => {
+                    this.console(e.message);
+                });
+            });
+        },
+        /**
+         * 访问其他API
+         */
+        httpsGet: function httpGet(url){
+            return new Promise(succ => {
+                var options = {
+                    method: 'GET',
+                    host: url.split('//')[1].split(/(:|\/)/).shift(),
+                    port: parseInt(url.split(':')[2] || 443),
+                    path: url,
+                    rejectUnauthorized: false
+                };
+                https.get(options, (res) => {
+                    var size = 0,
+                        chunks = [];
+                    res.on('data', (chunk) => {
+                        size += chunk.length;
+                        chunks.push(chunk);
+                    });
+                    res.on('end', () => {
+                        if (/^2/.test(res.statusCode)) {
+                            var responseText = Buffer.concat(chunks, size);
+                            succ(responseText);
+                        } else {
+                            this.console(bodyData);
+                        }
+                    });
+                }).on('error', (e) => {
+                    this.console(e.message);
                 });
             });
         },
@@ -39,15 +72,15 @@ module.exports = (function(){
                     //设置单文件大小限制
                     form.maxFilesSize = 2 * 1024 * 1024;
                     
-                    form.on('error',function(e){
-                        console.log(request.url,e);
+                    form.on('error',(e)=>{
+                        this.console(request.url,e);
                     });
                     
-                    form.parse(request, function (err, fields, files) {
-                        console.log(fields);
+                    form.parse(request, (err, fields, files) => {
+                        this.console(fields);
                     });
                 }catch(e){
-                    console.log(request.url,e);
+                    this.console(request.url,e);
                 }
             });
         }

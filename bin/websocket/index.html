@@ -5,77 +5,44 @@
     <title>WebSocket Echo Demo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
-        #getMessage {
+        .vertical-center{
+            text-align: center;
+        }
+        #getMessage, #sendMessage {
             width:90%;
             margin: 1rem 0;
             min-height:8rem;
         }
+
+        #getMessage{
+            height: 400px;
+        }
     </style>
+    <!--html>../compatible/native.html</html-->
+    <!--html>../compatible/websocket.html</html-->
 </head>
 
 <body>
-    <div class="vertical-center"></div>
-    <textarea id='getMessage' readonly></textarea>
+    <div class="vertical-center">
+        <strong id="wsname"></strong>
+        <br>
+        <textarea id="getMessage" readonly></textarea>
+        <textarea id="sendMessage"></textarea>
+    </div>
     <script>
-        fetch(location.origin + '/websocket?ip=' + location.hostname).then(res => res.json()).then(req => {
-            var handle = Date.now();
-            window.ws = new WebSocket(req.message);
-            ws.onopen = function (e) {
-                console.log('Connection to server opened');
-                ws.send(JSON.stringify({
-                    data: handle,
-                    action: 'login'
-                }));
-            }
+        initWebsocket(function(ws){
             ws.onmessage = function (e) {
-                document.getElementById('getMessage').innerHTML = JSON.stringify(JSON.parse(e.data),null, 4);
+                document.getElementById('getMessage').innerHTML = JSON.stringify(JSON.parse(e.data),null, 2);
             };
-
-            window.onbeforeunload = function () {
-                ws.send(JSON.stringify({
-                    action: 'logout'
-                }));
+            document.getElementById('wsname').innerHTML = ws.handle;
+            document.getElementById('sendMessage').onkeydown = function(e){
+                if(e.ctrlKey && e.keyCode === 13 && window.sendWebsocket){
+                    setTimeout(function(){e.target.value = '';}, 500);
+                    window.sendWebsocket(e.target.value);
+                }
             };
-
         });
-    </script>
-    <script>
-        var form = location.search.replace(/\?\/*views\/*/, '');
-        if (form) {
-            var script = document.createElement('script');
-            script.src = '../../service/'+form + '/websocket/index.js';
-            document.body.appendChild(script);
-        } else {
-            document.body.children[0].innerHTML = `
-                    <div class="">
-                        <p>&nbsp;</p>
-                        <textarea id="sendUrl" placeholder="Send Url to client"></textarea>
-                        <br>
-                        <button id="sendUrlBtn">Send!</button>
-                    </div>
-                    <div>
-                        <style>
-                            #sendUrl {
-                                width: 90%;
-                                height: 100px;
-                                padding: 0.5rem;
-                            }
-                            #sendUrlBtn {
-                                width: 90%;
-                                padding: 0.5rem;
-                            }
-                        </style>
-                    </div>
-                `;
-            document.getElementById('sendUrlBtn').onclick = sendUrl;
-            function sendUrl() {
-                ws.send(JSON.stringify({
-                    data: {
-                        url: document.getElementById('sendUrl').value
-                    }
-                }));
-            }
-        }
+
     </script>
 </body>
 

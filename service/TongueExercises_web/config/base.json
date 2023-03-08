@@ -2,56 +2,68 @@
     "yuefeng/test": {
         "message": "这是测试数据"
     },
+    "yuefeng/login": {
+        "token": "0e577a6c2c43fe9c0aeecbe51306a6a1|3070",
+        "uid": "56814515",
+        "name": "OOO",
+        "identity": "student",
+        "province_id": "",
+        "province_name": "",
+        "city_id": "",
+        "city_name": "",
+        "degree_id": "",
+        "degree_name": "",
+        "grade_id": "",
+        "grade_name": "",
+        "user_id": "3070"
+    },
     "yuefeng/testlist": {
         "error_code": 900,
         "message": "",
         "data:50": {
-            "id":"[1+1]",
-            "date":"2018-02-[01-29] 11:11:11",
-            "name":"习题 [(@)1]"
+            "id": "[1+1]",
+            "date": "2018-02-[01-29] 11:11:11",
+            "name": "习题 [(@)1]"
         }
     },
-    "yuefeng/studylogself":{
+    "yuefeng/studylogself": {
         "error_code": 900,
         "message": "",
         "data:50": {
-            "id":"[1+1]",
-            "date":"2018-02-[01-29] 11:11:11",
-            "score":"[50-99]",
-            "name":"习题 [(@)1]"
+            "id": "[1+1]",
+            "date": "2018-02-[01-29] 11:11:11",
+            "score": "[50-99]",
+            "name": "习题 [(@)1]"
         }
     },
-    "yuefeng/studylogdetal":{
+    "yuefeng/studylogdetal": {
         "error_code": 900,
         "message": "",
-        "data":{
-
-        }
+        "data": {}
     },
-    "yuefeng/activecodelist":{
+    "yuefeng/activecodelist": {
         "error_code": 900,
         "message": "",
         "data:50": {
-            "id":"[1+1]",
-            "num":"[(0-9)6]",
-            "code":"[(1-9)16]",
-            "start":"2018-02-[01-29] 11:11:11",
-            "end":"2018-03-[01-29] 11:11:11"
-
+            "id": "[1+1]",
+            "num": "[(0-9)6]",
+            "code": "[(1-9)16]",
+            "start": "2018-02-[01-29] 11:11:11",
+            "end": "2018-03-[01-29] 11:11:11"
         }
     },
-    "yuefeng/bindactivecode":{
+    "yuefeng/bindactivecode": {
         "error_code": 900,
         "message": "",
-        "data":""
+        "data": ""
     },
-    "yuefeng/trendchart":{
+    "yuefeng/trendchart": {
         "error_code": 900,
         "message": "",
-        "data:50":{
-            "id":"[1+1]",
-            "date":"2018-02-[01-29] 11:[11-59]:11",
-            "score":"[40-99]"
+        "data:50": {
+            "id": "[1+1]",
+            "date": "2018-02-[01-29] 11:[11-59]:11",
+            "score": "[40-99]"
         }
     }
 }

@@ -1,4 +1,5 @@
 (function ($injector, $value) {
+    if(this.$ehr){return;}
 
     var $wactchList = {};
 
@@ -464,8 +465,10 @@
                 field.replace(/\[[0-9a-zA-Z\.]*\]/g, function (str) {
                     return '.' + $value(scope, str.replace(/[\[\]]/g, ''));
                 }).split('.').forEach(function (f) {
-                    defineProperty(data, f.trim(), $value(data, f.trim()));
-                    data = data[f] || {};
+                    if($value(data, f.trim())){
+                        defineProperty(data, f.trim(), $value(data, f.trim()));
+                        data = data[f] || {};
+                    }
                 });
             });
 
@@ -608,6 +611,13 @@
 
             //如果有两个参数，就是存数据
             if (value) {
+                //稍后执行
+                if(/^\+/.test(field)) {
+                    field = field.replace(/^\+/, '');
+                    setTimeout(function(){
+                        ehuanrum(field);
+                    })
+                }
                 //如果以.结束的field是为了把value在包裹一下
                 if (/\.$/.test(field)) {
                     var $value = value;
@@ -700,7 +710,7 @@
             /** jshint W085 */
             /** jshint W061 */
             with(_obj) {
-                if (_value === undefined || !/^[0-9a-zA-Z\._$@]*$/.test(_str.trim())) {
+                if (_value === undefined || !/^[0-9a-zA-Z\._$@]+(\[[0-9a-zA-Z\._$@]+\])?$/.test(_str.trim())) {
                     return eval(_str);
                 } else {
                     eval(_str + '=' + getValue(_value));
