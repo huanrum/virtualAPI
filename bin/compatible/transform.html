@@ -537,7 +537,7 @@
           }
           autoComplement = !/\S{2}/.test(e.key);
         };
-        element.onkeyup = function(){
+        element.onkeyup = function(e){
           var activeCharts = /([^\s]*)$/m.exec(e,target.value.slice(0, e.target.selectionStart).split(/[\r\n]/).pop());
           var replace = activeCharts && complements[activeCharts[1]] || complements[e,target.value[e.target.selectionStart - 1]];
           if (autoComplement && replace) {
@@ -671,7 +671,7 @@
 
     function addSwitch(close, label, str) {
       window.onswitch = window.onswitch || function(e){
-        var parent = el.target.parentNode;
+        var parent = e.target.parentNode;
         while (parent && !/panel\-switch/.test(parent.className)) {
           parent = parent.parentNode
         }

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Setting</title>
+
+    <style>
+        fieldset+fieldset {
+            margin-top: 2em;
+        }
+
+        legend a {
+            cursor: pointer;
+            display: inline-block;
+            width: 20px;
+            height: 5px;
+            margin: 0 0.5rem;
+            background: green;
+            line-height: 0;
+            font-size: 0;
+            vertical-align: middle;
+        }
+
+        legend a:after {
+            content: '|';
+            display: block;
+            width: 20px;
+            height: 5px;
+            background: green;
+            transform: rotate(-90deg);
+        }
+
+        legend.modify a {
+            display: inline-block;
+            width: 10px;
+            height: 5px;
+            margin: 0 0.5rem;
+            background: green;
+            line-height: 0;
+            font-size: 0;
+            vertical-align: middle;
+            transform: rotate(45deg);
+        }
+
+        legend.modify a:after {
+            content: '/';
+            display: block;
+            width: 20px;
+            height: 5px;
+            background: green;
+            transform: rotate(-90deg) translateY(-50%) translateX(50%);
+        }
+
+        fieldset>div>div {
+            padding: 0.5rem;
+            border-bottom: 1px solid rgba(0,176,232,0.5);
+        }
+
+        fieldset>div>div div {
+            cursor: pointer;
+            position: relative;
+            display: inline-block;
+            width: 30px;
+            top: -5px;
+        }
+
+        fieldset>div>div div:hover {
+            opacity: 0.5;
+        }
+
+        fieldset>div>div div:before,
+        fieldset>div>div div:after {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 0;
+            content: '';
+            border-bottom: 2px solid red;
+        }
+
+        fieldset>div>div div:before {
+            transform: rotate(45deg);
+        }
+
+        fieldset>div>div div:after {
+            transform: rotate(-45deg);
+        }
+
+        fieldset>div>div label {
+            font-weight: 600;
+        }
+
+        fieldset>div>div label:hover {
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        fieldset>div>div input {
+            float: right;
+            width: calc(100% - 200px);
+            border: none;
+            padding: 0.4em;
+        }
+
+        fieldset>div>div input:focus {
+            outline: none;
+            color: #00AAEF;
+            caret-color: rgb(0,0,0);
+        }
+
+        fieldset.hide-content div,
+        fieldset.hide-content a,
+        fieldset.no-delete>div>div div {
+            display: none;
+        }
+
+        .common-dialog-back {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(123, 123, 123, 0.6);
+        }
+
+        .common-dialog-Message {
+            position: absolute;
+            margin-left: 80%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            padding: 2px;
+            border-radius: 10px;
+            background: #669966;
+        }
+
+        .common-dialog-back .common-dialog {
+            position: absolute;
+            margin-left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 10px;
+            background: #f3f3f3;
+            overflow: hidden;
+            border: 5px solid #ffffff;
+        }
+
+        .common-dialog-back .common-dialog.max-window {
+            width: 96%;
+            height: 96%;
+            left: 2% !important;
+            top: 2% !important;
+            margin-left: 0;
+            transform: none;
+        }
+
+        .common-dialog-back .common-dialog .common-dialog-header {
+            height: 2em;
+            background: #666699;
+            padding: 0.5em;
+        }
+
+        .common-dialog-back .common-dialog .common-dialog-header label {
+            color: #ffffff;
+        }
+
+        .common-dialog-back .common-dialog .common-dialog-header label sup {
+            color: rgba(168, 168, 168, 0.4);
+        }
+
+        .common-dialog-back .common-dialog .common-dialog-header a {
+            float: right;
+            cursor: pointer;
+        }
+
+        .common-dialog-back .common-dialog .common-dialog-content {
+            min-height: 3em;
+            max-height: 33em;
+            min-width: 12em;
+        }
+
+        .common-dialog-back .common-dialog .common-dialog-content>* {
+            margin: 0.3em;
+        }
+
+        .common-dialog-back .common-dialog .common-dialog-content div div {
+            display: inline-block;
+            width: 12em;
+        }
+
+        .common-dialog-back .common-dialog .common-dialog-content div input {
+            background: #f3f3f3;
+            border: none;
+            border-bottom: 1px solid #666699;
+        }
+
+        .common-dialog-back .common-dialog .common-dialog-message {
+            width: calc(100% - 1rem);
+            height: 100%;
+            background: #d3d3d3;
+            margin: 0.5em;
+            max-height: 33em;
+            min-height: 10em;
+            overflow: auto;
+        }
+
+        .common-dialog-back .common-dialog .common-dialog-footer {
+            border-top: 1px solid #d3d3d3;
+            text-align: center;
+            padding: 2px;
+        }
+
+        .common-dialog-back .common-dialog .common-dialog-footer a {
+            border: 1px solid #666699;
+            margin: 2px 1em;
+            padding: 1px;
+            cursor: pointer;
+        }
+
+        .common-dialog-back .common-dialog .common-dialog-footer a:hover {
+            opacity: 0.8;
+            color: #00AAEF;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        fetch(location.origin + '/config/').then(function (i) {
+            return i.json();
+        }).then(function (modules) {
+            Object.keys(modules).forEach(function (mod, index) {
+                var fieldset = document.createElement('fieldset');
+                var legend = document.createElement('legend');
+                var content = document.createElement('div');
+                var labelButton = document.createElement('label');
+                var aButton = document.createElement('a');
+
+                fieldset.className = 'config-group';
+                labelButton.innerHTML = modules[mod];
+
+                legend.appendChild(labelButton);
+                legend.appendChild(aButton);
+                fieldset.appendChild(legend);
+                fieldset.appendChild(content);
+                document.body.appendChild(fieldset);
+
+                if (index) {
+                    fieldset.className += ' no-delete hide-content';
+                    labelButton.onclick = function () {
+                        if (/hide-content/.test(fieldset.className)) {
+                            fieldset.className = fieldset.className.replace('hide-content', '');
+                        } else {
+                            fieldset.className += ' hide-content';
+                        }
+                    };
+                } else {
+                    content.onclick = function(e){
+                        if(e.target.nodeName === 'LABEL'){
+                            window.open(location.origin + '/views/' + e.target.innerHTML);
+                        }
+                    };
+                }
+
+                fetch(location.origin + '/config/' + mod).then(function (i) {
+                    return i.json();
+                }).then(function (data) {
+                    if (index) {
+                        createGroup(data,null,modules,mod,legend,content,aButton);
+                    } else {
+                        fetch(location.origin + '/config/edit').then(function (i) {
+                            return i.json();
+                        }).then(function (edit) {
+                            createGroup(data,edit,modules,mod,legend,content,aButton);
+                        });
+                    }
+                });
+            });
+        });
+
+
+        function createGroup(data,editData,modules,mod,legend,content,aButton) {
+            Object.keys(data).forEach(function(key){
+                createdRow(data,key,modules,mod,editData,legend,content);
+            });
+
+            aButton.onclick = function () {
+                if (/modify/.test(legend.className)) {
+                    showDialog('提交', '提交所有的改动').then(function () {
+                        fetch(location.origin + '/config/' + mod, {
+                            method: 'POST',
+                            body: JSON.stringify(data)
+                        }).then(function (i) {
+                            return i.json();
+                        }).then(function (req) {
+                            if (req && Object.keys(req).length) {
+                                var uiList = Object.keys(req).map(function (key) {
+                                    return '<li><input type="checkbox" value="' + key +
+                                        '"><label>' + key + (req[key] ? '新增' : '覆盖') +
+                                        '</label></li>';
+                                }).join('');
+
+                                showDialog('更新相关的服务器目录', '<ul>' + uiList + '</ul>').then(function (
+                                    outContent) {
+                                    Array.prototype.forEach.call(outContent[0].children,
+                                        function (el) {
+                                            if (el.querySelector('input').checked) {
+                                                fetch(location.origin + '/config/' +
+                                                    mod + '?' + el.querySelector(
+                                                        'input').value);
+                                            }
+                                        });
+                                });
+                            }
+                            legend.className = legend.className.replace('modify', '');
+                        })
+                    });
+                } else {
+                    showDialog('添加' + modules[mod] + 'Key', '<input>').then(function (outContent) {
+                        var key = outContent[0].value;
+                        data[key] = '';
+                        createdRow(data,key,modules,mod,editData,legend,content);
+                    });
+                }
+            };
+
+            
+        }
+
+        function createdRow(data,key,modules,mod,editData,legend,content) {
+                var row = document.createElement('div');
+                var label = document.createElement('label');
+                var input = document.createElement('input');
+                var remove = document.createElement('div');
+
+                label.innerHTML = key;
+                
+                input.value = data[key] || '';
+
+                row.appendChild(remove);
+                row.appendChild(label);
+                row.appendChild(input);
+
+                content.appendChild(row);
+
+                if(editData){
+                    label.title = editData[key] || '';
+                    label.onclick = function(e){
+                        e.stopPropagation();
+                        showDialog('修改' + modules[mod] + ' ' + key + ' 的编辑路径', '<input style="width: calc(100% - 0.6em);" value="'+(editData[key]||'')+'">').then(function (children) {
+                            if(children[0].value && children[0].value !== editData[key]){
+                                editData[key] = children[0].value;
+                                label.title = editData[key];
+                                fetch(location.origin + '/config/edit', {
+                                    method: 'POST',
+                                    body: JSON.stringify(editData)
+                                });
+                            }
+                        });
+                    };
+                }
+
+                input.onchange = function () {
+                    data[key] = input.value.trim();
+                    legend.className += legend.className.replace('modify', '') + ' modify';
+                };
+
+                remove.onclick = function () {
+                    showDialog('删除' + modules[mod] + 'Key', '确定要删除，确定请点击确定按钮。').then(function () {
+                        delete data[key];
+                        content.removeChild(row);
+                        legend.className += legend.className.replace('modify', '') + ' modify';
+                    });
+                }
+            }
+
+
+
+        function showDialog(title, elementHtml) {
+            return new Promise(function (succ) {
+                var dialogPanl = document.createElement('div');
+                var dialog = document.createElement('div');
+
+                var header = document.createElement('div');
+                var content = document.createElement('div');
+                var footer = document.createElement('div');
+
+                header.innerHTML = title;
+                content.innerHTML = elementHtml;
+
+                var cancel = document.createElement('a');
+                var ok = document.createElement('a');
+                cancel.innerHTML = '取消';
+                ok.innerHTML = '确定';
+
+
+                footer.appendChild(cancel);
+                footer.appendChild(ok);
+
+                dialog.appendChild(header);
+                dialog.appendChild(content);
+                dialog.appendChild(footer);
+
+                dialogPanl.appendChild(dialog);
+                document.body.appendChild(dialogPanl);
+
+                dialogPanl.className = 'common-dialog-back';
+                dialog.className = 'common-dialog';
+                header.className = 'common-dialog-header';
+                content.className = 'common-dialog-content';
+                footer.className = 'common-dialog-footer';
+
+                cancel.onclick = function () {
+                    document.body.removeChild(dialogPanl);
+                };
+
+                ok.onclick = function () {
+                    document.body.removeChild(dialogPanl);
+                    succ(content.children);
+                };
+
+            })
+        }
+    </script>
+</body>
+
+</html>
